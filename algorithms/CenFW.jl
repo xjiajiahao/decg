@@ -1,18 +1,10 @@
-using StatsBase
-@everywhere using MathProgBase, Ipopt, Clp
-
 # centralized frank wolfe, here num_iters denotes #iteration
-@everywhere function CenFW(dim, data_cell, LMO, f_batch, gradient_batch, num_iters)
+function CenFW(dim, data_cell, LMO, f_batch, gradient_batch, num_iters)
     num_agents = size(data_cell, 2);
     function gradient_sum(x) # compute the sum of T gradients
         grad_x = @sync @parallel (+) for i in 1:num_agents # the documentation says that @paralel for can handle situations where each iteration is tiny
             gradient_batch(x, data_cell[i])
         end
-
-        # grad_x = 0;
-        # for i in 1:num_agents # the documentation says that @paralel for can handle situations where each iteration is tiny
-        #     grad_x =+ gradient_batch(x, data_cell[i]);
-        # end
         return grad_x;
     end
 
@@ -20,11 +12,6 @@ using StatsBase
         f_x = @sync @parallel (+) for i in 1:num_agents # the documentation says that @paralel for can handle situations where each iteration is tiny
             f_batch(x, data_cell[i])
         end
-
-        # f_x = 0;
-        # for i in 1:num_agents # the documentation says that @paralel for can handle situations where each iteration is tiny
-        #    f_x += f_batch(x, data_cell[i]);
-        # end
         return f_x;
     end
 

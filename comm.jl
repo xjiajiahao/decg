@@ -1,4 +1,5 @@
 using MAT, Base.Iterators.cycle
+@everywhere using MathProgBase, Clp
 # using PyPlot
 # PyPlot.matplotlib[:rcParams]["figure.autolayout"] = "True"
 # srand(0)
@@ -20,6 +21,22 @@ function load_movie_partitioned_data(num_agents)
     return (user_ratings_cell_arr, num_movies, num_users)
 end
 
+function load_network_50()
+    ROOT = "./data/";
+    filename = "$(ROOT)weights_50.mat";
+    file = matopen(filename);
+    weights = read(file, "weights");
+    close(file);
+    return weights
+end
+
+function generate_network(num_agents, avg_degree)
+    if num_agents != 50
+        error("num_agents must be 50");
+    end
+    return
+end
+
 # Linear Maximization Oracle (LMO):
 # find min c^T x, s.t. a^T x < k, 0 <= x <= d, where x \in R^n, a is a 1-by-n row vector
 function generate_linear_prog_function(d, a, k)
@@ -32,7 +49,6 @@ function generate_linear_prog_function(d, a, k)
     end
     return linear_prog;
 end
-
 
 function generate_figure_obj()
     res_list = [];
