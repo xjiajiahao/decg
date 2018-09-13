@@ -115,10 +115,8 @@ end
     return sum_gradient;
 end
 
-@everywhere function stochastic_gradient_extension(x, ratings) # compute stochastic gradient: O(???)
-    dim = length(x);
-    stochastic_grad = zeros(dim);
-    function stochastic_partial_extension(x, ratings, i)
+@everywhere function stochastic_gradient_extension(x, ratings, sample_times) # compute stochastic gradient: O(???)
+    function stochastic_partial_extension(x, ratings, i, rand_vec)
         the_index = findfirst(ratings[:, 1], i);
         if the_index == 0 # this means f(R+i) = f(R\i), for any R, then no need to sample
             return 0;
@@ -130,7 +128,8 @@ end
             if index == the_index # exclude the i'th index
                 continue;
             end
-            if rand() <= x[round(Int, ratings[index, 1])]
+            tmp_index = round(Int, ratings[index, 1]);
+            if rand_vec[tmp_index] <= x[tmp_index]
                 tmp_f = ratings[index, 2];
                 break;
             end
@@ -140,16 +139,21 @@ end
         return stochastic_partial;
     end
 
-    for i in 1:dim
-        stochastic_grad[i] = stochastic_partial_extension(x, ratings, i);
+    dim = length(x);
+    stochastic_grad = zeros(dim);
+    for i = 1:sample_times
+        rand_vec = rand(dim);
+        for i in 1:dim
+            stochastic_grad[i] += stochastic_partial_extension(x, ratings, i, rand_vec);
+        end
     end
-    return stochastic_grad;
+    return stochastic_grad/sample_times;
 end
 
-@everywhere function stochastic_gradient_extension_batch(x, batch_ratings) # ratings is a n-by-2 matrix sorted in descendant order, where n denotes #movies some user has rated
+@everywhere function stochastic_gradient_extension_batch(x, batch_ratings, sample_times = 1) # ratings is a n-by-2 matrix sorted in descendant order, where n denotes #movies some user has rated
     sum_stochastic_gradient = 0;
     for ratings in batch_ratings
-        sum_stochastic_gradient += stochastic_gradient_extension(x, ratings);
+        sum_stochastic_gradient += stochastic_gradient_extension(x, ratings, sample_times);
     end
     return sum_stochastic_gradient;
 end

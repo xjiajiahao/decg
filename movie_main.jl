@@ -8,7 +8,7 @@ include("comm.jl");
 const k_int = 10;  # the cardinality constraint
 # const num_agents = 100;
 const num_agents = 50;
-const num_iters = floor(Int, 1e1);
+const num_iters = floor(Int, 385);
 alpha = 1/sqrt(num_iters);
 phi = 1/num_iters^(2/3);
 
@@ -32,7 +32,11 @@ a_2d = ones(1, dim); # a should be a n_constraints-by-dim matrix
 LMO = generate_linear_prog_function(d, a_2d, k);
 
 # res_CenFW = CenFW(dim, data_cell, LMO, f_extension_batch, gradient_extension_batch, num_iters);
+#
 # res_DeFW = DeFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, gradient_extension_batch, num_iters, alpha);
-# res_DESAGAFW = DeSAGAFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, gradient_extension_batch, num_iters);
-
+#
 # res_DeSFW = DeSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, stochastic_gradient_extension_batch, num_iters, alpha, phi);
+
+# res_DESAGAFW = DeSAGAFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, gradient_extension_batch, num_iters);
+#
+# res_DeSSAGAFW = DeSSAGAFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, stochastic_gradient_extension_batch, num_iters);
