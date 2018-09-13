@@ -1,4 +1,4 @@
-function DeSAGAFW(dim, data_cell, num_agents, weights, LMO, f_batch, gradient_batch, num_iters)
+function DeSAGAFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters)
     function gradient_cat(x) # compute the sum of T gradients
         grad_x = @sync @parallel (hcat) for i in 1:num_agents # the documentation says that @paralel for can handle situations where each iteration is tiny
             gradient_batch(x[:, i], data_cell[i])
@@ -26,8 +26,9 @@ function DeSAGAFW(dim, data_cell, num_agents, weights, LMO, f_batch, gradient_ba
     d = zeros(dim, num_agents);
     g = zeros(dim, num_agents);
     grad_x_old = zeros(dim, num_agents);
-    results = zeros(num_iters+1, 3);
-    results[1, :] = [0, 0, f_sum(mean(x, 2))];
+    num_comm = 0.0;
+    results = zeros(num_iters+1, 4);
+    results[1, :] = [0, 0, 0, f_sum(mean(x, 2))];
     for iter in 1:num_iters
         grad_x = gradient_cat(x);
         if iter == 1
@@ -43,8 +44,9 @@ function DeSAGAFW(dim, data_cell, num_agents, weights, LMO, f_batch, gradient_ba
         x_bar = mean(x, 2);
         curr_obj = f_sum(x_bar);
         t_elapsed = time() - t_start;
+        num_comm += 2*dim*num_out_edges;  # 1 for local gradients, 1 for local variables
         println("$(iter), $(t_elapsed), $(curr_obj)");
-        results[iter+1, :] = [iter, t_elapsed, curr_obj];
+        results[iter+1, :] = [iter, t_elapsed, num_comm, curr_obj];
     end
     return results;
 end
