@@ -1,7 +1,7 @@
 # centralized frank wolfe, here num_iters denotes #iteration
 function CenFW(dim, data_cell, LMO, f_batch, gradient_batch, num_iters)
     num_agents = size(data_cell, 2);
-    function gradient_sum(x) # compute the sum of T gradients
+    function gradient_sum(x) # compute the sum of T gradients @TODO file should be commented correctly
         grad_x = @sync @parallel (+) for i in 1:num_agents # the documentation says that @paralel for can handle situations where each iteration is tiny
             gradient_batch(x, data_cell[i])
         end
