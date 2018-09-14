@@ -1,3 +1,10 @@
+@everywhere function f_discrete_batch(s::IntSet, data_mat)
+    indices = [i for i in s];
+    max_values, max_idx = findmax(data_mat[indices, :], 1);
+    sum_f = sum(max_values);
+    return sum_f;
+end
+
 @everywhere function f_extension_sample(x, ratings, sample_times = 1e5) # ratings is a n-by-2 matrix sorted in descendant order, where n denotes #movies some user has rated
     res = 0;
     for j in 1:sample_times

@@ -1,7 +1,7 @@
 using LaTeXStrings
 
 include("facility.jl");
-include("algorithms/CenFW.jl"); include("algorithms/DeFW.jl"); include("algorithms/DeSAGAFW.jl");
+include("algorithms/CenFW.jl"); include("algorithms/DeFW.jl"); include("algorithms/DeSAGAFW.jl"); include("algorithms/CenGreedy.jl");
 include("comm.jl");
 
 # Step 1: initialization
@@ -15,6 +15,7 @@ phi = 1/num_iters^(2/3);
 # load data
 # data_cell[i][j] is a n_j-by-2 matrix representing the ratings of agent i's jth user
 const data_cell, num_movies, num_users = load_movie_partitioned_data(num_agents);
+const data_mat = load_movie_full_data();
 
 # load weights matrix
 # const weights = generate_network(num_agents, avg_degree);
@@ -31,12 +32,13 @@ d = ones(dim);
 a_2d = ones(1, dim); # a should be a n_constraints-by-dim matrix
 LMO = generate_linear_prog_function(d, a_2d, k);
 
+# res_CenGreedy = CenGreedy(dim, data_mat, f_discrete_batch, k_int);
 # res_CenFW = CenFW(dim, data_cell, LMO, f_extension_batch, gradient_extension_batch, num_iters);
 #
-res_DeFW = DeFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, gradient_extension_batch, num_iters, alpha);
-
-res_DeSFW = DeSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, stochastic_gradient_extension_batch, num_iters, alpha, phi);
-
+# res_DeFW = DeFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, gradient_extension_batch, num_iters, alpha);
+#
+# res_DeSFW = DeSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, stochastic_gradient_extension_batch, num_iters, alpha, phi);
+#
 # res_DESAGAFW = DeSAGAFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, gradient_extension_batch, num_iters);
 #
 # res_DeSSAGAFW = DeSSAGAFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, stochastic_gradient_extension_batch, num_iters);
