@@ -13,22 +13,13 @@ function load_movie_partitioned_data(num_agents)
     filename = "$(ROOT)Movies_$(num_agents)_agents.mat";
     file = matopen(filename);
     user_ratings_cell_arr = read(file, "user_ratings_cell_arr"); # @NOTE we would use the cell arrary data structure where for each user, the ratings are sorted from high to low
+    user_ratings_mat = read(file, "user_ratings_mat");
     num_movies = round(Int, read(file, "num_movies"));
     num_users = round(Int, read(file, "num_users"));
     close(file);
 
     # return (user_ratings_cell_arr, num_movies, num_users)
-    return (user_ratings_cell_arr, num_movies, num_users)
-end
-
-function load_movie_full_data()
-    ROOT = "./data/";
-    # file = matopen("data/Movies20M.mat");
-    filename = "$(ROOT)Movies.mat";
-    file = matopen(filename);
-    user_ratings_mat = read(file, "user_ratings_matrix"); # @NOTE we would use the cell arrary data structure where for each user, the ratings are sorted from high to low
-    close(file);
-    return user_ratings_mat;
+    return (user_ratings_cell_arr, user_ratings_mat, num_movies, num_users)
 end
 
 function load_network_50()
