@@ -1,2 +1,4 @@
 data/*.mat
+data/*.fig
+draft.jl
 **/*.txt
