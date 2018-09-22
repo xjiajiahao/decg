@@ -1,7 +1,7 @@
 function [user_ratings_cell_arr, num_movies, num_users, num_agents] = gen_partitioned_data(num_agents)
 %% initialization
-% ROOT = './data/';
-ROOT = './';
+ROOT = './data/';
+% ROOT = './';
 num_movies = 3883;
 num_users = 6040;
 num_genres = 18;

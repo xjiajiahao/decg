@@ -1,12 +1,12 @@
 % stbfs: calculate spanning tree with breadth-first search
-% 
+%
 % Data structure
-% 
+%
 %   Node properties (nodeclass)
 %     conmatrix: connection matrix of node in the undirected graph, with
 %                weights as the elements. node v_i and v_j are connected
 %                only when they are in the transmission range of each other
-% 
+%
 %   Spanning tree (spanningtree)
 %     nodeflag: nodeflag=1 indicates the existence in the spanning tree
 %     nodelabel: label of nodes in the spanning tree
@@ -45,4 +45,4 @@ end
 
 spanningtree.nodeflag=nodeflag;
 spanningtree.nodelabel=nodelabel;
-spanningtree.edgelabel=edgelabel;        
+spanningtree.edgelabel=edgelabel;
