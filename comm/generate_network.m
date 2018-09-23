@@ -1,6 +1,6 @@
 n_nodes = 100;
 
-pl = 5.0/(n_nodes - 1);
+pl = 20.0/(n_nodes - 1);
 % pl = 0.4;
 adj_matrix = gennetwork(n_nodes,pl);  %%% random graph with probability pl and size n
 
