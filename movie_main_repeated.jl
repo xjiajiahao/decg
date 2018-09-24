@@ -61,7 +61,7 @@ for i = 1 : repeated
         # final_res[i, 3] = res_DeSSAGAFW[end, 4];
         # final_res[i, 5] = res_DeSSAGAFW[end, 3];
 
-        res_CenSFW = CenSFW(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_batch, num_iters);
+        res_CenSFW = CenSFW(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_batch, tmpn);
         final_res[i, 2] = res_CenSFW[end, 3];
 
         final_res[i, 1] = num_iters;
