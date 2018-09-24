@@ -30,7 +30,9 @@ function load_nqp_partitioned_data(num_agents)
     A = read(file, "A");
     dim = round(Int, read(file, "dim"));
     u = read(file, "u");
+    u = squeeze(u, 2);
     b = read(file, "b");
+    b = squeeze(b, 2);
     close(file);
     return (data_cell, A, dim, u, b)
 end
