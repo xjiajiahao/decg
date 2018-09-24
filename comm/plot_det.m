@@ -7,7 +7,7 @@ OUTPUT_DIR = [ROOT, 'imgs/'];
 
 cols = [2, 3, 6];
 % cols = [2, 3, 6, 7];
-labels = {'DeCG', 'DeGSFW', 'CenFW', 'CenGreedy'};
+labels = {'DeCG', 'DeGSFW', 'CenCG', 'CenGreedy'};
 curve_styles = {'-', '-', '-', '-'};
 ylimits = [4.5, inf];
 
@@ -59,6 +59,27 @@ for i = 1 : length(cols)
 end
 hold on;
 xlabel('#gradient evaluations');
+ylabel('objective value');
+legend('show');
+grid on;
+ylim(ylimits);
+
+
+cols = [2, 3];
+the_figure = figure('position', [0, 0, width, height]);
+fig_name =[OUTPUT_DIR, 'det_comm', '.eps'];
+figures{end+1} = the_figure;
+figure_names{end+1} = fig_name;
+for i = 1 : length(cols)
+    col = cols(i);
+    curve_style = curve_styles{i};
+    label = labels{i};
+
+    plot(res(:, 4), res(:, col)/num_users, curve_style, 'linewidth', linewidth, 'DisplayName', label);
+    hold on;
+end
+hold on;
+xlabel('#doubles');
 ylabel('objective value');
 legend('show');
 grid on;
