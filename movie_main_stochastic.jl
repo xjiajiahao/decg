@@ -33,7 +33,8 @@ LMO = generate_linear_prog_function(d, a_2d, k);
 
 # const num_iters_arr = Int[2e2, 4e2, 6e2, 8e2, 10e2];
 # const num_iters_arr = Int[1e0, 2e0, 3e0, 4e0, 5e0];
-const num_iters_arr = Int[1:14;];
+# const num_iters_arr = Int[1:14;];
+const num_iters_arr = Int[15:20;];
 final_res = zeros(length(num_iters_arr), 5);
 
 for i = 1 : length(num_iters_arr)
@@ -53,12 +54,12 @@ for i = 1 : length(num_iters_arr)
     # final_res[i, 2] = res_DeSFW[end, 4];
     # final_res[i, 4] = res_DeSFW[end, 3];
 
-    # res_DeSSAGAFW = DeSSAGAFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, stochastic_gradient_extension_batch, tmpn);
-    # final_res[i, 3] = res_DeSSAGAFW[end, 4];
-    # final_res[i, 5] = res_DeSSAGAFW[end, 3];
+    res_DeSSAGAFW = DeSSAGAFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, stochastic_gradient_extension_batch, tmpn);
+    final_res[i, 3] = res_DeSSAGAFW[end, 4];
+    final_res[i, 5] = res_DeSSAGAFW[end, 3];
 
-    res_CenSFW = CenSFW(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_batch, num_iters);
-    final_res[i, 2] = res_CenSFW[end, 3];
+    # res_CenSFW = CenSFW(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_batch, num_iters);
+    # final_res[i, 2] = res_CenSFW[end, 3];
 
     final_res[i, 1] = num_iters;
 end
