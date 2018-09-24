@@ -22,6 +22,19 @@ function load_movie_partitioned_data(num_agents)
     return (user_ratings_cell_arr, user_ratings_mat, num_movies, num_users)
 end
 
+function load_nqp_partitioned_data(num_agents)
+    ROOT = "./data/";
+    filename = "$(ROOT)NQP_$(num_agents)_agents.mat";
+    file = matopen(filename);
+    data_cell = read(file, "data_cell"); # data_cell is a 1-by-num_agents cell, each element of data_cell is a 1-by-batch_size cell which contains #batch_size matrices H_i of size dim-by-dim
+    A = read(file, "A");
+    dim = round(Int, read(file, "dim"));
+    u = read(file, "u");
+    b = read(file, "b");
+    close(file);
+    return (data_cell, A, dim, u, b)
+end
+
 function load_network_50()
     ROOT = "./data/";
     filename = "$(ROOT)weights_50.mat";
@@ -39,7 +52,7 @@ function generate_network(num_agents, avg_degree)
 end
 
 # Linear Maximization Oracle (LMO):
-# find min c^T x, s.t. a^T x < k, 0 <= x <= d, where x \in R^n, a is a 1-by-n row vector
+# find min c^T x, s.t. a^T x < k, 0 <= x <= d, where x \in R^n, a is a m-by-n matrix, where m denotes the number of constraints
 function generate_linear_prog_function(d, a, k)
     function linear_prog(x0) # quadratic programming: min_x ||x - x0 ||/2
         sol = linprog(-x0, a, '<', k, 0.0, d, ClpSolver());
