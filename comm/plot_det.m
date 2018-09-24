@@ -1,9 +1,9 @@
-width=434;
-height=420;
+width=600;
+height=450;
 linewidth = 2;
 ROOT = '../data/';
 % OUTPUT_DIR = '/home/stephen/';
-OUTPUT_DIR = ROOT;
+OUTPUT_DIR = [ROOT, 'imgs/'];
 
 cols = [2, 3, 6];
 % cols = [2, 3, 6, 7];
