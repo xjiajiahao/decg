@@ -9,8 +9,8 @@ const k_int = 10;  # the cardinality constraint
 # const num_agents = 100;
 const num_agents = 50;
 const num_iters = Int(2e2);
-# alpha = 1/sqrt(num_iters);
-# phi = 1/num_iters^(2/3);
+alpha = 1/sqrt(num_iters);
+phi = 1/num_iters^(2/3);
 
 # load data
 # data_cell[i][j] is a n_j-by-2 matrix representing the ratings of agent i's jth user

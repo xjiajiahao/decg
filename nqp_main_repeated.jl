@@ -6,6 +6,7 @@ include("comm.jl");
 
 # Step 1: initialization
 const num_agents = 50;
+repeated = 5;
 # const num_iters = Int(20);
 # alpha = 1/sqrt(num_iters);
 # phi = 1/num_iters^(2/3);
@@ -28,26 +29,32 @@ LMO = generate_linear_prog_function(u, A, b);
 # const num_iters_arr = Int[1:14;];
 # const num_iters_arr = Int[10:10:200;];
 const num_iters_arr = Int[1:20;];
-final_res = zeros(length(num_iters_arr), 5);
+res = zeros(length(num_iters_arr), 5);
 
-for i = 1 : length(num_iters_arr)
-    num_iters = num_iters_arr[i];
-    alpha = 1/sqrt(num_iters);
-    phi = 1/num_iters^(2/3);
+for i = 1 : repeated
+    final_res = zeros(length(num_iters_arr), 5);
+    for i = 1 : length(num_iters_arr)
+        tmpn = num_iters_arr[i];
+        num_iters = round(Int, tmpn*(tmpn+1)*(2*tmpn+1)/6);
+        alpha = 1/sqrt(num_iters);
+        phi = 1/num_iters^(2/3);
 
-    res_DeFW = DeFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters, alpha);
-    final_res[i, 2] = res_DeFW[end, 4];
-    final_res[i, 4] = res_DeFW[end, 3];
+        res_DeSFW = DeSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, stochastic_gradient_batch, num_iters, alpha, phi);
+        final_res[i, 2] = res_DeSFW[end, 4];
+        final_res[i, 4] = res_DeSFW[end, 3];
 
-    res_DeSAGAFW = DeSAGAFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters);
-    final_res[i, 3] = res_DeSAGAFW[end, 4];
-    final_res[i, 5] = res_DeSAGAFW[end, 3];
+        res_DeSSAGAFW = DeSSAGAFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, stochastic_gradient_batch, tmpn);
+        final_res[i, 3] = res_DeSSAGAFW[end, 4];
+        final_res[i, 5] = res_DeSSAGAFW[end, 3];
 
-    # res_CenFW = CenFW(dim, data_cell, LMO, f_batch, gradient_batch, num_iters);
-    # final_res[i, 2] = res_CenFW[end, 3];
+        # res_CenFW = CenFW(dim, data_cell, LMO, f_batch, gradient_batch, num_iters);
+        # final_res[i, 2] = res_CenFW[end, 3];
 
-    final_res[i, 1] = num_iters;
+        final_res[i, 1] = num_iters;
+    end
+    res = res + final_res;
 end
+final_res = res ./ repeated;
 
 # res_CenFW = CenFW(dim, data_cell, LMO, f_batch, gradient_batch, num_iters);
 #

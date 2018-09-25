@@ -38,20 +38,24 @@ end
     return sum_g/batch_size;
 end
 
-@everywhere function stochastic_gradient(x, data) # compute stochastic gradient
+@everywhere function stochastic_gradient(x, data, sample_times) # compute stochastic gradient
     dim = length(x);
     u = ones(dim, 1);
-    rand_idx = rand(1:length(data));
-    H = data[rand_idx];
-    res = H * ( x - u );
-    return squeeze(res, 2);
+    res = zeros(dim, 1);
+    for i = 1 : sample_times
+        rand_idx = rand(1:length(data));
+        H = data[rand_idx];
+        res = H * ( x - u );
+    end
+    res = squeeze(res./sample_times, 2);
+    return res;
 end
 
-@everywhere function stochastic_gradient_batch(x, data_cell)
+@everywhere function stochastic_gradient_batch(x, data_cell, sample_times = 1)
     res = 0;
     batch_size = length(data_cell);
     for data in data_cell
-        res += stochastic_gradient(x, data);
+        res += stochastic_gradient(x, data, sample_times);
     end
     return res/batch_size;
 end
