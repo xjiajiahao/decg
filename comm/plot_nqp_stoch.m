@@ -1,6 +1,8 @@
 width=600;
 height=450;
 linewidth = 2;
+batch_size = 50;
+num_agents = 50;
 ROOT = '../data/';
 % OUTPUT_DIR = '/home/stephen/';
 OUTPUT_DIR = [ROOT, 'imgs/'];
@@ -9,9 +11,11 @@ cols = [2, 3]; %, 6];
 % cols = [2, 3, 6, 7];
 labels = {'DeSCG', 'DeSGSFW', 'CenSCG', 'CenGreedy'};
 curve_styles = {'-.', '-', '-', '-'};
-ylimits = [4.455, inf];
-xlimits_grads = [-inf, 1000];
-xlimits_iters = [-inf, 14];
+ylimits = [6e3, inf];
+xlimits_grads = [-inf, 1e6];
+xlimits_iters = [-inf, inf];
+xlimits_comm = [-inf, 3.5e5];
+% xlimits_comm = [-inf, inf];
 
 figures = {};
 figure_names = {};
@@ -19,7 +23,7 @@ figure_names = {};
 num_samples = 5;
 clear res;
 for i = 1 : num_samples
-    load([ROOT, 'res_DeSFW_DeSSAGAFW_0',num2str(i), '.mat']);
+    load([ROOT, 'res_DeFW_DeSAGAFW_nqp_0',num2str(i), '.mat']);
     if exist('res', 'var')
         res =  res + final_res;
     else
@@ -27,17 +31,12 @@ for i = 1 : num_samples
     end
 end
 res = res ./ num_samples;
-res_CenGreedy = 27571;
-num_users = 6000;
-load([ROOT, 'res_CenSFW.mat']);
-res = [res, final_res(:, 2)];
-res = [res, res_CenGreedy*ones(size(res, 1), 1)];
-res = [[zeros(1, size(res, 2)-1), res_CenGreedy]; res];
-num_gradients = res(:, 1) * num_users;
+res = [zeros(1, size(res, 2)); res];
+num_gradients = res(:, 1) * batch_size*num_agents;
 
 
 the_figure = figure('position', [0, 0, width, height]);
-fig_name =[OUTPUT_DIR, 'stoch_grads', '.eps'];
+fig_name =[OUTPUT_DIR, 'nqp_stoch_grads', '.eps'];
 figures{end+1} = the_figure;
 figure_names{end+1} = fig_name;
 for i = 1 : length(cols)
@@ -45,7 +44,7 @@ for i = 1 : length(cols)
     curve_style = curve_styles{i};
     label = labels{i};
 
-    plot(num_gradients, res(:, col)/num_users, curve_style, 'linewidth', linewidth, 'DisplayName', label);
+    plot(num_gradients, res(:, col), curve_style, 'linewidth', linewidth, 'DisplayName', label);
     hold on;
 end
 hold on;
@@ -54,52 +53,53 @@ ylabel('objective value');
 legend('show');
 grid on;
 ylim(ylimits);
-xlim(xlimits_grads*num_users);
+xlim(xlimits_grads);
 
 
 
 
 
-load([ROOT, 'res_DeSFW_14.mat']);
+load([ROOT, 'res_DeSFW_nqp_20.mat']);
 final_res = [zeros(1, size(final_res, 2)); final_res];
 res(:, 1) = final_res(:, 1);
 res(:, 2) = final_res(:, 2);
 res(:, 4) = final_res(:, 4);
-load([ROOT, 'res_CenSFW_14.mat']);
-final_res = [zeros(1, size(final_res, 2)); final_res];
-res(:, 6) = final_res(:, 2);
-
-the_figure = figure('position', [0, 0, width, height]);
-fig_name =[OUTPUT_DIR, 'stoch_iters', '.eps'];
-figures{end+1} = the_figure;
-figure_names{end+1} = fig_name;
-for i = 1 : length(cols)
-    col = cols(i);
-    curve_style = curve_styles{i};
-    label = labels{i};
-
-    plot(res(:, 1), res(:, col)/num_users, curve_style, 'linewidth', linewidth, 'DisplayName', label);
-    hold on;
-end
-hold on;
-xlabel('T (#iterations)');
-ylabel('objective value');
-legend('show');
-grid on;
-ylim(ylimits);
-xlim(xlimits_iters);
-
+%
+% the_figure = figure('position', [0, 0, width, height]);
+% fig_name =[OUTPUT_DIR, 'nqp_stoch_iters', '.eps'];
+% figures{end+1} = the_figure;
+% figure_names{end+1} = fig_name;
+% for i = 1 : length(cols)
+%     col = cols(i);
+%     curve_style = curve_styles{i};
+%     label = labels{i};
+%
+%     plot(res(:, 1), res(:, col), curve_style, 'linewidth', linewidth, 'DisplayName', label);
+%     hold on;
+% end
+% hold on;
+% xlabel('T (#iterations)');
+% ylabel('objective value');
+% legend('show');
+% grid on;
+% ylim(ylimits);
+% xlim(xlimits_iters);
+%
 cols = [2, 3];
 the_figure = figure('position', [0, 0, width, height]);
-fig_name =[OUTPUT_DIR, 'stoch_comm', '.eps'];
+fig_name =[OUTPUT_DIR, 'nqp_stoch_comm', '.eps'];
 figures{end+1} = the_figure;
 figure_names{end+1} = fig_name;
 for i = 1 : length(cols)
     col = cols(i);
     curve_style = curve_styles{i};
     label = labels{i};
-
-    plot(res(:, 4), res(:, col)/num_users, curve_style, 'linewidth', linewidth, 'DisplayName', label);
+    if cols(i) == 2
+        comm_col = 4;
+    else
+        comm_col = 5;
+    end
+    plot(res(:, comm_col), res(:, col), curve_style, 'linewidth', linewidth, 'DisplayName', label);
     hold on;
 end
 hold on;
@@ -108,7 +108,7 @@ ylabel('objective value');
 legend('show');
 grid on;
 ylim(ylimits);
-xlim([0, 48708352]);
+xlim(xlimits_comm);
 
 for i = 1:length(figures)
     the_figure = figures{i};

@@ -1,4 +1,4 @@
-font_size = 16;
+font_size = 20;
 
 set(0,'DefaultAxesFontName', 'Times New Roman');
 set(0,'DefaultAxesFontSize', font_size);

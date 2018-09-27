@@ -1,34 +1,34 @@
 width=600;
 height=450;
 linewidth = 2;
+batch_size = 50;
+num_agents = 50;
 ROOT = '../data/';
 % OUTPUT_DIR = '/home/stephen/';
 OUTPUT_DIR = [ROOT, 'imgs/'];
 
-cols = [2, 3]; %, 6];
+cols = [2, 3];
 % cols = [2, 3, 6, 7];
-labels = {'DeCG', 'DeGSFW', 'CenCG', 'CenGreedy'};
+% labels = {'DeCG', 'DeGSFW', 'CenCG', 'CenGreedy'};
+labels = {'DeCG', 'DeGSFW'};
 curve_styles = {'-.', '-', '-', '-'};
-ylimits = [4.5, inf];
-xlimits_comm = [-inf, 7e8];
-xlimits_grads = [-inf, 12e5];
+ylimits = [6e3, inf];
+xlimits_grads = [-inf, inf];
+xlimits_comm = [-inf, 3.5e5];
 
-res_CenGreedy = 27571;
-num_users = 6000;
-load([ROOT, 'res_DeFW_DeSAGAFW_200.mat']);
+
+load([ROOT, 'res_DeFW_DeSAGAFW_nqp_20.mat']);
+
 res = final_res;
-load([ROOT, 'res_CenFW.mat']);
-res = [res, final_res(:, 2)];
-res = [res, res_CenGreedy*ones(size(res, 1), 1)];
-res = [[zeros(1, size(res, 2)-1), res_CenGreedy]; res];
-num_gradients = res(:, 1) * num_users;
+res = [zeros(1, size(res, 2)); res];
+num_gradients = res(:, 1) * batch_size*num_agents;
 
 figures = {};
 figure_names = {};
 
 
 the_figure = figure('position', [0, 0, width, height]);
-fig_name =[OUTPUT_DIR, 'det_iters', '.eps'];
+fig_name =[OUTPUT_DIR, 'nqp_det_iters', '.eps'];
 figures{end+1} = the_figure;
 figure_names{end+1} = fig_name;
 for i = 1 : length(cols)
@@ -36,7 +36,7 @@ for i = 1 : length(cols)
     curve_style = curve_styles{i};
     label = labels{i};
 
-    plot(res(:, 1), res(:, col)/num_users, curve_style, 'linewidth', linewidth, 'DisplayName', label);
+    plot(res(:, 1), res(:, col), curve_style, 'linewidth', linewidth, 'DisplayName', label);
     hold on;
 end
 hold on;
@@ -48,7 +48,7 @@ ylim(ylimits);
 
 
 the_figure = figure('position', [0, 0, width, height]);
-fig_name =[OUTPUT_DIR, 'det_grads', '.eps'];
+fig_name =[OUTPUT_DIR, 'nqp_det_grads', '.eps'];
 figures{end+1} = the_figure;
 figure_names{end+1} = fig_name;
 for i = 1 : length(cols)
@@ -56,7 +56,7 @@ for i = 1 : length(cols)
     curve_style = curve_styles{i};
     label = labels{i};
 
-    plot(num_gradients, res(:, col)/num_users, curve_style, 'linewidth', linewidth, 'DisplayName', label);
+    plot(num_gradients, res(:, col), curve_style, 'linewidth', linewidth, 'DisplayName', label);
     hold on;
 end
 hold on;
@@ -70,7 +70,7 @@ xlim(xlimits_grads);
 
 cols = [2, 3];
 the_figure = figure('position', [0, 0, width, height]);
-fig_name =[OUTPUT_DIR, 'det_comm', '.eps'];
+fig_name =[OUTPUT_DIR, 'nqp_det_comm', '.eps'];
 figures{end+1} = the_figure;
 figure_names{end+1} = fig_name;
 for i = 1 : length(cols)
@@ -78,7 +78,7 @@ for i = 1 : length(cols)
     curve_style = curve_styles{i};
     label = labels{i};
 
-    plot(res(:, 4), res(:, col)/num_users, curve_style, 'linewidth', linewidth, 'DisplayName', label);
+    plot(res(:, 4), res(:, col), curve_style, 'linewidth', linewidth, 'DisplayName', label);
     hold on;
 end
 hold on;

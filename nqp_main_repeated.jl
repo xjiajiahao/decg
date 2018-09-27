@@ -6,7 +6,7 @@ include("comm.jl");
 
 # Step 1: initialization
 const num_agents = 50;
-repeated = 5;
+repeated = 1;
 # const num_iters = Int(20);
 # alpha = 1/sqrt(num_iters);
 # phi = 1/num_iters^(2/3);
