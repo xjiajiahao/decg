@@ -17,7 +17,7 @@ xlimits_grads = [-inf, inf];
 xlimits_comm = [-inf, 3.5e5];
 
 
-load([ROOT, 'res_DeFW_DeSAGAFW_nqp_20.mat']);
+load([ROOT, 'res_DeCG_DeGSFW_nqp_b=1_20.mat']);
 
 res = final_res;
 res = [zeros(1, size(res, 2)); res];

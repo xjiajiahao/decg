@@ -9,7 +9,7 @@ function DeFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, 
 
     function f_sum(x)  # compute local objective functions simultaneously, and then output the sum
         f_x = @sync @parallel (+) for i in 1:num_agents
-            f_batch(x, data_cell[i])
+            f_batch(x[:, i], data_cell[i])
         end
         return f_x;
     end
@@ -26,7 +26,7 @@ function DeFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, 
     d = zeros(dim, num_agents);  # local gradient estimators
     num_comm = 0.0;
     results = zeros(num_iters+1, 4);
-    results[1, :] = [0, 0, 0, f_sum(mean(x, 2))];  # [#iter, time, #comm, obj_value]
+    # results[1, :] = [0, 0, 0, f_sum(mean(x, 2))];  # [#iter, time, #comm, obj_value]
     for iter in 1:num_iters
         grad_x = gradient_cat(x);  # compute the true local gradients, grad_x is a dim-by-num_agents matrix
         d = (1 - alpha) * d * weights + alpha * grad_x; # first communication: exchange local gradient estimators
@@ -34,13 +34,15 @@ function DeFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, 
         x = x*weights + v / num_iters; # second communication: exchange local variables
 
         # evaluate obj function at mean(x[i])
-        x_bar = mean(x, 2);
-        curr_obj = f_sum(x_bar);
+        # x_bar = mean(x, 2);
+        # curr_obj = f_sum(x_bar);
         t_elapsed = time() - t_start;
         num_comm += 2*dim*num_out_edges;  # 1 for local gradients, 1 for local variables
-        println("$(iter), $(t_elapsed), $(curr_obj)");
-        results[iter+1, :] = [iter, t_elapsed, num_comm, curr_obj];
+        println("$(iter), $(t_elapsed)");
+        # results[iter+1, :] = [iter, t_elapsed, num_comm, curr_obj];
     end
+    t_elapsed = time() - t_start;
+    results = [num_iters, t_elapsed, num_comm, f_sum(x)];
     return results;
 end
 
@@ -55,7 +57,7 @@ function DeSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch,
 
     function f_sum(x) # compute local objective functions simultaneously, and then output the sum
         f_x = @sync @parallel (+) for i in 1:num_agents
-            f_batch(x, data_cell[i])
+            f_batch(x[:, i], data_cell[i])
         end
         return f_x;
     end
@@ -73,7 +75,7 @@ function DeSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch,
     g = zeros(dim, num_agents);  # local stochastic averaged gradient
     num_comm = 0.0;
     results = zeros(num_iters+1, 4);
-    results[1, :] = [0, 0, 0, f_sum(mean(x, 2))];  # [#iter, time, #comm, obj_value]
+    # results[1, :] = [0, 0, 0, f_sum(mean(x, 2))];  # [#iter, time, #comm, obj_value]
     for iter in 1:num_iters
         grad_x = gradient_cat(x);  # compute the true local gradients, grad_x is a dim-by-num_agents matrix
         g = (1 - phi) * g + phi * grad_x;  # update the local stochastic averaged gradient
@@ -82,12 +84,14 @@ function DeSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch,
         x = x*weights + v / num_iters;  # second communication: exchange local variables
 
         # evaluate obj function at mean(x)
-        x_bar = mean(x, 2);
-        curr_obj = f_sum(x_bar);
+        # x_bar = mean(x, 2);
+        # curr_obj = f_sum(x_bar);
         t_elapsed = time() - t_start;
         num_comm += 2*dim*num_out_edges;  # 1 for local gradients, 1 for local variables
-        println("$(iter), $(t_elapsed), $(curr_obj)");
-        results[iter+1, :] = [iter, t_elapsed, num_comm, curr_obj];
+        println("$(iter), $(t_elapsed)");
+        # results[iter+1, :] = [iter, t_elapsed, num_comm, curr_obj];
     end
+    t_elapsed = time() - t_start;
+    results = [num_iters, t_elapsed, num_comm, f_sum(x)];
     return results;
 end

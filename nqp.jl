@@ -1,3 +1,4 @@
+@everywhere using Distributions
 @everywhere function f(x, data) # data is a 1-by-batch_size cell where each entry is a dim-by-dim matrix H
     dim = length(x);
     batch_size = length(data);
@@ -42,10 +43,14 @@ end
     dim = length(x);
     u = ones(dim, 1);
     res = zeros(dim, 1);
+    sig = sqrt(10);
+    distrib = Normal(0, sig);
     for i = 1 : sample_times
-        rand_idx = rand(1:length(data));
-        H = data[rand_idx];
-        res = H * ( x - u );
+        # rand_idx = rand(1:length(data));
+        # H = data[rand_idx];
+        H = data[1];
+        epsilon = rand(distrib, dim);
+        res += H * ( x - u ) + epsilon;
     end
     res = squeeze(res./sample_times, 2);
     return res;

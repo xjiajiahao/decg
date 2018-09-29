@@ -22,15 +22,17 @@ figure_names = {};
 
 num_samples = 5;
 clear res;
-for i = 1 : num_samples
-    load([ROOT, 'res_DeFW_DeSAGAFW_nqp_0',num2str(i), '.mat']);
-    if exist('res', 'var')
-        res =  res + final_res;
-    else
-        res =  final_res;
-    end
-end
-res = res ./ num_samples;
+load([ROOT, 'res_DeSCG_DeSGSFW_nqp_b=1_grad.mat']);
+% for i = 1 : num_samples
+%     load([ROOT, 'res_DeFW_DeSAGAFW_nqp_0',num2str(i), '.mat']);
+%     if exist('res', 'var')
+%         res =  res + final_res;
+%     else
+%         res =  final_res;
+%     end
+% end
+% res = res ./ num_samples;
+res = final_res;
 res = [zeros(1, size(res, 2)); res];
 num_gradients = res(:, 1) * batch_size*num_agents;
 
@@ -59,7 +61,7 @@ xlim(xlimits_grads);
 
 
 
-load([ROOT, 'res_DeSFW_nqp_20.mat']);
+load([ROOT, 'res_DeSCG_DeSGSFW_nqp_b=1_comm.mat']);
 final_res = [zeros(1, size(final_res, 2)); final_res];
 res(:, 1) = final_res(:, 1);
 res(:, 2) = final_res(:, 2);

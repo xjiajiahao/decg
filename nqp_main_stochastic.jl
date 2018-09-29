@@ -32,17 +32,18 @@ final_res = zeros(length(num_iters_arr), 5);
 
 for i = 1 : length(num_iters_arr)
     tmpn = num_iters_arr[i];
+    # num_iters = tmpn;
     num_iters = round(Int, tmpn*(tmpn+1)*(2*tmpn+1)/6);
     alpha = 1/sqrt(num_iters);
     phi = 1/num_iters^(2/3);
 
     res_DeSFW = DeSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, stochastic_gradient_batch, num_iters, alpha, phi);
-    final_res[i, 2] = res_DeSFW[end, 4];
-    final_res[i, 4] = res_DeSFW[end, 3];
+    final_res[i, 2] = res_DeSFW[4];
+    final_res[i, 4] = res_DeSFW[3];
 
     res_DeSSAGAFW = DeSSAGAFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, stochastic_gradient_batch, tmpn);
-    final_res[i, 3] = res_DeSSAGAFW[end, 4];
-    final_res[i, 5] = res_DeSSAGAFW[end, 3];
+    final_res[i, 3] = res_DeSSAGAFW[4];
+    final_res[i, 5] = res_DeSSAGAFW[3];
 
     # res_CenFW = CenFW(dim, data_cell, LMO, f_batch, gradient_batch, num_iters);
     # final_res[i, 2] = res_CenFW[end, 3];
