@@ -8,9 +8,9 @@ include("comm.jl");
 const k_int = 10;  # the cardinality constraint
 # const num_agents = 100;
 const num_agents = 50;
-const num_iters = Int(2e2);
-alpha = 1/sqrt(num_iters);
-phi = 1/num_iters^(2/3);
+# const num_iters = Int(2e2);
+# alpha = 1/sqrt(num_iters);
+# phi = 1/num_iters^(2/3);
 
 # load data
 # data_cell[i][j] is a n_j-by-2 matrix representing the ratings of agent i's jth user
@@ -34,11 +34,13 @@ LMO = generate_linear_prog_function(d, a_2d, k);
 # const num_iters_arr = Int[2e2, 4e2, 6e2, 8e2, 10e2];
 # const num_iters_arr = Int[1e0, 2e0, 3e0, 4e0, 5e0];
 # const num_iters_arr = Int[1:14;];
-const num_iters_arr = Int[10:10:200;];
-# const num_iters_arr = Int[10;];
+# const num_iters_arr = Int[10:10:200;];
+const num_iters_arr = Int[1:3;];
 final_res = zeros(length(num_iters_arr), 5);
 
+t_start = time();
 for i = 1 : length(num_iters_arr)
+    println("repeated: $(i), T: $(num_iters_arr[i]), time: $(Dates.hour(now())):$(Dates.minute(now()))");
     num_iters = num_iters_arr[i];
     alpha = 1/sqrt(num_iters);
     phi = 1/num_iters^(2/3);

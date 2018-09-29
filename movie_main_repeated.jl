@@ -37,7 +37,9 @@ LMO = generate_linear_prog_function(d, a_2d, k);
 const num_iters_arr = Int[1:14;];
 res = zeros(length(num_iters_arr), 5);
 
+t_start = time();
 for i = 1 : repeated
+    println("repeated: $(i), T: $(num_iters_arr[i]), time: $(Dates.hour(now())):$(Dates.minute(now()))");
     final_res = zeros(length(num_iters_arr), 5);
 
     for i = 1 : length(num_iters_arr)

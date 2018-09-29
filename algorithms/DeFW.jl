@@ -36,9 +36,9 @@ function DeFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, 
         # evaluate obj function at mean(x[i])
         # x_bar = mean(x, 2);
         # curr_obj = f_sum(x_bar);
-        t_elapsed = time() - t_start;
+        # t_elapsed = time() - t_start;
         num_comm += 2*dim*num_out_edges;  # 1 for local gradients, 1 for local variables
-        println("$(iter), $(t_elapsed)");
+        # println("$(iter), $(t_elapsed)");
         # results[iter+1, :] = [iter, t_elapsed, num_comm, curr_obj];
     end
     t_elapsed = time() - t_start;
@@ -86,9 +86,9 @@ function DeSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch,
         # evaluate obj function at mean(x)
         # x_bar = mean(x, 2);
         # curr_obj = f_sum(x_bar);
-        t_elapsed = time() - t_start;
+        # t_elapsed = time() - t_start;
         num_comm += 2*dim*num_out_edges;  # 1 for local gradients, 1 for local variables
-        println("$(iter), $(t_elapsed)");
+        # println("$(iter), $(t_elapsed)");
         # results[iter+1, :] = [iter, t_elapsed, num_comm, curr_obj];
     end
     t_elapsed = time() - t_start;
