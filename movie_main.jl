@@ -34,8 +34,8 @@ LMO = generate_linear_prog_function(d, a_2d, k);
 # const num_iters_arr = Int[2e2, 4e2, 6e2, 8e2, 10e2];
 # const num_iters_arr = Int[1e0, 2e0, 3e0, 4e0, 5e0];
 # const num_iters_arr = Int[1:14;];
-# const num_iters_arr = Int[10:10:200;];
-const num_iters_arr = Int[1:3;];
+const num_iters_arr = Int[10:10:200;];
+# const num_iters_arr = Int[1:3;];
 final_res = zeros(length(num_iters_arr), 5);
 
 t_start = time();
