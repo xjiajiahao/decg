@@ -39,10 +39,10 @@ res = zeros(length(num_iters_arr), 5);
 
 t_start = time();
 for i = 1 : repeated
-    println("repeated: $(i), T: $(num_iters_arr[i]), time: $(Dates.hour(now())):$(Dates.minute(now()))");
     final_res = zeros(length(num_iters_arr), 5);
 
     for i = 1 : length(num_iters_arr)
+        println("repeated: $(i), T: $(num_iters_arr[i]), time: $(Dates.hour(now())):$(Dates.minute(now()))");
         tmpn = num_iters_arr[i];
         # num_iters = num_iters_arr[i];
         num_iters = round(Int, tmpn*(tmpn+1)*(2*tmpn+1)/6);
