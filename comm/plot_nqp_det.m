@@ -42,7 +42,7 @@ end
 hold on;
 xlabel('T (#iterations)');
 ylabel('objective value');
-legend('show');
+legend('show', 'location', 'southeast');
 grid on;
 ylim(ylimits);
 
@@ -60,9 +60,9 @@ for i = 1 : length(cols)
     hold on;
 end
 hold on;
-xlabel('#gradient evaluations');
+xlabel('#true gradients');
 ylabel('objective value');
-legend('show');
+legend('show', 'location', 'southeast');
 grid on;
 ylim(ylimits);
 xlim(xlimits_grads);
@@ -84,7 +84,7 @@ end
 hold on;
 xlabel('#doubles');
 ylabel('objective value');
-legend('show');
+legend('show', 'location', 'southeast');
 grid on;
 ylim(ylimits);
 xlim(xlimits_comm);

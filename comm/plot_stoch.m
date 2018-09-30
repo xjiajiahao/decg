@@ -16,10 +16,10 @@ xlimits_iters = [-inf, 14];
 figures = {};
 figure_names = {};
 
-num_samples = 5;
+num_samples = 1;
 clear res;
 for i = 1 : num_samples
-    load([ROOT, 'res_DeSFW_DeSSAGAFW_0',num2str(i), '.mat']);
+    load([ROOT, 'res_DeSCG_DeSGSFW_0',num2str(i), '.mat']);
     if exist('res', 'var')
         res =  res + final_res;
     else
@@ -49,9 +49,9 @@ for i = 1 : length(cols)
     hold on;
 end
 hold on;
-xlabel('#gradient evaluations');
+xlabel('#stochastic gradients');
 ylabel('objective value');
-legend('show');
+legend('show', 'location', 'southeast');
 grid on;
 ylim(ylimits);
 xlim(xlimits_grads*num_users);
@@ -60,7 +60,7 @@ xlim(xlimits_grads*num_users);
 
 
 
-load([ROOT, 'res_DeSFW_14.mat']);
+load([ROOT, 'res_DeSCG_DeSGSFW_14.mat']);
 final_res = [zeros(1, size(final_res, 2)); final_res];
 res(:, 1) = final_res(:, 1);
 res(:, 2) = final_res(:, 2);
@@ -84,7 +84,7 @@ end
 hold on;
 xlabel('T (#iterations)');
 ylabel('objective value');
-legend('show');
+legend('show', 'location', 'southeast');
 grid on;
 ylim(ylimits);
 xlim(xlimits_iters);
@@ -105,7 +105,7 @@ end
 hold on;
 xlabel('#doubles');
 ylabel('objective value');
-legend('show');
+legend('show', 'location', 'southeast');
 grid on;
 ylim(ylimits);
 xlim([0, 48708352]);

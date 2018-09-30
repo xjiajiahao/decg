@@ -15,7 +15,7 @@ xlimits_grads = [-inf, 12e5];
 
 res_CenGreedy = 27571;
 num_users = 6000;
-load([ROOT, 'res_DeFW_DeSAGAFW_200.mat']);
+load([ROOT, 'res_DeCG_DeGSFW_200.mat']);
 res = final_res;
 load([ROOT, 'res_CenFW.mat']);
 res = [res, final_res(:, 2)];
@@ -42,7 +42,7 @@ end
 hold on;
 xlabel('T (#iterations)');
 ylabel('objective value');
-legend('show');
+legend('show', 'location', 'southeast');
 grid on;
 ylim(ylimits);
 
@@ -60,9 +60,9 @@ for i = 1 : length(cols)
     hold on;
 end
 hold on;
-xlabel('#gradient evaluations');
+xlabel('#true gradients');
 ylabel('objective value');
-legend('show');
+legend('show', 'location', 'southeast');
 grid on;
 ylim(ylimits);
 xlim(xlimits_grads);
@@ -84,7 +84,7 @@ end
 hold on;
 xlabel('#doubles');
 ylabel('objective value');
-legend('show');
+legend('show', 'location', 'southeast');
 grid on;
 ylim(ylimits);
 xlim(xlimits_comm);

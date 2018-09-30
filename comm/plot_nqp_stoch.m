@@ -50,9 +50,9 @@ for i = 1 : length(cols)
     hold on;
 end
 hold on;
-xlabel('#gradient evaluations');
+xlabel('#stochastic gradients');
 ylabel('objective value');
-legend('show');
+legend('show', 'location', 'southeast');
 grid on;
 ylim(ylimits);
 xlim(xlimits_grads);
@@ -82,7 +82,7 @@ res(:, 4) = final_res(:, 4);
 % hold on;
 % xlabel('T (#iterations)');
 % ylabel('objective value');
-% legend('show');
+% legend('show', 'location', 'southeast');
 % grid on;
 % ylim(ylimits);
 % xlim(xlimits_iters);
@@ -107,7 +107,7 @@ end
 hold on;
 xlabel('#doubles');
 ylabel('objective value');
-legend('show');
+legend('show', 'location', 'southeast');
 grid on;
 ylim(ylimits);
 xlim(xlimits_comm);
