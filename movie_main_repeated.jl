@@ -42,10 +42,10 @@ for i = 1 : repeated
     final_res = zeros(length(num_iters_arr), 5);
 
     for i = 1 : length(num_iters_arr)
-        println("repeated: $(i), T: $(num_iters_arr[i]), time: $(Dates.hour(now())):$(Dates.minute(now()))");
         tmpn = num_iters_arr[i];
-        # num_iters = num_iters_arr[i];
         num_iters = round(Int, tmpn*(tmpn+1)*(2*tmpn+1)/6);
+        println("repeated: $(i), T: $(num_iters), time: $(Dates.hour(now())):$(Dates.minute(now()))");
+        # num_iters = num_iters_arr[i];
         alpha = 1/sqrt(num_iters);
         phi = 1/num_iters^(2/3);
 
@@ -55,7 +55,7 @@ for i = 1 : repeated
         # res_DeSAGAFW = DeSAGAFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, gradient_extension_batch, num_iters);
         # final_res[i, 3] = res_DeSAGAFW[4];
 
-        res_DeSFW = DeSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, stochastic_gradient_extension_batch, tmpn, alpha, phi);
+        res_DeSFW = DeSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, stochastic_gradient_extension_batch, num_iters, alpha, phi);
         final_res[i, 2] = res_DeSFW[4];
         final_res[i, 4] = res_DeSFW[3];
 
