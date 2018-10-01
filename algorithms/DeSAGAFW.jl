@@ -9,7 +9,7 @@ function DeSAGAFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_bat
 
     function f_sum(x)  # compute local objective functions simultaneously, and then output the sum
         f_x = @sync @parallel (+) for i in 1:num_agents
-            f_batch(x[:, i], data_cell[i])
+            f_batch(x, data_cell[i])
         end
         return f_x;
     end
@@ -49,7 +49,12 @@ function DeSAGAFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_bat
         # results[iter+1, :] = [iter, t_elapsed, num_comm, curr_obj];
     end
     t_elapsed = time() - t_start;
-    results = [num_iters, t_elapsed, num_comm, f_sum(x)];
+    avg_f = 0;
+    for i = 1:num_agents
+        avg_f += f_sum(x[:, i]);
+    end
+    avg_f = avg_f / num_agents;
+    results = [num_iters, t_elapsed, num_comm, avg_f];
     return results;
 end
 
@@ -64,7 +69,7 @@ function DeSSAGAFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_ba
 
     function f_sum(x)  # compute local objective functions simultaneously, and then output the sum
         f_x = @sync @parallel (+) for i in 1:num_agents
-            f_batch(x[:, i], data_cell[i])
+            f_batch(x, data_cell[i])
         end
         return f_x;
     end
@@ -105,6 +110,11 @@ function DeSSAGAFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_ba
         # results[iter+1, :] = [iter, t_elapsed, num_comm, curr_obj];
     end
     t_elapsed = time() - t_start;
-    results = [num_iters, t_elapsed, num_comm, f_sum(x)];
+    avg_f = 0;
+    for i = 1:num_agents
+        avg_f += f_sum(x[:, i]);
+    end
+    avg_f = avg_f / num_agents;
+    results = [num_iters, t_elapsed, num_comm, avg_f];
     return results;
 end

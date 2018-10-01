@@ -35,8 +35,8 @@ for i = 1 : repeated
     final_res = zeros(length(num_iters_arr), 5);
     for i = 1 : length(num_iters_arr)
         tmpn = num_iters_arr[i];
-        num_iters = tmpn;
-        # num_iters = round(Int, tmpn*(tmpn+1)*(2*tmpn+1)/6);
+        # num_iters = tmpn;
+        num_iters = round(Int, tmpn*(tmpn+1)*(2*tmpn+1)/6);
         alpha = 1/sqrt(num_iters);
         phi = 1/num_iters^(2/3);
 
