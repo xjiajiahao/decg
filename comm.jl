@@ -37,12 +37,13 @@ function load_nqp_partitioned_data(num_agents)
     return (data_cell, A, dim, u, b)
 end
 
-function load_network_50()
+function load_network_50(network_type="er")
     ROOT = "./data/";
-    filename = "$(ROOT)weights_50.mat";
+    filename = "$(ROOT)weights_$(network_type)_50.mat";
     file = matopen(filename);
     weights = read(file, "weights");
     close(file);
+    # weights = sparse(weights);
     return weights
 end
 

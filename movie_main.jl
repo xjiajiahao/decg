@@ -18,7 +18,9 @@ const data_cell, data_mat, num_movies, num_users = load_movie_partitioned_data(n
 
 # load weights matrix
 # const weights = generate_network(num_agents, avg_degree);
-const weights = load_network_50();
+const weights = load_network_50("complete");
+# const weights = load_network_50("line");
+# const weights = load_network_50("er");
 num_out_edges = count(i->(i>0), weights) - num_agents;
 
 const dim = num_movies;
@@ -35,6 +37,7 @@ LMO = generate_linear_prog_function(d, a_2d, k);
 # const num_iters_arr = Int[1e0, 2e0, 3e0, 4e0, 5e0];
 # const num_iters_arr = Int[1:14;];
 const num_iters_arr = Int[10:10:200;];
+# const num_iters_arr = Int[20;];
 # const num_iters_arr = Int[1:3;];
 final_res = zeros(length(num_iters_arr), 5);
 

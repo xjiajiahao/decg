@@ -16,7 +16,7 @@ xlimits_iters = [-inf, 14];
 figures = {};
 figure_names = {};
 
-num_samples = 1;
+num_samples = 5;
 clear res;
 for i = 1 : num_samples
     load([ROOT, 'res_DeSCG_DeSGSFW_0',num2str(i), '.mat']);
