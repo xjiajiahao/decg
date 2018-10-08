@@ -60,7 +60,7 @@ for i = 1 : length(cols)
     hold on;
 end
 hold on;
-xlabel('#true gradients');
+xlabel('#full gradients');
 ylabel('objective value');
 legend('show', 'location', 'southeast');
 grid on;
