@@ -1,7 +1,7 @@
 using LaTeXStrings
 
 include("nqp.jl");
-include("algorithms/CenFW.jl"); include("algorithms/DeFW.jl"); include("algorithms/DeSAGAFW.jl");
+include("algorithms/CenFW.jl"); include("algorithms/DeFW.jl"); include("algorithms/DeSAGAFW.jl"); include("algorithms/AccDeSAGAFW.jl");
 include("comm.jl");
 
 # Step 1: initialization
@@ -18,7 +18,7 @@ const data_cell, A, dim, u, b = load_nqp_partitioned_data(num_agents);
 # load weights matrix
 # const weights = load_network_50("complete");
 # const weights = load_network_50("line");
-const weights = load_network_50("er");
+const weights, beta = load_network_50("er");
 num_out_edges = count(i->(i>0), weights) - num_agents;
 
 x0 = zeros(dim);
@@ -56,6 +56,7 @@ end
 # res_DeFW = DeFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters, alpha);
 #
 # res_DESAGAFW = DeSAGAFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters);
+res_AccDESAGAFW = AccDeSAGAFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters, beta);
 
 
 
@@ -64,3 +65,4 @@ end
 # res_DeSFW = DeSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, stochastic_gradient_batch, num_iters, alpha, phi);
 # #
 # res_DeSSAGAFW = DeSSAGAFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, stochastic_gradient_batch, num_iters);
+# res_AccDESSAGAFW = res_AccDeSSAGAFW = DeSSAGAFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, stochastic_gradient_batch, num_iters, beta);

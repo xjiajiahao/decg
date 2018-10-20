@@ -43,8 +43,13 @@ function load_network_50(network_type="er")
     file = matopen(filename);
     weights = read(file, "weights");
     close(file);
-    # weights = sparse(weights);
-    return weights
+    # find the first and second largest (in magnitude) eigenvalues
+    eigvalues, eigvectors = eigs(weights, nev=2, which=:LM);
+    if abs(eigvalues[1] - 1.0) > 1e-4
+        error("the largest eigenvalue of the weight matrix must be 1");
+    end
+    beta = eigvalues[2];
+    return (weights, beta);
 end
 
 function generate_network(num_agents, avg_degree)
