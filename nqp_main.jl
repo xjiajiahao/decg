@@ -37,9 +37,13 @@ for i = 1 : length(num_iters_arr)
     alpha = 1/sqrt(num_iters);
     phi = 1/num_iters^(2/3);
 
-    res_DeFW = DeFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters, alpha);
-    final_res[i, 2] = res_DeFW[4];
-    final_res[i, 4] = res_DeFW[3];
+    # res_DeFW = DeFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters, alpha);
+    # final_res[i, 2] = res_DeFW[4];
+    # final_res[i, 4] = res_DeFW[3];
+
+    res_AccDESAGAFW = AccDeSAGAFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters, beta);
+    final_res[i, 2] = res_AccDESAGAFW[4];
+    final_res[i, 4] = res_AccDESAGAFW[3];
 
     res_DeSAGAFW = DeSAGAFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters);
     final_res[i, 3] = res_DeSAGAFW[4];
@@ -56,7 +60,7 @@ end
 # res_DeFW = DeFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters, alpha);
 #
 # res_DESAGAFW = DeSAGAFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters);
-res_AccDESAGAFW = AccDeSAGAFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters, beta);
+# res_AccDESAGAFW = AccDeSAGAFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters, beta);
 
 
 

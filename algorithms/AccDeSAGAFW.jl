@@ -37,7 +37,7 @@ function AccDeSAGAFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_
         x = xhat + v / num_iters;  # second communication: exchange local variables
 
         grad_x = gradient_cat(x);  # compute the true local gradients, grad_x is a dim-by-num_agents matrix
-        g = d + grad_x - grad_x_old;
+        g = dhat + grad_x - grad_x_old;
         grad_x_old = grad_x;
     end
     t_elapsed = time() - t_start;
@@ -118,10 +118,12 @@ function ChebyshevComm(x, g, weights, beta, K)
     g_old = g * 1.0;
     x_curr = (1/beta)*x_old;
     g_curr = (1/beta)*g_old;
+    a_new = a_curr;
+    x_new = x_curr;
+    g_new = g_curr;
     if K <= 1
         return (x_curr, g_curr);
     end
-
     for k = 1:K-1
         a_new = 2 / beta * a_curr - a_old;
         x_new = (2 / beta) * x_curr * weights - x_old;
