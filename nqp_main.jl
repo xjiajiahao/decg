@@ -1,7 +1,7 @@
 using LaTeXStrings
 
 include("nqp.jl");
-include("algorithms/CenFW.jl"); include("algorithms/DeFW.jl"); include("algorithms/DeSAGAFW.jl"); include("algorithms/AccDeSAGAFW.jl");
+include("algorithms/CenFW.jl"); include("algorithms/DeFW.jl"); include("algorithms/DeGSFW.jl"); include("algorithms/AccDeGSFW.jl");
 include("comm.jl");
 
 # Step 1: initialization
@@ -41,13 +41,13 @@ for i = 1 : length(num_iters_arr)
     # final_res[i, 2] = res_DeFW[4];
     # final_res[i, 4] = res_DeFW[3];
 
-    res_AccDESAGAFW = AccDeSAGAFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters, beta);
+    res_AccDESAGAFW = AccDeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters, beta);
     final_res[i, 2] = res_AccDESAGAFW[4];
     final_res[i, 4] = res_AccDESAGAFW[3];
 
-    res_DeSAGAFW = DeSAGAFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters);
-    final_res[i, 3] = res_DeSAGAFW[4];
-    final_res[i, 5] = res_DeSAGAFW[3];
+    res_DeGSFW = DeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters);
+    final_res[i, 3] = res_DeGSFW[4];
+    final_res[i, 5] = res_DeGSFW[3];
 
     # res_CenFW = CenFW(dim, data_cell, LMO, f_batch, gradient_batch, num_iters);
     # final_res[i, 2] = res_CenFW[end, 3];
@@ -59,8 +59,8 @@ end
 #
 # res_DeFW = DeFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters, alpha);
 #
-# res_DESAGAFW = DeSAGAFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters);
-# res_AccDESAGAFW = AccDeSAGAFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters, beta);
+# res_DESAGAFW = DeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters);
+# res_AccDESAGAFW = AccDeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters, beta);
 
 
 
@@ -68,5 +68,5 @@ end
 # #
 # res_DeSFW = DeSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, stochastic_gradient_batch, num_iters, alpha, phi);
 # #
-# res_DeSSAGAFW = DeSSAGAFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, stochastic_gradient_batch, num_iters);
-# res_AccDESSAGAFW = res_AccDeSSAGAFW = DeSSAGAFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, stochastic_gradient_batch, num_iters, beta);
+# res_DeSGSFW = DeSGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, stochastic_gradient_batch, num_iters);
+# res_AccDESSAGAFW = res_AccDeSGSFW = DeSGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, stochastic_gradient_batch, num_iters, beta);

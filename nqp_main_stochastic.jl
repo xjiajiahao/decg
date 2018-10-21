@@ -1,7 +1,7 @@
 using LaTeXStrings
 
 include("nqp.jl");
-include("algorithms/CenFW.jl"); include("algorithms/DeFW.jl"); include("algorithms/DeSAGAFW.jl");
+include("algorithms/CenFW.jl"); include("algorithms/DeFW.jl"); include("algorithms/DeGSFW.jl");
 include("comm.jl");
 
 # Step 1: initialization
@@ -41,9 +41,9 @@ for i = 1 : length(num_iters_arr)
     final_res[i, 2] = res_DeSFW[4];
     final_res[i, 4] = res_DeSFW[3];
 
-    res_DeSSAGAFW = DeSSAGAFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, stochastic_gradient_batch, tmpn);
-    final_res[i, 3] = res_DeSSAGAFW[4];
-    final_res[i, 5] = res_DeSSAGAFW[3];
+    res_DeSGSFW = DeSGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, stochastic_gradient_batch, tmpn);
+    final_res[i, 3] = res_DeSGSFW[4];
+    final_res[i, 5] = res_DeSGSFW[3];
 
     # res_CenFW = CenFW(dim, data_cell, LMO, f_batch, gradient_batch, num_iters);
     # final_res[i, 2] = res_CenFW[end, 3];
@@ -55,7 +55,7 @@ end
 #
 # res_DeFW = DeFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters, alpha);
 #
-# res_DESAGAFW = DeSAGAFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters);
+# res_DESAGAFW = DeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters);
 
 
 
@@ -63,4 +63,4 @@ end
 # #
 # res_DeSFW = DeSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, stochastic_gradient_batch, num_iters, alpha, phi);
 # #
-# res_DeSSAGAFW = DeSSAGAFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, stochastic_gradient_batch, num_iters);
+# res_DeSGSFW = DeSGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, stochastic_gradient_batch, num_iters);

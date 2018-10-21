@@ -1,5 +1,5 @@
 # our methods
-function AccDeSAGAFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters, beta)
+function AccDeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters, beta)
     function gradient_cat(x) # compute local gradients simultaneously
         grad_x = @sync @parallel (hcat) for i in 1:num_agents # the documentation says that @paralel for can handle situations where each iteration is tiny
             gradient_batch(x[:, i], data_cell[i])
@@ -51,7 +51,7 @@ function AccDeSAGAFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_
 end
 
 
-function AccDeSSAGAFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters, beta)
+function AccDeSGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters, beta)
     function gradient_cat(x, sample_times) # compute local gradients simultaneously
         grad_x = @sync @parallel (hcat) for i in 1:num_agents
             gradient_batch(x[:, i], data_cell[i], sample_times)  # @TODO t^2 should be smaller than the batch size b
