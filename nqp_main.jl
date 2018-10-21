@@ -16,9 +16,9 @@ const data_cell, A, dim, u, b = load_nqp_partitioned_data(num_agents);
 # the NQP problem is defined as f_i(x) = ( x/2 - u )^T H_i x, s.t. {x | 0<=x<=u, Ax<=b}, where A is the constraint_mat of size num_constraints-by-dim
 
 # load weights matrix
-# const weights = load_network_50("complete");
-# const weights = load_network_50("line");
-const weights, beta = load_network_50("er");
+# const weights, beta = load_network_50("complete");
+const weights, beta = load_network_50("line");
+# const weights, beta = load_network_50("er");
 num_out_edges = count(i->(i>0), weights) - num_agents;
 
 x0 = zeros(dim);

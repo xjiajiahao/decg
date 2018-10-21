@@ -17,7 +17,7 @@ const data_cell, A, dim, u, b = load_nqp_partitioned_data(num_agents);
 # the NQP problem is defined as f_i(x) = ( x/2 - u )^T H_i x, s.t. {x | 0<=x<=u, Ax<=b}, where A is the constraint_mat of size num_constraints-by-dim
 
 # load weights matrix
-const weights = load_network_50();
+const weights, beta = load_network_50();
 num_out_edges = count(i->(i>0), weights) - num_agents;
 
 x0 = zeros(dim);
@@ -40,9 +40,13 @@ for i = 1 : repeated
         alpha = 1/sqrt(num_iters);
         phi = 1/num_iters^(2/3);
 
-        res_DeSFW = DeSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, stochastic_gradient_batch, num_iters, alpha, phi);
-        final_res[i, 2] = res_DeSFW[4];
-        final_res[i, 4] = res_DeSFW[3];
+        # res_DeSFW = DeSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, stochastic_gradient_batch, num_iters, alpha, phi);
+        # final_res[i, 2] = res_DeSFW[4];
+        # final_res[i, 4] = res_DeSFW[3];
+
+        res_AccDESAGAFW = AccDeSAGAFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters, beta);
+        final_res[i, 2] = res_AccDESAGAFW[4];
+        final_res[i, 4] = res_AccDESAGAFW[3];
 
         res_DeSSAGAFW = DeSSAGAFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, stochastic_gradient_batch, tmpn);
         final_res[i, 3] = res_DeSSAGAFW[4];

@@ -9,7 +9,8 @@ data_cell = cell(1, num_agents);
 for i = 1 : num_agents
     tmp_cell = cell(1, batch_size);
     for j = 1 : batch_size
-        tmp_cell{j} = -abs(magnitude_data) .* rand(dim);
+        % tmp_cell{j} = -abs(magnitude_data) .* rand(dim);
+        tmp_cell{j} = -abs(magnitude_data * rand()) .* rand(dim);
     end
     data_cell{i} = tmp_cell;
 end

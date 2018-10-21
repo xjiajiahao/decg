@@ -76,30 +76,21 @@ function AccDeSSAGAFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f
     t_start = time();
     x = zeros(dim, num_agents);  # local variables
     d = zeros(dim, num_agents);  # aggregated gradient estimators
-    g = zeros(dim, num_agents);  # local SAGA-style gradient
-    grad_x_old = zeros(dim, num_agents);  # used to store the old gradient
+    g = gradient_cat(x, 1);  # local SAGA-style gradient estimators
+    grad_x_old = g;  # used to store the old local gradients
     num_comm = 0.0;
     results = zeros(num_iters+1, 4);
     # results[1, :] = [0, 0, 0, f_sum(mean(x, 2))];  # [#iter, time, #comm, obj_value]
     for iter in 1:num_iters
-        sample_times = iter^2;
+        xhat, dhat = ChebyshevComm(x, g, weights, beta, K);
+        num_comm += K * 2*dim*num_out_edges;  # 1 for local gradients, 1 for local variables
+        v = LMO_cat(dhat);  # find argmax <d[i], v> for all agents i simultaneously
+        x = xhat + v / num_iters;  # second communication: exchange local variables
+
+        sample_times = (iter+1)^2;
         grad_x = gradient_cat(x, sample_times);  # compute the true local gradients, grad_x is a dim-by-num_agents matrix
-        if iter == 1
-            g = grad_x;
-        else
-            g = d + grad_x - grad_x_old;
-        end
-        d = g * weights;  # first communication: exchange gradient estimators
-        v = LMO_cat(d);  # find argmax <d[i], v> each all agent i
-        x = x*weights + v / num_iters;  # second communication: exchange local variables
+        g = dhat + grad_x - grad_x_old;
         grad_x_old = grad_x;
-        # evaluate obj function
-        # x_bar = mean(x, 2);
-        # curr_obj = f_sum(x_bar);
-        # t_elapsed = time() - t_start;
-        num_comm += 2*dim*num_out_edges;  # 1 for local gradients, 1 for local variables
-        # println("$(iter), $(t_elapsed)");
-        # results[iter+1, :] = [iter, t_elapsed, num_comm, curr_obj];
     end
     t_elapsed = time() - t_start;
     avg_f = 0;

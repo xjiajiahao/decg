@@ -1,7 +1,7 @@
 using LaTeXStrings
 
 include("facility.jl");
-include("algorithms/CenFW.jl"); include("algorithms/DeFW.jl"); include("algorithms/DeSAGAFW.jl"); include("algorithms/CenGreedy.jl");
+include("algorithms/CenFW.jl"); include("algorithms/DeFW.jl"); include("algorithms/DeSAGAFW.jl"); include("algorithms/CenGreedy.jl"); include("algorithms/AccDeSAGAFW.jl");
 include("comm.jl");
 
 # Step 1: initialization
@@ -18,9 +18,9 @@ const data_cell, data_mat, num_movies, num_users = load_movie_partitioned_data(n
 
 # load weights matrix
 # const weights = generate_network(num_agents, avg_degree);
-const weights = load_network_50("complete");
-# const weights = load_network_50("line");
-# const weights = load_network_50("er");
+# const weights, beta = load_network_50("complete");
+# const weights, beta = load_network_50("line");
+const weights, beta = load_network_50("er");
 num_out_edges = count(i->(i>0), weights) - num_agents;
 
 const dim = num_movies;
@@ -48,9 +48,13 @@ for i = 1 : length(num_iters_arr)
     alpha = 1/sqrt(num_iters);
     phi = 1/num_iters^(2/3);
 
-    res_DeFW = DeFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, gradient_extension_batch, num_iters, alpha);
-    final_res[i, 2] = res_DeFW[4];
-    final_res[i, 4] = res_DeFW[3];
+    # res_DeFW = DeFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, gradient_extension_batch, num_iters, alpha);
+    # final_res[i, 2] = res_DeFW[4];
+    # final_res[i, 4] = res_DeFW[3];
+
+    res_AccDESAGAFW = AccDeSAGAFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters, beta);
+    final_res[i, 2] = res_AccDESAGAFW[4];
+    final_res[i, 4] = res_AccDESAGAFW[3];
 
     res_DeSAGAFW = DeSAGAFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, gradient_extension_batch, num_iters);
     final_res[i, 3] = res_DeSAGAFW[4];
