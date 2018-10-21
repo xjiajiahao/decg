@@ -108,8 +108,8 @@ function ChebyshevComm(x, g, weights, beta, K)
     a_curr = 1/beta;
     x_old = x * 1.0;
     g_old = g * 1.0;
-    x_curr = (1/beta)*x_old;
-    g_curr = (1/beta)*g_old;
+    x_curr = (1/beta)* x_old * weights;
+    g_curr = (1/beta)* g_old * weights;
     a_new = a_curr;
     x_new = x_curr;
     g_new = g_curr;
@@ -117,7 +117,7 @@ function ChebyshevComm(x, g, weights, beta, K)
         return (x_curr, g_curr);
     end
     for k = 1:K-1
-        a_new = 2 / beta * a_curr - a_old;
+        a_new = (2 / beta) * a_curr - a_old;
         x_new = (2 / beta) * x_curr * weights - x_old;
         g_new = (2 / beta) * g_curr * weights - g_old;
 
