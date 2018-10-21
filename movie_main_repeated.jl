@@ -61,7 +61,7 @@ for i = 1 : repeated
         # final_res[i, 2] = res_DeSFW[4];
         # final_res[i, 4] = res_DeSFW[3];
 
-        res_AccDeSSAGAFW = DeSSAGAFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, stochastic_gradient_extension_batch, tmpn, beta);
+        res_AccDeSSAGAFW = AccDeSSAGAFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, stochastic_gradient_extension_batch, tmpn, beta);
         final_res[i, 3] = res_DeSSAGAFW[4];
         final_res[i, 5] = res_DeSSAGAFW[3];
 
