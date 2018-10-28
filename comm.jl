@@ -7,10 +7,10 @@ using MAT, Base.Iterators.cycle
 # global_line_width = 3
 
 # load data set, which has been randomly and equally partitioned
-function load_movie_partitioned_data(num_agents)
+function load_movie_partitioned_data(num_agents, prefix="1M")
     ROOT = "./data/";
     # file = matopen("data/Movies20M.mat");
-    filename = "$(ROOT)Movies_$(num_agents)_agents.mat";
+    filename = "$(ROOT)Movies_$(prefix)_$(num_agents)_agents.mat";
     file = matopen(filename);
     user_ratings_cell_arr = read(file, "user_ratings_cell_arr"); # @NOTE we would use the cell arrary data structure where for each user, the ratings are sorted from high to low
     user_ratings_mat = read(file, "user_ratings_mat");

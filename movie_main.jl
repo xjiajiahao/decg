@@ -14,13 +14,13 @@ const num_agents = 50;
 
 # load data
 # data_cell[i][j] is a n_j-by-2 matrix representing the ratings of agent i's jth user
-const data_cell, data_mat, num_movies, num_users = load_movie_partitioned_data(num_agents);
+const data_cell, data_mat, num_movies, num_users = load_movie_partitioned_data(num_agents, "100K");
 
 # load weights matrix
 # const weights = generate_network(num_agents, avg_degree);
 # const weights, beta = load_network_50("complete");
-# const weights, beta = load_network_50("line");
-const weights, beta = load_network_50("er");
+const weights, beta = load_network_50("line");
+# const weights, beta = load_network_50("er");
 num_out_edges = count(i->(i>0), weights) - num_agents;
 
 const dim = num_movies;
