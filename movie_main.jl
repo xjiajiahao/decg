@@ -36,14 +36,15 @@ LMO = generate_linear_prog_function(d, a_2d, k);
 # const num_iters_arr = Int[2e2, 4e2, 6e2, 8e2, 10e2];
 # const num_iters_arr = Int[1e0, 2e0, 3e0, 4e0, 5e0];
 # const num_iters_arr = Int[1:14;];
-const num_iters_arr = Int[10:10:200;];
+# const num_iters_arr = Int[10:10:200;];
 # const num_iters_arr = Int[20;];
 # const num_iters_arr = Int[1:3;];
+const num_iters_arr = Int[1:1:20;];
 final_res = zeros(length(num_iters_arr), 5);
 
 t_start = time();
 for i = 1 : length(num_iters_arr)
-    println("repeated: $(i), T: $(num_iters_arr[i]), time: $(Dates.hour(now())):$(Dates.minute(now()))");
+    println("repeated: $(i), algorithm: AccDeGSFW, T: $(num_iters_arr[i]), time: $(Dates.hour(now())):$(Dates.minute(now())):$(Dates.second(now()))");
     num_iters = num_iters_arr[i];
     alpha = 1/sqrt(num_iters);
     phi = 1/num_iters^(2/3);
@@ -56,7 +57,9 @@ for i = 1 : length(num_iters_arr)
     final_res[i, 2] = res_AccDESAGAFW[4];
     final_res[i, 4] = res_AccDESAGAFW[3];
 
-    res_DeGSFW = DeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, gradient_extension_batch, num_iters);
+    K = ceil(sqrt((1 + beta)/(1 - beta))) + 1;
+    println("repeated: $(i), algorithm: DeGSFW, T: $(num_iters_arr[i]*K), time: $(Dates.hour(now())):$(Dates.minute(now())):$(Dates.second(now()))");
+    res_DeGSFW = DeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, gradient_extension_batch, num_iters*K);
     final_res[i, 3] = res_DeGSFW[4];
     final_res[i, 5] = res_DeGSFW[3];
 
