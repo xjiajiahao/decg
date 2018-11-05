@@ -1,5 +1,5 @@
 # Mokhtari's decentralized FW
-function DeFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters, alpha)
+function DeCG(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters, alpha)
     function gradient_cat(x)  # compute local gradients simultaneously
         grad_x = @sync @parallel (hcat) for i in 1:num_agents # the documentation says that @paralel for can handle situations where each iteration is tiny
             gradient_batch(x[:, i], data_cell[i])
@@ -52,7 +52,7 @@ function DeFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, 
 end
 
 
-function DeSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters, alpha, phi)
+function DeSCG(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters, alpha, phi)
     function gradient_cat(x) # compute local gradients simultaneously
         grad_x = @sync @parallel (hcat) for i in 1:num_agents
             gradient_batch(x[:, i], data_cell[i])

@@ -1,7 +1,7 @@
 using LaTeXStrings
 
 include("facility.jl");
-include("algorithms/CenFW.jl"); include("algorithms/DeFW.jl"); include("algorithms/DeGSFW.jl"); include("algorithms/CenGreedy.jl"); include("algorithms/AccDeGSFW.jl");
+include("algorithms/CenFW.jl"); include("algorithms/DeCG.jl"); include("algorithms/DeGSFW.jl"); include("algorithms/CenGreedy.jl"); include("algorithms/AccDeGSFW.jl");
 include("comm.jl");
 
 # Step 1: initialization
@@ -51,9 +51,9 @@ for i = 1 : length(num_iters_arr)
     phi = 1/num_iters^(2/3);
 
     println("DeCG, T: $(true_num_iters), time: $(Dates.hour(now())):$(Dates.minute(now())):$(Dates.second(now()))");
-    res_DeFW = DeFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, gradient_extension_batch, true_num_iters, alpha);
-    final_res[i, 2] = res_DeFW[4];
-    final_res[i, 4] = res_DeFW[3];
+    res_DeCG = DeCG(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, gradient_extension_batch, true_num_iters, alpha);
+    final_res[i, 2] = res_DeCG[4];
+    final_res[i, 4] = res_DeCG[3];
 
     println("DeGSFW, T: $(true_num_iters), time: $(Dates.hour(now())):$(Dates.minute(now())):$(Dates.second(now()))");
     res_DeGSFW = DeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, gradient_extension_batch, true_num_iters);
@@ -74,9 +74,9 @@ end
 # res_CenGreedy = CenGreedy(dim, data_mat, f_discrete_batch, k_int, f_extension_batch, num_agents, data_cell);
 # res_CenFW = CenFW(dim, data_cell, LMO, f_extension_batch, gradient_extension_batch, num_iters);
 #
-# res_DeFW = DeFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, gradient_extension_batch, num_iters, alpha);
+# res_DeCG = DeCG(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, gradient_extension_batch, num_iters, alpha);
 #
-# res_DeSFW = DeSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, stochastic_gradient_extension_batch, num_iters, alpha, phi);
+# res_DeSCG = DeSCG(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, stochastic_gradient_extension_batch, num_iters, alpha, phi);
 #
 # res_DESAGAFW = DeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, gradient_extension_batch, num_iters);
 #
