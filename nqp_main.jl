@@ -41,16 +41,16 @@ for i = 1 : length(num_iters_arr)
     # final_res[i, 2] = res_DeFW[4];
     # final_res[i, 4] = res_DeFW[3];
 
-    res_AccDESAGAFW = AccDeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters, beta);
-    final_res[i, 2] = res_AccDESAGAFW[4];
-    final_res[i, 4] = res_AccDESAGAFW[3];
+    # res_AccDESAGAFW = AccDeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters, beta);
+    # final_res[i, 2] = res_AccDESAGAFW[4];
+    # final_res[i, 4] = res_AccDESAGAFW[3];
 
     res_DeGSFW = DeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters);
     final_res[i, 3] = res_DeGSFW[4];
     final_res[i, 5] = res_DeGSFW[3];
 
-    # res_CenFW = CenFW(dim, data_cell, LMO, f_batch, gradient_batch, num_iters);
-    # final_res[i, 2] = res_CenFW[end, 3];
+    res_CenFW = CenFW(dim, data_cell, LMO, f_batch, gradient_batch, num_iters);
+    final_res[i, 2] = res_CenFW[end, 3];
 
     final_res[i, 1] = num_iters;
 end
