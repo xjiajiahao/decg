@@ -40,28 +40,30 @@ LMO = generate_linear_prog_function(d, a_2d, k);
 # const num_iters_arr = Int[20;];
 # const num_iters_arr = Int[1:3;];
 const num_iters_arr = Int[1:1:20;];
-final_res = zeros(length(num_iters_arr), 5);
+final_res = zeros(length(num_iters_arr), 7);
 
 t_start = time();
 for i = 1 : length(num_iters_arr)
-    println("repeated: $(i), algorithm: AccDeGSFW, T: $(num_iters_arr[i]), time: $(Dates.hour(now())):$(Dates.minute(now())):$(Dates.second(now()))");
+    K = ceil(sqrt((1 + beta)/(1 - beta))) + 1;
+    true_num_iters = num_iters; # * K;
     num_iters = num_iters_arr[i];
     alpha = 1/sqrt(num_iters);
     phi = 1/num_iters^(2/3);
 
-    # res_DeFW = DeFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, gradient_extension_batch, num_iters, alpha);
-    # final_res[i, 2] = res_DeFW[4];
-    # final_res[i, 4] = res_DeFW[3];
+    println("DeCG, T: $(true_num_iters), time: $(Dates.hour(now())):$(Dates.minute(now())):$(Dates.second(now()))");
+    res_DeFW = DeFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, gradient_extension_batch, true_num_iters, alpha);
+    final_res[i, 2] = res_DeFW[4];
+    final_res[i, 4] = res_DeFW[3];
 
-    res_AccDESAGAFW = AccDeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, gradient_extension_batch, num_iters, beta);
-    final_res[i, 2] = res_AccDESAGAFW[4];
-    final_res[i, 4] = res_AccDESAGAFW[3];
-
-    K = ceil(sqrt((1 + beta)/(1 - beta))) + 1;
-    println("repeated: $(i), algorithm: DeGSFW, T: $(num_iters_arr[i]*K), time: $(Dates.hour(now())):$(Dates.minute(now())):$(Dates.second(now()))");
-    res_DeGSFW = DeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, gradient_extension_batch, num_iters*K);
+    println("DeGSFW, T: $(true_num_iters), time: $(Dates.hour(now())):$(Dates.minute(now())):$(Dates.second(now()))");
+    res_DeGSFW = DeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, gradient_extension_batch, true_num_iters);
     final_res[i, 3] = res_DeGSFW[4];
     final_res[i, 5] = res_DeGSFW[3];
+
+    println("AccDeGSFW, T: $(num_iters), time: $(Dates.hour(now())):$(Dates.minute(now())):$(Dates.second(now()))");
+    res_AccDeGSFW = AccDeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, gradient_extension_batch, num_iters, beta, K);
+    final_res[i, 6] = res_AccDeGSFW[4];
+    final_res[i, 7] = res_AccDeGSFW[3];
 
     # res_CenFW = CenFW(dim, data_cell, LMO, f_extension_batch, gradient_extension_batch, num_iters);
     # final_res[i, 2] = res_CenFW[3];
