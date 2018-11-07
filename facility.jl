@@ -158,13 +158,15 @@ end
 end
 
 @everywhere function stochastic_gradient_extension_batch(x, batch_ratings, sample_times = 1) # ratings is a n-by-2 matrix sorted in descendant order, where n denotes #movies some user has rated
-    # sum_stochastic_gradient = 0;
-    # for ratings in batch_ratings
-    #     sum_stochastic_gradient += stochastic_gradient_extension(x, ratings, sample_times);
-    # end
-    # return sum_stochastic_gradient;
-    idx = rand(1:length(batch_ratings));
-    ratings = batch_ratings[idx];
-    doubly_stochastic_gradient = stochastic_gradient_extension(x, ratings, sample_times);
-    return doubly_stochastic_gradient;
+    dim = length(x);
+    sum_stochastic_gradient = zeros(dim);
+    for ratings in batch_ratings
+        sum_stochastic_gradient += stochastic_gradient_extension(x, ratings, sample_times);
+    end
+    return sum_stochastic_gradient;
+    
+    # idx = rand(1:length(batch_ratings));
+    # ratings = batch_ratings[idx];
+    # doubly_stochastic_gradient = stochastic_gradient_extension(x, ratings, sample_times);
+    # return doubly_stochastic_gradient * length(batch_ratings);
 end
