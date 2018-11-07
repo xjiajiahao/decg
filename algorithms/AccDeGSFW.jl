@@ -104,6 +104,9 @@ function AccDeSGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_b
 end
 
 function ChebyshevComm(x, g, weights, beta, K)
+    if K <= 1
+        return (x * weights, g * weights);
+    end
     a_old = 1;
     a_curr = 1/beta;
     x_old = x * 1.0;
@@ -113,9 +116,6 @@ function ChebyshevComm(x, g, weights, beta, K)
     a_new = a_curr;
     x_new = x_curr;
     g_new = g_curr;
-    if K <= 1
-        return (x_curr, g_curr);
-    end
     for k = 1:K-1
         a_new = (2 / beta) * a_curr - a_old;
         x_new = (2 / beta) * x_curr * weights - x_old;

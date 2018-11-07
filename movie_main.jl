@@ -18,8 +18,8 @@ const data_cell, data_mat, num_movies, num_users = load_movie_partitioned_data(n
 
 # load weights matrix
 # const weights = generate_network(num_agents, avg_degree);
-# const weights, beta = load_network_50("complete");
-const weights, beta = load_network_50("line");
+const weights, beta = load_network_50("complete");
+# const weights, beta = load_network_50("line");
 # const weights, beta = load_network_50("er");
 num_out_edges = count(i->(i>0), weights) - num_agents;
 
@@ -39,24 +39,31 @@ LMO = generate_linear_prog_function(d, a_2d, k);
 # const num_iters_arr = Int[10:10:200;];
 # const num_iters_arr = Int[20;];
 # const num_iters_arr = Int[1:3;];
-const num_iters_arr = Int[1:1:20;];
+# const num_iters_arr = Int[1:1:20;];
+const num_iters_arr = Int[1:1:10;];
 final_res = zeros(length(num_iters_arr), 7);
 
 t_start = time();
 for i = 1 : length(num_iters_arr)
-    K = ceil(sqrt((1 + beta)/(1 - beta))) + 1;
-    true_num_iters = num_iters; # * K;
+    # set the value of K (the degree of the chebyshev polynomial)
+    if 1/(1-beta) <= ((e^2 + 1)/(e^2 - 1))^2
+        K = 1;
+    else
+        K = ceil(sqrt((1 + beta)/(1 - beta))) + 1;
+    end
     num_iters = num_iters_arr[i];
+    # non_acc_num_iters = num_iters;
+    non_acc_num_iters = num_iters * K;
     alpha = 1/sqrt(num_iters);
     phi = 1/num_iters^(2/3);
 
-    println("DeCG, T: $(true_num_iters), time: $(Dates.hour(now())):$(Dates.minute(now())):$(Dates.second(now()))");
-    res_DeCG = DeCG(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, gradient_extension_batch, true_num_iters, alpha);
+    println("DeCG, T: $(non_acc_num_iters), time: $(Dates.hour(now())):$(Dates.minute(now())):$(Dates.second(now()))");
+    res_DeCG = DeCG(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, gradient_extension_batch, non_acc_num_iters, alpha);
     final_res[i, 2] = res_DeCG[4];
     final_res[i, 4] = res_DeCG[3];
 
-    println("DeGSFW, T: $(true_num_iters), time: $(Dates.hour(now())):$(Dates.minute(now())):$(Dates.second(now()))");
-    res_DeGSFW = DeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, gradient_extension_batch, true_num_iters);
+    println("DeGSFW, T: $(non_acc_num_iters), time: $(Dates.hour(now())):$(Dates.minute(now())):$(Dates.second(now()))");
+    res_DeGSFW = DeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, gradient_extension_batch, non_acc_num_iters);
     final_res[i, 3] = res_DeGSFW[4];
     final_res[i, 5] = res_DeGSFW[3];
 

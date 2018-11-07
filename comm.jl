@@ -45,10 +45,13 @@ function load_network_50(network_type="er")
     close(file);
     # find the first and second largest (in magnitude) eigenvalues
     eigvalues, eigvectors = eigs(weights, nev=2, which=:LM);
-    if abs(eigvalues[1] - 1.0) > 1e-4
+    if abs(eigvalues[1] - 1.0) > 1e-8
         error("the largest eigenvalue of the weight matrix must be 1");
     end
-    beta = eigvalues[2];
+    beta = abs(eigvalues[2]);
+    if beta < 1e-8
+        beta = 0.0;
+    end
     return (weights, beta);
 end
 

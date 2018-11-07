@@ -37,18 +37,25 @@ LMO = generate_linear_prog_function(d, a_2d, k);
 # const num_iters_arr = Int[2e2, 4e2, 6e2, 8e2, 10e2];
 # const num_iters_arr = Int[1e0, 2e0, 3e0, 4e0, 5e0];
 # const num_iters_arr = Int[1:14;];
-const num_iters_arr = Int[1:1:20;];
-res = zeros(length(num_iters_arr), 5);
+const num_iters_arr = Int[1:1:10;];
+res = zeros(length(num_iters_arr), 7);
 
 t_start = time();
 for i = 1 : repeated
-    final_res = zeros(length(num_iters_arr), 5);
+    final_res = zeros(length(num_iters_arr), 7);
 
     for i = 1 : length(num_iters_arr)
-        tmpn = num_iters_arr[i];
+        # set the value of K (the degree of the chebyshev polynomial)
+        if 1/(1-beta) <= ((e^2 + 1)/(e^2 - 1))^2
+            K = 1;
+        else
+            K = ceil(sqrt((1 + beta)/(1 - beta))) + 1;
+        end
         num_iters = num_iters_arr[i];
-        # num_iters = round(Int, tmpn*(tmpn+1)*(2*tmpn+1)/6);
-        println("repeated: $(i), algorithm: AccDeSGSFW, T: $(num_iters_arr[i]), time: $(Dates.hour(now())):$(Dates.minute(now())):$(Dates.second(now()))");
+        non_acc_num_iters = num_iters * K;
+        decg_num_iters = num_iters * K;
+        # non_acc_num_iters = num_iters;
+        # decg_num_iters = round(Int, num_iters*(num_iters+1)*(2*num_iters+1)/6);
         alpha = 1/sqrt(num_iters);
         phi = 1/num_iters^(2/3);
 
@@ -58,19 +65,21 @@ for i = 1 : repeated
         # res_DeGSFW = DeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, gradient_extension_batch, num_iters);
         # final_res[i, 3] = res_DeGSFW[4];
 
-        # res_DeSCG = DeSCG(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, stochastic_gradient_extension_batch, num_iters, alpha, phi);
-        # final_res[i, 2] = res_DeSCG[4];
-        # final_res[i, 4] = res_DeSCG[3];
+        println("repeated: $(i), algorithm: DeSCG, T: $(decg_num_iters), time: $(Dates.hour(now())):$(Dates.minute(now())):$(Dates.second(now()))");
+        res_DeSCG = DeSCG(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, stochastic_gradient_extension_batch, decg_num_iters, alpha, phi);
+        final_res[i, 2] = res_DeSCG[4];
+        final_res[i, 4] = res_DeSCG[3];
 
-        res_AccDeSGSFW = AccDeSGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, stochastic_gradient_extension_batch, tmpn, beta);
-        final_res[i, 2] = res_AccDeSGSFW[4];
-        final_res[i, 4] = res_AccDeSGSFW[3];
-
-        K = ceil(sqrt((1 + beta)/(1 - beta))) + 1;
-        println("repeated: $(i), algorithm: DeSGSFW, T: $(num_iters_arr[i]*K), time: $(Dates.hour(now())):$(Dates.minute(now())):$(Dates.second(now()))");
-        res_DeSGSFW = DeSGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, stochastic_gradient_extension_batch, tmpn*K);
+        println("repeated: $(i), algorithm: DeSGSFW, T: $(non_acc_num_iters), time: $(Dates.hour(now())):$(Dates.minute(now())):$(Dates.second(now()))");
+        res_DeSGSFW = DeSGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, stochastic_gradient_extension_batch, non_acc_num_iters);
         final_res[i, 3] = res_DeSGSFW[4];
         final_res[i, 5] = res_DeSGSFW[3];
+
+        println("repeated: $(i), algorithm: AccDeSGSFW, T: $(num_iters), time: $(Dates.hour(now())):$(Dates.minute(now())):$(Dates.second(now()))");
+        res_AccDeSGSFW = AccDeSGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, stochastic_gradient_extension_batch, num_iters, beta, K);
+        final_res[i, 6] = res_AccDeSGSFW[4];
+        final_res[i, 7] = res_AccDeSGSFW[3];
+
         #
         # res_CenSFW = CenSFW(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_batch, num_iters);
         # final_res[i, 2] = res_CenSFW[3];
