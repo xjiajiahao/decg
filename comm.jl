@@ -1,4 +1,8 @@
-using MAT, Base.Iterators.cycle
+using MAT, LinearAlgebra
+using Distributed
+
+const e  = exp(1);
+
 @everywhere using MathProgBase, Clp
 # using PyPlot
 # PyPlot.matplotlib[:rcParams]["figure.autolayout"] = "True"
@@ -44,11 +48,12 @@ function load_network_50(network_type="er")
     weights = read(file, "weights");
     close(file);
     # find the first and second largest (in magnitude) eigenvalues
-    eigvalues, eigvectors = eigs(weights, nev=2, which=:LM);
-    if abs(eigvalues[1] - 1.0) > 1e-8
+    dim = size(weights, 1);
+    eigvalues = (LinearAlgebra.eigen(weights)).values;
+    if abs(eigvalues[dim] - 1.0) > 1e-8
         error("the largest eigenvalue of the weight matrix must be 1");
     end
-    beta = abs(eigvalues[2]);
+    beta = max(abs(eigvalues[1]), abs(eigvalues[dim - 1]));
     if beta < 1e-8
         beta = 0.0;
     end

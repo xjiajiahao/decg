@@ -1,4 +1,5 @@
-@everywhere function f_discrete_batch(s::IntSet, data_mat)
+using Distributed
+@everywhere function f_discrete_batch(s, data_mat)
     indices = [i for i in s];
     max_values, max_idx = findmax(data_mat[indices, :], 1);
     sum_f = sum(max_values);
@@ -151,7 +152,8 @@ end
     indices_in_ratings = zeros(Int, dim);
     for i = 1:dim
         for tmp_idx = 1 : size(ratings, 1)
-            if ratings[tmp_idx, 1] == i
+            curr_idx = ratings[tmp_idx, 1];
+            if curr_idx == i
                 indices_in_ratings[i] = tmp_idx;
                 break;
             end

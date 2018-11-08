@@ -2,14 +2,14 @@
 function CenFW(dim, data_cell, LMO, f_batch, gradient_batch, num_iters)
     num_agents = size(data_cell, 2);
     function gradient_sum(x) # compute the sum of local gradients
-        grad_x = @sync @parallel (+) for i in 1:num_agents
+        grad_x = @sync @distributed (+) for i in 1:num_agents
             gradient_batch(x, data_cell[i])
         end
         return grad_x;
     end
 
     function f_sum(x) # compute the sum of local functions
-        f_x = @sync @parallel (+) for i in 1:num_agents
+        f_x = @sync @distributed (+) for i in 1:num_agents
             f_batch(x, data_cell[i])
         end
         return f_x;
@@ -37,14 +37,14 @@ end
 function CenSFW(dim, data_cell, LMO, f_batch, gradient_batch, num_iters)
     num_agents = size(data_cell, 2);
     function gradient_sum(x) # compute the sum of local gradients
-        grad_x = @sync @parallel (+) for i in 1:num_agents
+        grad_x = @sync @distributed (+) for i in 1:num_agents
             gradient_batch(x, data_cell[i])
         end
         return grad_x;
     end
 
     function f_sum(x) # compute the sum of local functions
-        f_x = @sync @parallel (+) for i in 1:num_agents
+        f_x = @sync @distributed (+) for i in 1:num_agents
             f_batch(x, data_cell[i])
         end
         return f_x;

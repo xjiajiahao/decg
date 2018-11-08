@@ -1,7 +1,7 @@
 # the standard discrete greedy algorithm
 function CenGreedy(dim, data_mat, f_discrete_batch, k::Int64, f_extension_batch, num_agents, data_cell)
     function f_sum(x) # compute the sum of T gradients
-        f_x = @sync @parallel (+) for i in 1:num_agents # the documentation says that @paralel for can handle situations where each iteration is tiny
+        f_x = @sync @distributed (+) for i in 1:num_agents # the documentation says that @paralel for can handle situations where each iteration is tiny
             f_extension_batch(x, data_cell[i])
         end
         return f_x;

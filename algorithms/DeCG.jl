@@ -1,21 +1,21 @@
 # Mokhtari's decentralized FW
 function DeCG(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters, alpha)
     function gradient_cat(x)  # compute local gradients simultaneously
-        grad_x = @sync @parallel (hcat) for i in 1:num_agents # the documentation says that @paralel for can handle situations where each iteration is tiny
+        grad_x = @sync @distributed (hcat) for i in 1:num_agents # the documentation says that @paralel for can handle situations where each iteration is tiny
             gradient_batch(x[:, i], data_cell[i])
         end
         return grad_x;
     end
 
     function f_sum(x)  # compute local objective functions simultaneously, and then output the sum
-        f_x = @sync @parallel (+) for i in 1:num_agents
+        f_x = @sync @distributed (+) for i in 1:num_agents
             f_batch(x, data_cell[i])
         end
         return f_x;
     end
 
     function LMO_cat(d)
-        res = @sync @parallel (hcat) for i in 1:num_agents
+        res = @sync @distributed (hcat) for i in 1:num_agents
             LMO(d[:, i])
         end
         return res;
@@ -54,21 +54,21 @@ end
 
 function DeSCG(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters, alpha, phi)
     function gradient_cat(x) # compute local gradients simultaneously
-        grad_x = @sync @parallel (hcat) for i in 1:num_agents
+        grad_x = @sync @distributed (hcat) for i in 1:num_agents
             gradient_batch(x[:, i], data_cell[i])
         end
         return grad_x;
     end
 
     function f_sum(x) # compute local objective functions simultaneously, and then output the sum
-        f_x = @sync @parallel (+) for i in 1:num_agents
+        f_x = @sync @distributed (+) for i in 1:num_agents
             f_batch(x, data_cell[i])
         end
         return f_x;
     end
 
     function LMO_cat(d)  # perform the linear programming simultaneously
-        res = @sync @parallel (hcat) for i in 1:num_agents
+        res = @sync @distributed (hcat) for i in 1:num_agents
             LMO(d[:, i])
         end
         return res;
