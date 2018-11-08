@@ -39,7 +39,7 @@ LMO = generate_linear_prog_function(d, a_2d, k);
 # const num_iters_arr = Int[1e0, 2e0, 3e0, 4e0, 5e0];
 # const num_iters_arr = Int[1:14;];
 # const num_iters_arr = Int[1:1:10;];
-const num_iters_arr = Int[40:1:40;];
+const num_iters_arr = Int[10];
 res = zeros(length(num_iters_arr), 7);
 
 t_start = time();
@@ -67,15 +67,15 @@ for i = 1 : repeated
         # res_DeGSFW = DeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, gradient_extension_batch, num_iters);
         # final_res[i, 3] = res_DeGSFW[4];
 
-        println("repeated: $(i), algorithm: DeSCG, T: $(decg_num_iters), time: $(Dates.hour(now())):$(Dates.minute(now())):$(Dates.second(now()))");
-        res_DeSCG = DeSCG(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, stochastic_gradient_extension_batch, decg_num_iters, alpha, phi);
-        final_res[i, 2] = res_DeSCG[4];
-        final_res[i, 4] = res_DeSCG[3];
+        # println("repeated: $(i), algorithm: DeSCG, T: $(decg_num_iters), time: $(Dates.hour(now())):$(Dates.minute(now())):$(Dates.second(now()))");
+        # res_DeSCG = DeSCG(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, stochastic_gradient_extension_batch, decg_num_iters, alpha, phi);
+        # final_res[i, 2] = res_DeSCG[4];
+        # final_res[i, 4] = res_DeSCG[3];
 
-        # println("repeated: $(i), algorithm: DeSGSFW, T: $(non_acc_num_iters), time: $(Dates.hour(now())):$(Dates.minute(now())):$(Dates.second(now()))");
-        # res_DeSGSFW = DeSGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, stochastic_gradient_extension_batch, non_acc_num_iters);
-        # final_res[i, 3] = res_DeSGSFW[4];
-        # final_res[i, 5] = res_DeSGSFW[3];
+        println("repeated: $(i), algorithm: DeSGSFW, T: $(non_acc_num_iters), time: $(Dates.hour(now())):$(Dates.minute(now())):$(Dates.second(now()))");
+        res_DeSGSFW = DeSGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, stochastic_gradient_extension_batch, non_acc_num_iters);
+        final_res[i, 3] = res_DeSGSFW[4];
+        final_res[i, 5] = res_DeSGSFW[3];
 
         # println("repeated: $(i), algorithm: AccDeSGSFW, T: $(num_iters), time: $(Dates.hour(now())):$(Dates.minute(now())):$(Dates.second(now()))");
         # res_AccDeSGSFW = AccDeSGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, stochastic_gradient_extension_batch, num_iters, beta, K);

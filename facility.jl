@@ -123,35 +123,35 @@ end
 end
 
 @everywhere function stochastic_gradient_extension(x, ratings, sample_times) # compute stochastic gradient: O(???)
-    function stochastic_partial_extension(x, ratings, i, rand_vec, index_of_i_in_ratings)
-        # index_of_i_in_ratings = findfirst(ratings[:, 1], i);
-        # if index_of_i_in_ratings == 0 # this means f(R+i) = f(R\i), for any R, then no need to sample
-        #     return 0;
-        # end
-        assert(index_of_i_in_ratings != 0);
-        # 1. Generate a random set X\i
-        tmp_f = 0;
-        for index = 1:size(ratings, 1)
-            if index == index_of_i_in_ratings # exclude the i'th index
-                continue;
-            end
-            tmp_index = round(Int, ratings[index, 1]);
-            if rand_vec[tmp_index] <= x[tmp_index]
-                tmp_f = ratings[index, 2];
-                break;
-            end
-        end
-        # 2. compute f(X+i) - f(X\i)
-        stochastic_partial = max(tmp_f, ratings[index_of_i_in_ratings, 2]) - tmp_f;
-        return stochastic_partial;
-    end
+    # function stochastic_partial_extension(x, ratings, i, rand_vec, index_of_i_in_ratings)
+    #     # index_of_i_in_ratings = findfirst(ratings[:, 1], i);
+    #     # if index_of_i_in_ratings == 0 # this means f(R+i) = f(R\i), for any R, then no need to sample
+    #     #     return 0;
+    #     # end
+    #     assert(index_of_i_in_ratings != 0);
+    #     # 1. Generate a random set X\i
+    #     tmp_f = 0;
+    #     for index = 1:size(ratings, 1)
+    #         if index == index_of_i_in_ratings # exclude the i'th index
+    #             continue;
+    #         end
+    #         tmp_index = round(Int, ratings[index, 1]);
+    #         if rand_vec[tmp_index] <= x[tmp_index]
+    #             tmp_f = ratings[index, 2];
+    #             break;
+    #         end
+    #     end
+    #     # 2. compute f(X+i) - f(X\i)
+    #     stochastic_partial = max(tmp_f, ratings[index_of_i_in_ratings, 2]) - tmp_f;
+    #     return stochastic_partial;
+    # end
 
     dim = length(x);
     stochastic_grad = zeros(dim);
     indices_in_ratings = zeros(Int, dim);
     for i = 1:dim
         for tmp_idx = 1 : size(ratings, 1)
-            if tmp_idx == i
+            if ratings[tmp_idx, 1] == i
                 indices_in_ratings[i] = tmp_idx;
                 break;
             end
@@ -165,7 +165,23 @@ end
             if (index_of_i_in_ratings == 0)
                 continue;
             end
-            stochastic_grad[i] += stochastic_partial_extension(x, ratings, i, rand_vec, index_of_i_in_ratings);
+
+            tmp_f = 0;
+            for index = 1:size(ratings, 1)
+                if index == index_of_i_in_ratings # exclude the i'th index
+                    continue;
+                end
+                double_index = ratings[index, 1];
+                tmp_index = round(Int, double_index);
+                if rand_vec[tmp_index] <= x[tmp_index]
+                    tmp_f = ratings[index, 2];
+                    break;
+                end
+            end
+            # 2. compute f(X+i) - f(X\i)
+            tmp_res = max(0.0, ratings[index_of_i_in_ratings, 2] - tmp_f);
+            stochastic_grad[i] += tmp_res;
+            # stochastic_grad[i] += stochastic_partial_extension(x, ratings, i, rand_vec, index_of_i_in_ratings);
         end
     end
     return stochastic_grad/sample_times;
