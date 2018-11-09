@@ -12,14 +12,14 @@ void stochastic_gradient_extension(double *x, long dim, double *ratings, long nu
     // Step 1. find the the indices in the ratings matrix
     long i, j, k, tmp_idx, curr_idx;
     double tmp_f, curr_partial;
-    memset(indices_in_ratings, 0, dim * sizeof(indices_in_ratings[0]));
+    memset(indices_in_ratings, 0, dim * sizeof(indices_in_ratings[0]));  // @NOTE indices_in_ratings is a Vector{Int64} of size dim-by-1
     for (j = 0; j < nnz; j++) {
         curr_idx = ratings[j*num_rows];
 #if DEBUG
         if (j==0)
             printf("ratings[0]: %ld\n", curr_idx);
 #endif
-        indices_in_ratings[curr_idx] = j;
+        indices_in_ratings[curr_idx-1] = j+1;  // @NOTE the original array counts from 1, so we have to store j+1 instead of j
     }
 
     // Step 2. repeate computing stochastic gradient for multiple times and take average
@@ -44,7 +44,7 @@ void stochastic_gradient_extension(double *x, long dim, double *ratings, long nu
             tmp_f = 0;
             for (j = 0; j < nnz; j++)
             {
-                if (j == curr_idx)
+                if (j+1 == curr_idx)
                     continue;
                 tmp_idx = ratings[j*num_rows];
                 if (rand_vec[j] <= x[tmp_idx])
@@ -53,7 +53,7 @@ void stochastic_gradient_extension(double *x, long dim, double *ratings, long nu
                     break;
                 }
             }
-            curr_partial = ratings[curr_idx * num_rows + 1] - tmp_f;
+            curr_partial = ratings[(curr_idx-1) * num_rows + 1] - tmp_f;
             curr_partial = curr_partial > 0.0 ? curr_partial : 0.0;
             stochastic_gradient[i] += curr_partial;
         }
