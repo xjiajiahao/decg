@@ -39,13 +39,13 @@ void stochastic_gradient_extension(double *x, long dim, double *ratings, long nu
                 if (j == curr_idx)
                     continue;
                 tmp_idx = ratings[j*num_rows];
-                if (rand_vec[j] < x[tmp_idx])
+                if (rand_vec[j] <= x[tmp_idx])
                 {
                     tmp_f = ratings[j*num_rows + 1];
                     break;
                 }
             }
-            curr_partial = ratings[curr_idx * num_rows] - tmp_f;
+            curr_partial = ratings[curr_idx * num_rows + 1] - tmp_f;
             curr_partial = curr_partial > 0.0 ? curr_partial : 0.0;
             stochastic_gradient[i] += curr_partial;
         }
