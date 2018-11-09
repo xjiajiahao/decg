@@ -2,16 +2,23 @@
 #include <string.h>
 #include <random>
 #include "facility.h"
+#define DEBUG 1
 
 void stochastic_gradient_extension(double *x, long dim, double *ratings, long num_rows, long nnz, long sample_times, long *indices_in_ratings, double *stochastic_gradient, double *rand_vec)
 {
+#if DEBUG
     printf("dim: %ld, num_rows: %ld, nnz: %ld\n", dim, num_rows, nnz);
+#endif
     // Step 1. find the the indices in the ratings matrix
     long i, j, k, tmp_idx, curr_idx;
     double tmp_f, curr_partial;
     memset(indices_in_ratings, 0, dim * sizeof(indices_in_ratings[0]));
     for (j = 0; j < nnz; j++) {
         curr_idx = ratings[j*num_rows];
+#if DEBUG
+        if (j==0)
+            printf("ratings[0]: %ld\n", curr_idx);
+#endif
         indices_in_ratings[curr_idx] = j;
     }
 
