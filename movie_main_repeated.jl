@@ -105,4 +105,4 @@ function main(left::Int, interval::Int, right::Int)
     return final_res;
 end
 
-final_res = main(10, 1, 10);
+# final_res = main(10, 1, 10);

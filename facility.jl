@@ -212,30 +212,32 @@ end
     # end
     # return sum_stochastic_gradient;
 
+    # dim = length(x);
+    # stochastic_gradient = zeros(dim);
+    # indices_in_ratings = zeros(Int64, dim);
+    # rand_vec = zeros(dim);
+    # for ratings in batch_ratings
+    #     stochastic_gradient_extension!(x, ratings, sample_times, indices_in_ratings, stochastic_gradient, rand_vec);
+    # end
+    # return stochastic_gradient;
+
     dim = length(x);
+    num_rows = 2;
     stochastic_gradient = zeros(dim);
     indices_in_ratings = zeros(Int64, dim);
     rand_vec = zeros(dim);
     for ratings in batch_ratings
-        stochastic_gradient_extension!(x, ratings, sample_times, indices_in_ratings, stochastic_gradient, rand_vec);
+        nnz = size(ratings, 2);  # ratings is a 2-by-nnz matrix
+        ccall((:stochastic_gradient_extension, "libfacility"),
+            Cvoid,
+            (Ref{Cdouble}, Clonglong,
+            Ref{Cdouble}, Clonglong, Clonglong, Clonglong,
+            Ref{Clonglong}, Ref{Cdouble}, Ref{Cdouble}),
+            x, dim,
+            ratings, num_rows, nnz, sample_times,
+            indices_in_ratings, stochastic_gradient, rand_vec);
     end
     return stochastic_gradient;
-
-    # dim = length(x);
-    # nnz = size(ratings, 2);  # ratings is a 2-by-nnz matrix
-    # num_rows = 2;
-    # stochastic_gradient = zeros(dim);
-    # indices_in_ratings = zeros(Int64, dim);
-    # rand_vec = zeros(dim);
-    # ccall((:stochastic_gradient_extension, "libfacility"),
-    #     Cvoid,
-    #     (Ref{Cdouble}, Clonglong,
-    #     Ref{Cdouble}, Clonglong, Clonglong, Clonglong,
-    #     Ref{Clonglong}, Ref{Cdouble}, Ref{Cdouble}),
-    #     Ref(x), dim,
-    #     Ref(ratings), num_rows, nnz, sample_times,
-    #     Ref(indices_in_ratings), Ref(stochastic_gradient), Ref(rand_vec));
-    # return stochastic_gradient;
 
     # num_users_on_curr_agent = length(batch_ratings);
     # idx = rand(1:num_users_on_curr_agent);
