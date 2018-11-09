@@ -104,3 +104,5 @@ function main(left::Int, interval::Int, right::Int)
     # res_DeSGSFW = DeSGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, stochastic_gradient_extension_batch, num_iters);
     return final_res;
 end
+
+final_res = main(10, 1, 10);

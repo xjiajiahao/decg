@@ -2,3 +2,7 @@ data/
 draft.jl
 draft.m
 **/*.txt
+**/*.cov
+**/*.mem
+**/*.o
+**/*.so

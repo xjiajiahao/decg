@@ -1,4 +1,5 @@
 using Distributed
+@everywhere using Random
 @everywhere function f_discrete_batch(s, data_mat)
     indices = [i for i in s];
     max_values, max_idx = findmax(data_mat[indices, :], 1);
@@ -11,9 +12,9 @@ end
     for j in 1:sample_times
         # 1. Generate a random set X
         tmp_f = 0;
-        for index in 1:size(ratings, 1)
-            if rand() <= x[round(Int, ratings[index, 1])]
-                tmp_f = ratings[index, 2];
+        for index in 1:size(ratings, 2)
+            if rand() <= x[round(Int, ratings[1, index])]
+                tmp_f = ratings[2, index];
                 break;
             end
         end
@@ -26,9 +27,9 @@ end
 @everywhere function f_extension(x, ratings) # ratings is a n-by-2 matrix sorted in descendant order, where n denotes #movies some user has rated
     res = 0;
     prod = 1;
-    for index in 1:size(ratings, 1) # for all rated movies from high to low
-        x_current_coord = x[round(Int, ratings[index, 1])];
-        res += ratings[index, 2] * x_current_coord * prod;
+    for index in 1:size(ratings, 2) # for all rated movies from high to low
+        x_current_coord = x[round(Int, ratings[1, index])];
+        res += ratings[2, index] * x_current_coord * prod;
         prod *= 1 - x_current_coord;
         if prod == 0
             break;
@@ -48,7 +49,7 @@ end
 @everywhere function partial_extension_sample(x, ratings, i, sample_times = 1e5) # compute partial derivative : O(#sample * #ratings)
     res = 0;
 
-    index_of_i_in_ratings = findfirst(ratings[:, 1], i);
+    index_of_i_in_ratings = findfirst(ratings[1, :], i);
     if index_of_i_in_ratings == 0 # this means f(R+{i}) = f(R\{i}), for any R, then no need to sample
         return 0;
     end
@@ -56,17 +57,17 @@ end
     for j in 1:sample_times
         # 1. Generate a random set X\i
         tmp_f = 0;
-        for index in 1:size(ratings, 1)
+        for index in 1:size(ratings, 2)
             if index == index_of_i_in_ratings # exclude the i'th index
                 continue;
             end
-            if rand() <= x[round(Int, ratings[index, 1])]
-                tmp_f = ratings[index, 2];
+            if rand() <= x[round(Int, ratings[1, index])]
+                tmp_f = ratings[2, index];
                 break;
             end
         end
         # 2. compute f(X+i) - f(X\i)
-        tmp_partial = max(tmp_f, ratings[index_of_i_in_ratings, 2]) - tmp_f;
+        tmp_partial = max(0, ratings[2, index_of_i_in_ratings] - tmp_f);
         res += tmp_partial;
     end
     res /= sample_times;
@@ -78,10 +79,10 @@ end
     res_diff = 0;
     prod = 1;
 
-    # index_of_i_in_ratings = findfirst(ratings[:, 1], i);  # @NOTE bottleneck
+    # index_of_i_in_ratings = findfirst(ratings[1, :], i);  # @NOTE bottleneck
     index_of_i_in_ratings = 0;  # the for loop is equivilant to the above line, but faster
-    for tmp_i in 1 : size(ratings, 1)
-        if i == ratings[tmp_i, 1]
+    for tmp_i in 1 : size(ratings, 2)
+        if i == ratings[1, tmp_i]
             index_of_i_in_ratings = tmp_i;
             break;
         end
@@ -91,12 +92,12 @@ end
         return 0;
     end
 
-    for index in 1:size(ratings, 1) # for all rated movies from high to low
+    for index in 1:size(ratings, 2) # for all rated movies from high to low
         if index == index_of_i_in_ratings
-            res_union = res_diff + ratings[index, 2] * 1 * prod;
+            res_union = res_diff + ratings[2, index] * 1 * prod;
         else
-            x_current_coord = x[round(Int, ratings[index, 1])];
-            res_diff += ratings[index, 2] * x_current_coord * prod;  # @NOTE bottleneck
+            x_current_coord = x[round(Int, ratings[1, index])];
+            res_diff += ratings[2, index] * x_current_coord * prod;  # @NOTE bottleneck
             prod *= 1 - x_current_coord;
         end
         if prod == 0
@@ -151,8 +152,8 @@ end
     stochastic_grad = zeros(dim);
     indices_in_ratings = zeros(Int, dim);
     for i = 1:dim
-        for tmp_idx = 1 : size(ratings, 1)
-            curr_idx = ratings[tmp_idx, 1];
+        for tmp_idx = 1 : size(ratings, 2)
+            curr_idx = ratings[1, tmp_idx];
             if curr_idx == i
                 indices_in_ratings[i] = tmp_idx;
                 break;
@@ -160,8 +161,9 @@ end
         end
     end
 
+    rand_vec = zeros(dim);
     for j = 1:sample_times
-        rand_vec = rand(dim);
+        Random.rand!(rand_vec);
         for i in 1:dim
             index_of_i_in_ratings = indices_in_ratings[i];
             if (index_of_i_in_ratings == 0)
@@ -169,19 +171,19 @@ end
             end
 
             tmp_f = 0;
-            for index = 1:size(ratings, 1)
+            for index = 1:size(ratings, 2)
                 if index == index_of_i_in_ratings # exclude the i'th index
                     continue;
                 end
-                double_index = ratings[index, 1];
+                double_index = ratings[1, index];
                 tmp_index = round(Int, double_index);
                 if rand_vec[tmp_index] <= x[tmp_index]
-                    tmp_f = ratings[index, 2];
+                    tmp_f = ratings[2, index];
                     break;
                 end
             end
             # 2. compute f(X+i) - f(X\i)
-            tmp_res = max(0.0, ratings[index_of_i_in_ratings, 2] - tmp_f);
+            tmp_res = max(0.0, ratings[2, index_of_i_in_ratings] - tmp_f);
             stochastic_grad[i] += tmp_res;
             # stochastic_grad[i] += stochastic_partial_extension(x, ratings, i, rand_vec, index_of_i_in_ratings);
         end

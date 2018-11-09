@@ -1,9 +1,9 @@
 using MAT, LinearAlgebra
 using Distributed
+@everywhere using MathProgBase, Clp
 
 const e  = exp(1);
 
-@everywhere using MathProgBase, Clp
 # using PyPlot
 # PyPlot.matplotlib[:rcParams]["figure.autolayout"] = "True"
 # srand(0)
