@@ -2,7 +2,7 @@
 #include <string.h>
 #include <random>
 #include "facility.h"
-#define DEBUG 1
+#define DEBUG 0
 
 void stochastic_gradient_extension(double *x, long dim, double *ratings, long num_rows, long nnz, long sample_times, long *indices_in_ratings, double *stochastic_gradient, double *rand_vec)
 {
