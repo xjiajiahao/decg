@@ -4,7 +4,7 @@ include("facility.jl");
 include("algorithms/CenFW.jl"); include("algorithms/DeCG.jl"); include("algorithms/DeGSFW.jl"); include("algorithms/CenGreedy.jl"); include("algorithms/AccDeGSFW.jl");
 include("comm.jl");
 
-function main()
+function main(left::Int, interval::Int, right::Int)
     # Step 1: initialization
     k_int = 10;  # the cardinality constraint
     # const num_agents = 100;
@@ -39,7 +39,7 @@ function main()
     # const num_iters_arr = Int[1e0, 2e0, 3e0, 4e0, 5e0];
     # const num_iters_arr = Int[1:14;];
     # const num_iters_arr = Int[1:1:10;];
-    num_iters_arr = Int[10];
+    num_iters_arr = left:interval:right;
     res = zeros(length(num_iters_arr), 7);
 
     t_start = time();
