@@ -5,6 +5,7 @@
 
 void stochastic_gradient_extension(double *x, long dim, double *ratings, long num_rows, long nnz, long sample_times, long *indices_in_ratings, double *stochastic_gradient, double *rand_vec)
 {
+    printf("dim: %ld, num_rows: %ld, nnz: %ld\n", dim, num_rows, nnz);
     // Step 1. find the the indices in the ratings matrix
     long i, j, k, tmp_idx, curr_idx;
     double tmp_f, curr_partial;
