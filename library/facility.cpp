@@ -7,7 +7,7 @@
 void stochastic_gradient_extension(double *x, long dim, double *ratings, long num_rows, long nnz, long sample_times, long *indices_in_ratings, double *stochastic_gradient, double *rand_vec)
 {
 #if DEBUG
-    printf("dim: %ld, num_rows: %ld, nnz: %ld\n", dim, num_rows, nnz);
+    // printf("dim: %ld, num_rows: %ld, nnz: %ld\n", dim, num_rows, nnz);
 #endif
     // Step 1. find the the indices in the ratings matrix
     long i, j, k, tmp_idx, curr_idx;
@@ -16,8 +16,8 @@ void stochastic_gradient_extension(double *x, long dim, double *ratings, long nu
     for (j = 0; j < nnz; j++) {
         curr_idx = ratings[j*num_rows];
 #if DEBUG
-        if (j==0)
-            printf("ratings[0]: %ld\n", curr_idx);
+        // if (j==0)
+        //    printf("ratings[0]: %ld\n", curr_idx);
 #endif
         indices_in_ratings[curr_idx] = j;
     }
@@ -37,7 +37,7 @@ void stochastic_gradient_extension(double *x, long dim, double *ratings, long nu
         for (i = 0; i < dim; i++)
         {
             curr_idx = indices_in_ratings[i];
-            // if the movie has not rated, just ignore that coordinate
+            // if the movie has not rated, just ignore that coordinate since f(X\curr_idx) = f(X + curr_idx),
             if (curr_idx == 0)
                 continue;
             // compute f(X\curr_idx) @NOTE f(X+curr_idx) is simply max{f(X\curr_idx), f({curr_idx})}
@@ -55,6 +55,10 @@ void stochastic_gradient_extension(double *x, long dim, double *ratings, long nu
             }
             curr_partial = ratings[curr_idx * num_rows + 1] - tmp_f;
             curr_partial = curr_partial > 0.0 ? curr_partial : 0.0;
+#if DEBUG
+            // if (k == 0 && i == 0)
+                printf("curr_partial: %lf\n", curr_partial);
+#endif
             stochastic_gradient[i] += curr_partial;
         }
     }
