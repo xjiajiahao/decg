@@ -124,33 +124,8 @@ end
     return sum_gradient;
 end
 
-@everywhere function stochastic_gradient_extension!(x::Vector{Float64}, ratings::Array{Float64, 2}, sample_times::Int64, indices_in_ratings::Vector{Int64}, ret_stochastic_grad::Vector{Float64}, rand_vec::Vector{Float64}) # compute stochastic gradient: O(???)
-    # function stochastic_partial_extension(x, ratings, i, rand_vec, index_of_i_in_ratings)
-    #     # index_of_i_in_ratings = findfirst(ratings[:, 1], i);
-    #     # if index_of_i_in_ratings == 0 # this means f(R+i) = f(R\i), for any R, then no need to sample
-    #     #     return 0;
-    #     # end
-    #     assert(index_of_i_in_ratings != 0);
-    #     # 1. Generate a random set X\i
-    #     tmp_f = 0;
-    #     for index = 1:size(ratings, 1)
-    #         if index == index_of_i_in_ratings # exclude the i'th index
-    #             continue;
-    #         end
-    #         tmp_index = round(Int, ratings[index, 1]);
-    #         if rand_vec[tmp_index] <= x[tmp_index]
-    #             tmp_f = ratings[index, 2];
-    #             break;
-    #         end
-    #     end
-    #     # 2. compute f(X+i) - f(X\i)
-    #     stochastic_partial = max(tmp_f, ratings[index_of_i_in_ratings, 2]) - tmp_f;
-    #     return stochastic_partial;
-    # end
-
+@everywhere function stochastic_gradient_extension!(x::Vector{Float64}, ratings::Array{Float64, 2}, sample_times::Int64, indices_in_ratings::Vector{Int64}, ret_stochastic_grad::Vector{Float64}, rand_vec::Vector{Float64})
     dim = length(x);
-    # stochastic_grad = zeros(dim);
-    # indices_in_ratings = zeros(Int, dim);
     fill!(indices_in_ratings, zero(Int));
     tmp_idx = 0;
     nnz = size(ratings, 2);
@@ -184,64 +159,42 @@ end
             # 2. compute f(X+i) - f(X\i)
             tmp_res = max(0.0, ratings[2, index_of_i_in_ratings] - tmp_f);
             ret_stochastic_grad[i] += tmp_res;
-            # stochastic_grad[i] += stochastic_partial_extension(x, ratings, i, rand_vec, index_of_i_in_ratings);
         end
     end
     nothing
 end
 
-@everywhere function stochastic_gradient_extension_C_wrapper(x, ratings, sample_times, indices_in_ratings, ret_stoch_grad)
+@everywhere function stochastic_gradient_extension_batch(x, batch_ratings, sample_times = 1) # ratings is a n-by-2 matrix sorted in descendant order, where n denotes #movies some user has rated
     dim = length(x);
-    nnz = size(ratings, 2);  # ratings is a 2-by-nnz matrix
-    num_rows = 2;
-    ccall((:stochastic_gradient_extension, "libfacility"),
-        Cvoid,
-        (Ref{Cdouble}, Clonglong,
-        Ref{Cdouble}, Clonglong, Clonglong, Clonglong,
-        Ref{Clonglong}, Ref{Cdouble}),
-        Ref(x), dim,
-        Ref(ratings), num_rows, nnz, sample_times,
-        Ref(indices_in_ratings), Ref(ret_stoch_grad));
+    stochastic_gradient = zeros(dim);
+    indices_in_ratings = zeros(Int64, dim);
+    rand_vec = zeros(dim);
+    for ratings in batch_ratings
+        stochastic_gradient_extension!(x, ratings, sample_times, indices_in_ratings, stochastic_gradient, rand_vec);
+    end
+    stochastic_gradient = stochastic_gradient ./ sample_times;
+    return stochastic_gradient;
 end
 
-@everywhere function stochastic_gradient_extension_batch(x, batch_ratings, sample_times = 1) # ratings is a n-by-2 matrix sorted in descendant order, where n denotes #movies some user has rated
-    # dim = length(x);
-    # sum_stochastic_gradient = zeros(dim);
-    # for ratings in batch_ratings
-    #     sum_stochastic_gradient += stochastic_gradient_extension(x, ratings, sample_times);
-    # end
-    # return sum_stochastic_gradient;
-
-    # dim = length(x);
-    # stochastic_gradient = zeros(dim);
-    # indices_in_ratings = zeros(Int64, dim);
-    # rand_vec = zeros(dim);
-    # for ratings in batch_ratings
-    #     stochastic_gradient_extension!(x, ratings, sample_times, indices_in_ratings, stochastic_gradient, rand_vec);
-    # end
-    # return stochastic_gradient;
-
+# the following function is equivilant to the above one, but implemented in C which is surprising slower
+@everywhere function stochastic_gradient_extension_batch_C(x, batch_ratings, sample_times = 1) # ratings is a n-by-2 matrix sorted in descendant order, where n denotes #movies some user has rated
     dim = length(x);
     num_rows = 2;
     stochastic_gradient = zeros(dim);
     indices_in_ratings = zeros(Int64, dim);
     rand_vec = zeros(dim);
+    julia_rand = @cfunction(rand, Cdouble, ());
     for ratings in batch_ratings
         nnz = size(ratings, 2);  # ratings is a 2-by-nnz matrix
         ccall((:stochastic_gradient_extension, "libfacility"),
             Cvoid,
             (Ref{Cdouble}, Clonglong,
             Ref{Cdouble}, Clonglong, Clonglong, Clonglong,
-            Ref{Clonglong}, Ref{Cdouble}, Ref{Cdouble}),
+            Ref{Clonglong}, Ref{Cdouble}, Ref{Cdouble}, Ptr{Cvoid}),
             x, dim,
             ratings, num_rows, nnz, sample_times,
-            indices_in_ratings, stochastic_gradient, rand_vec);
+            indices_in_ratings, stochastic_gradient, rand_vec, julia_rand);
     end
+    stochastic_gradient = stochastic_gradient ./ sample_times;
     return stochastic_gradient;
-
-    # num_users_on_curr_agent = length(batch_ratings);
-    # idx = rand(1:num_users_on_curr_agent);
-    # ratings = batch_ratings[idx];
-    # doubly_stochastic_gradient = stochastic_gradient_extension(x, ratings, sample_times);
-    # return doubly_stochastic_gradient * num_users_on_curr_agent;
 end
