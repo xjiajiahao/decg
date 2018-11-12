@@ -27,7 +27,7 @@ function DeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch
     g = zeros(dim, num_agents);  # local SAGA-style gradient estimators
     grad_x_old = zeros(dim, num_agents);  # used to store the old local gradients
     num_comm = 0.0;
-    results = zeros(num_iters+1, 4);
+    # results = zeros(num_iters+1, 4);
     # results[1, :] = [0, 0, 0, f_sum(mean(x, 2))];  # [#iter, time, #comm, obj_value]
     for iter in 1:num_iters
         grad_x = gradient_cat(x);  # compute the true local gradients, grad_x is a dim-by-num_agents matrix
@@ -87,7 +87,7 @@ function DeSGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batc
     g = zeros(dim, num_agents);  # local SAGA-style gradient
     grad_x_old = zeros(dim, num_agents);  # used to store the old gradient
     num_comm = 0.0;
-    results = zeros(num_iters+1, 4);
+    # results = zeros(num_iters+1, 4);
     # results[1, :] = [0, 0, 0, f_sum(mean(x, 2))];  # [#iter, time, #comm, obj_value]
     for iter in 1:num_iters
         sample_times = iter^2;

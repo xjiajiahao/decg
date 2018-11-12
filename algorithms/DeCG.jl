@@ -25,7 +25,7 @@ function DeCG(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, 
     x = zeros(dim, num_agents);  # local variables
     d = zeros(dim, num_agents);  # local gradient estimators
     num_comm = 0.0;
-    results = zeros(num_iters+1, 4);
+    # results = zeros(num_iters+1, 4);
     # results[1, :] = [0, 0, 0, f_sum(mean(x, 2))];  # [#iter, time, #comm, obj_value]
     for iter in 1:num_iters
         grad_x = gradient_cat(x);  # compute the true local gradients, grad_x is a dim-by-num_agents matrix
@@ -79,7 +79,7 @@ function DeSCG(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch,
     d = zeros(dim, num_agents);  # local gradient estimators
     g = zeros(dim, num_agents);  # local stochastic averaged gradient
     num_comm = 0.0;
-    results = zeros(num_iters+1, 4);
+    # results = zeros(num_iters+1, 4);
     # results[1, :] = [0, 0, 0, f_sum(mean(x, 2))];  # [#iter, time, #comm, obj_value]
     for iter in 1:num_iters
         grad_x = gradient_cat(x);  # compute the true local gradients, grad_x is a dim-by-num_agents matrix

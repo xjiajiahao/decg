@@ -27,7 +27,7 @@ function AccDeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_ba
     g = gradient_cat(x);  # local SAGA-style gradient estimators
     grad_x_old = g;  # used to store the old local gradients
     num_comm = 0.0;
-    results = zeros(num_iters+1, 4);
+    # results = zeros(num_iters+1, 4);
     # K = ceil(sqrt((1 + beta)/(1 - beta))) + 1;
     # results[1, :] = [0, 0, 0, f_sum(mean(x, 2))];  # [#iter, time, #comm, obj_value]
     for iter in 1:num_iters
@@ -79,7 +79,7 @@ function AccDeSGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_b
     g = gradient_cat(x, 1);  # local SAGA-style gradient estimators
     grad_x_old = g;  # used to store the old local gradients
     num_comm = 0.0;
-    results = zeros(num_iters+1, 4);
+    # results = zeros(num_iters+1, 4);
     # K = ceil(sqrt((1 + beta)/(1 - beta))) + 1;
     # results[1, :] = [0, 0, 0, f_sum(mean(x, 2))];  # [#iter, time, #comm, obj_value]
     for iter in 1:num_iters

@@ -1,4 +1,4 @@
-using LaTeXStrings, Dates
+using LaTeXStrings, Dates, MAT
 
 include("facility.jl");
 include("algorithms/CenFW.jl"); include("algorithms/DeCG.jl"); include("algorithms/DeGSFW.jl"); include("algorithms/CenGreedy.jl"); include("algorithms/AccDeGSFW.jl");
@@ -19,10 +19,10 @@ function main(left::Int, interval::Int, right::Int)
     data_cell, data_mat, num_movies, num_users = load_movie_partitioned_data(num_agents, "100K");
 
     # load weights matrix
-    # const weights, beta = generate_network(num_agents, avg_degree);
-    weights, beta = load_network_50("complete");
-    # const weights, beta = load_network_50("line");
-    # const weights, beta = load_network_50("er");
+    # weights, beta = generate_network(num_agents, avg_degree);
+    # weights, beta = load_network_50("complete");
+    weights, beta = load_network_50("line");
+    # weights, beta = load_network_50("er");
     num_out_edges = count(i->(i>0), weights) - num_agents;
 
     dim = num_movies;
@@ -51,7 +51,7 @@ function main(left::Int, interval::Int, right::Int)
             if 1/(1-beta) <= ((e^2 + 1)/(e^2 - 1))^2
                 K = 1;
             else
-                K = ceil(sqrt((1 + beta)/(1 - beta))) + 1;
+                K = round(Int, ceil(sqrt((1 + beta)/(1 - beta))) + 1);
             end
             num_iters = num_iters_arr[i];
             non_acc_num_iters = num_iters * K;
@@ -67,26 +67,27 @@ function main(left::Int, interval::Int, right::Int)
             # res_DeGSFW = DeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, gradient_extension_batch, num_iters);
             # final_res[i, 3] = res_DeGSFW[4];
 
-            # println("repeated: $(i), algorithm: DeSCG, T: $(decg_num_iters), time: $(Dates.Time(now()))");
-            # res_DeSCG = DeSCG(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, stochastic_gradient_extension_batch, decg_num_iters, alpha, phi);
-            # final_res[i, 2] = res_DeSCG[4];
-            # final_res[i, 4] = res_DeSCG[3];
+            println("repeated: $(i), algorithm: DeSCG, T: $(decg_num_iters), time: $(Dates.Time(now()))");
+            res_DeSCG = DeSCG(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, stochastic_gradient_extension_batch, decg_num_iters, alpha, phi);
+            final_res[i, 2] = res_DeSCG[4];
+            final_res[i, 4] = res_DeSCG[3];
 
             println("repeated: $(i), algorithm: DeSGSFW, T: $(non_acc_num_iters), time:$(Dates.Time(now()))");
             res_DeSGSFW = DeSGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, stochastic_gradient_extension_batch, non_acc_num_iters);
             final_res[i, 3] = res_DeSGSFW[4];
             final_res[i, 5] = res_DeSGSFW[3];
 
-            # println("repeated: $(i), algorithm: AccDeSGSFW, T: $(num_iters), time: $(Dates.hour(now())):$(Dates.minute(now())):$(Dates.second(now()))");
-            # res_AccDeSGSFW = AccDeSGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, stochastic_gradient_extension_batch, num_iters, beta, K);
-            # final_res[i, 6] = res_AccDeSGSFW[4];
-            # final_res[i, 7] = res_AccDeSGSFW[3];
+            println("repeated: $(i), algorithm: AccDeSGSFW, T: $(num_iters), time: $(Dates.hour(now())):$(Dates.minute(now())):$(Dates.second(now()))");
+            res_AccDeSGSFW = AccDeSGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, stochastic_gradient_extension_batch, num_iters, beta, K);
+            final_res[i, 6] = res_AccDeSGSFW[4];
+            final_res[i, 7] = res_AccDeSGSFW[3];
 
             #
             # res_CenSFW = CenSFW(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_batch, num_iters);
             # final_res[i, 2] = res_CenSFW[3];
 
             final_res[i, 1] = num_iters;
+            matwrite("data/movie_main_repeated_auto_save.mat", Dict("final_res" => final_res));
         end
         res = res + final_res;
     end
