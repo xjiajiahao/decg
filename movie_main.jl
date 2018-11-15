@@ -4,7 +4,7 @@ include("facility.jl");
 include("algorithms/CenFW.jl"); include("algorithms/DeCG.jl"); include("algorithms/DeGSFW.jl"); include("algorithms/CenGreedy.jl"); include("algorithms/AccDeGSFW.jl");
 include("comm.jl");
 
-function main()
+function main(left::Int, interval::Int, right::Int, FIX_COMM::Bool)
     # Step 1: initialization
     k_int = 10;  # the cardinality constraint
     # num_agents = 100;
@@ -41,7 +41,8 @@ function main()
     # num_iters_arr = Int[20;];
     # num_iters_arr = Int[1:3;];
     # num_iters_arr = Int[1:1:20;];
-    num_iters_arr = Int[1:1:10;];
+    # num_iters_arr = Int[1:1:10;];
+    num_iters_arr = left:interval:right;
     final_res = zeros(length(num_iters_arr), 7);
 
     t_start = time();
@@ -53,8 +54,11 @@ function main()
             K = ceil(sqrt((1 + beta)/(1 - beta))) + 1;
         end
         num_iters = num_iters_arr[i];
-        # non_acc_num_iters = num_iters;
-        non_acc_num_iters = num_iters * K;
+        if FIX_COMM
+            non_acc_num_iters = num_iters * K;
+        else
+            non_acc_num_iters = num_iters;
+        end
         alpha = 1/sqrt(num_iters);
         phi = 1/num_iters^(2/3);
 

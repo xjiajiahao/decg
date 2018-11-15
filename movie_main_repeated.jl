@@ -4,7 +4,7 @@ include("facility.jl");
 include("algorithms/CenFW.jl"); include("algorithms/DeCG.jl"); include("algorithms/DeGSFW.jl"); include("algorithms/CenGreedy.jl"); include("algorithms/AccDeGSFW.jl");
 include("comm.jl");
 
-function main(left::Int, interval::Int, right::Int)
+function main(left::Int, interval::Int, right::Int, repeated::Int, FIX_COMM::Bool)
     # Step 1: initialization
     k_int = 10;  # the cardinality constraint
     # const num_agents = 100;
@@ -12,7 +12,7 @@ function main(left::Int, interval::Int, right::Int)
     # const num_iters = Int(1e1);
     # alpha = 1/sqrt(num_iters);
     # phi = 1/num_iters^(2/3);
-    repeated = 1;
+    # repeated = 1;
 
     # load data
     # data_cell[i][j] is a n_j-by-2 matrix representing the ratings of agent i's jth user
@@ -54,10 +54,13 @@ function main(left::Int, interval::Int, right::Int)
                 K = round(Int, ceil(sqrt((1 + beta)/(1 - beta))) + 1);
             end
             num_iters = num_iters_arr[i];
-            non_acc_num_iters = num_iters * K;
-            decg_num_iters = num_iters * K;
-            # non_acc_num_iters = num_iters;
-            # decg_num_iters = round(Int, num_iters*(num_iters+1)*(2*num_iters+1)/6);
+            if FIX_COMM
+                non_acc_num_iters = num_iters * K;
+                decg_num_iters = num_iters * K;
+            else
+                non_acc_num_iters = num_iters;
+                decg_num_iters = round(Int, num_iters*(num_iters+1)*(2*num_iters+1)/6);
+            end
             alpha = 1/sqrt(num_iters);
             phi = 1/num_iters^(2/3);
 
