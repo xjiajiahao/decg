@@ -4,7 +4,7 @@ include("facility.jl");
 include("algorithms/CenFW.jl"); include("algorithms/DeCG.jl"); include("algorithms/DeGSFW.jl"); include("algorithms/CenGreedy.jl"); include("algorithms/AccDeGSFW.jl");
 include("comm.jl");
 
-function main(left::Int, interval::Int, right::Int, repeated::Int, FIX_COMM::Bool)
+function movie_main_repeated(left::Int, interval::Int, right::Int, repeated::Int, graph_style::String, FIX_COMM::Bool)
     # Step 1: initialization
     k_int = 10;  # the cardinality constraint
     # const num_agents = 100;
@@ -21,8 +21,13 @@ function main(left::Int, interval::Int, right::Int, repeated::Int, FIX_COMM::Boo
     # load weights matrix
     # weights, beta = generate_network(num_agents, avg_degree);
     # weights, beta = load_network_50("complete");
-    weights, beta = load_network_50("line");
+    # weights, beta = load_network_50("line");
     # weights, beta = load_network_50("er");
+    available_graph_style = ["complete", "line", "er"];
+    if ~(graph_style in available_graph_style)
+        error("graph_style should be \"complete\", \"line\", or \"er\"");
+    end
+    weights, beta = load_network_50(graph_style);
     num_out_edges = count(i->(i>0), weights) - num_agents;
 
     dim = num_movies;
@@ -46,7 +51,7 @@ function main(left::Int, interval::Int, right::Int, repeated::Int, FIX_COMM::Boo
     for i = 1 : repeated
         final_res = zeros(length(num_iters_arr), 7);
 
-        for i = 1 : length(num_iters_arr)
+        for j = 1 : length(num_iters_arr)
             # set the value of K (the degree of the chebyshev polynomial)
             if 1/(1-beta) <= ((e^2 + 1)/(e^2 - 1))^2
                 K = 1;

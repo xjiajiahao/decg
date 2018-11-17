@@ -1,10 +1,10 @@
-using LaTeXStrings
+using LaTeXStrings, Dates, MAT
 
 include("facility.jl");
 include("algorithms/CenFW.jl"); include("algorithms/DeCG.jl"); include("algorithms/DeGSFW.jl"); include("algorithms/CenGreedy.jl"); include("algorithms/AccDeGSFW.jl");
 include("comm.jl");
 
-function main(left::Int, interval::Int, right::Int, FIX_COMM::Bool)
+function movie_main(left::Int, interval::Int, right::Int, graph_style::String, FIX_COMM::Bool)
     # Step 1: initialization
     k_int = 10;  # the cardinality constraint
     # num_agents = 100;
@@ -19,9 +19,14 @@ function main(left::Int, interval::Int, right::Int, FIX_COMM::Bool)
 
     # load weights matrix
     # weights = generate_network(num_agents, avg_degree);
-    weights, beta = load_network_50("complete");
+    # weights, beta = load_network_50("complete");
     # weights, beta = load_network_50("line");
     # weights, beta = load_network_50("er");
+    available_graph_style = ["complete", "line", "er"];
+    if ~(graph_style in available_graph_style)
+        error("graph_style should be \"complete\", \"line\", or \"er\"");
+    end
+    weights, beta = load_network_50(graph_style);
     num_out_edges = count(i->(i>0), weights) - num_agents;
 
     dim = num_movies;
