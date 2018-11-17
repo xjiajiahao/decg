@@ -95,7 +95,7 @@ function DeSGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batc
         if iter == 1
             g = grad_x;
         else
-            g = @. d + grad_x - grad_x_old;
+            g = d + grad_x - grad_x_old;
         end
         d = g * weights;  # first communication: exchange gradient estimators
         v = LMO_cat(d);  # find argmax <d[i], v> each all agent i
