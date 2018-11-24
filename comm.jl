@@ -51,7 +51,7 @@ function load_network_50(network_type="er")
     dim = size(weights, 1);
     eigvalues = (LinearAlgebra.eigen(weights)).values;
     if abs(eigvalues[dim] - 1.0) > 1e-8
-        error("the largest eigenvalue of the weight matrix must be 1");
+        error("the largest eigenvalue of the weight matrix is $(eigvalues[dim]), but it must be 1");
     end
     beta = max(abs(eigvalues[1]), abs(eigvalues[dim - 1]));
     if beta < 1e-8
