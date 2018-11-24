@@ -19,7 +19,7 @@ A = rand(num_constraints, dim);
 u = ones(dim, 1);
 b = ones(num_constraints, 1);
 
-filename = [ROOT, 'NQP_50_agents.mat'];
+filename = [ROOT, 'NQP_', num2str(num_agents), '_agents.mat'];
 save(filename, 'data_cell', 'A', 'dim', 'u', 'b');
 
 end

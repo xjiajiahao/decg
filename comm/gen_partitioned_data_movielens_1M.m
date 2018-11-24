@@ -1,14 +1,15 @@
-function [user_ratings_cell_arr, num_movies, num_users, num_agents] = gen_partitioned_data(num_agents)
+function [user_ratings_cell_arr, num_movies, num_users, num_agents] = gen_partitioned_data_1M(num_agents)
+% data_cell[i][j] is a n_j-by-2 matrix representing the ratings of agent i's jth user
+
 %% initialization
-ROOT = './data/';
-% ROOT = './';
+ROOT = '../data/';
 num_movies = 3883;
 num_users = 6040;
 num_genres = 18;
 
-load('data/Movies.mat');
+load('data/Movies_1M.mat');
 rng(1); % For reproducibility
-indices = randperm(num_users);
+% indices = randperm(num_users);
 
 num_users_per_agent = floor(num_users / num_agents);
 user_ratings_cell_arr = cell(1, num_agents);
@@ -22,7 +23,7 @@ for i = 1 : num_agents
     user_ratings_cell_arr{i} = user_ratings_cell(tmp_idx);
 end
 
-filename = [ROOT, 'Movies_', num2str(num_agents), '_agents.mat'];
+filename = [ROOT, 'Movies_1M_', num2str(num_agents), '_agents.mat'];
 save(filename, 'user_ratings_cell_arr', 'user_ratings_mat', 'num_movies', 'num_users', 'num_agents');
 
 end

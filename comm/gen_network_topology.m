@@ -1,4 +1,4 @@
-function cmat=gennetwork(N,pl)
+function cmat=gen_network_topology(N,pl)
 
 % connectivity matrix
 while(true)

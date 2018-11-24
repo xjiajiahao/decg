@@ -1,7 +1,8 @@
 function [user_ratings_cell_arr, num_movies, num_users, num_agents] = gen_partitioned_data_100K(num_agents)
+% data_cell[i][j] is a n_j-by-2 matrix representing the ratings of agent i's jth user
+
 %% initialization
 ROOT = '../data/';
-% ROOT = './';
 num_movies = 1682;
 num_users = 943;
 
