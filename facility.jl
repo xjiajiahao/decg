@@ -117,7 +117,8 @@ end
 end
 
 @everywhere function gradient_extension_batch(x, batch_ratings) # ratings is a n-by-2 matrix sorted in descendant order, where n denotes #movies some user has rated
-    sum_gradient = 0;
+    dim = length(x);
+    sum_gradient = zeros(dim);
     for ratings in batch_ratings
         sum_gradient += gradient_extension(x, ratings);
     end

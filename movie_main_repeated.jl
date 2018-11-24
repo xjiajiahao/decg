@@ -4,7 +4,7 @@ include("facility.jl");
 include("algorithms/CenFW.jl"); include("algorithms/DeCG.jl"); include("algorithms/DeGSFW.jl"); include("algorithms/CenGreedy.jl"); include("algorithms/AccDeGSFW.jl");
 include("comm.jl");
 
-function main(left::Int, interval::Int, right::Int, repeated::Int, FIX_COMM::Bool)
+function movie_main_repeated(left::Int, interval::Int, right::Int, repeated::Int, graph_style::String, FIX_COMM::Bool)
     # Step 1: initialization
     k_int = 10;  # the cardinality constraint
     # const num_agents = 100;
@@ -21,8 +21,13 @@ function main(left::Int, interval::Int, right::Int, repeated::Int, FIX_COMM::Boo
     # load weights matrix
     # weights, beta = generate_network(num_agents, avg_degree);
     # weights, beta = load_network_50("complete");
-    weights, beta = load_network_50("line");
+    # weights, beta = load_network_50("line");
     # weights, beta = load_network_50("er");
+    available_graph_style = ["complete", "line", "er"];
+    if ~(graph_style in available_graph_style)
+        error("graph_style should be \"complete\", \"line\", or \"er\"");
+    end
+    weights, beta = load_network_50(graph_style);
     num_out_edges = count(i->(i>0), weights) - num_agents;
 
     dim = num_movies;
@@ -40,11 +45,11 @@ function main(left::Int, interval::Int, right::Int, repeated::Int, FIX_COMM::Boo
     # const num_iters_arr = Int[1:14;];
     # const num_iters_arr = Int[1:1:10;];
     num_iters_arr = left:interval:right;
-    res = zeros(length(num_iters_arr), 7);
+    res = zeros(length(num_iters_arr), 8);
 
     t_start = time();
-    for i = 1 : repeated
-        final_res = zeros(length(num_iters_arr), 7);
+    for j = 1 : repeated
+        final_res = zeros(length(num_iters_arr), 8);
 
         for i = 1 : length(num_iters_arr)
             # set the value of K (the degree of the chebyshev polynomial)
@@ -70,24 +75,25 @@ function main(left::Int, interval::Int, right::Int, repeated::Int, FIX_COMM::Boo
             # res_DeGSFW = DeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, gradient_extension_batch, num_iters);
             # final_res[i, 3] = res_DeGSFW[4];
 
-            println("repeated: $(i), algorithm: DeSCG, T: $(decg_num_iters), time: $(Dates.Time(now()))");
+            println("repeated: $(j), algorithm: DeSCG, T: $(decg_num_iters), time: $(Dates.Time(now()))");
             res_DeSCG = DeSCG(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, stochastic_gradient_extension_batch, decg_num_iters, alpha, phi);
             final_res[i, 2] = res_DeSCG[4];
             final_res[i, 4] = res_DeSCG[3];
 
-            println("repeated: $(i), algorithm: DeSGSFW, T: $(non_acc_num_iters), time:$(Dates.Time(now()))");
+            println("repeated: $(j), algorithm: DeSGSFW, T: $(non_acc_num_iters), time:$(Dates.Time(now()))");
             res_DeSGSFW = DeSGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, stochastic_gradient_extension_batch, non_acc_num_iters);
             final_res[i, 3] = res_DeSGSFW[4];
             final_res[i, 5] = res_DeSGSFW[3];
 
-            println("repeated: $(i), algorithm: AccDeSGSFW, T: $(num_iters), time: $(Dates.hour(now())):$(Dates.minute(now())):$(Dates.second(now()))");
+            println("repeated: $(j), algorithm: AccDeSGSFW, T: $(num_iters), time: $(Dates.hour(now())):$(Dates.minute(now())):$(Dates.second(now()))");
             res_AccDeSGSFW = AccDeSGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, stochastic_gradient_extension_batch, num_iters, beta, K);
             final_res[i, 6] = res_AccDeSGSFW[4];
             final_res[i, 7] = res_AccDeSGSFW[3];
 
-            #
-            # res_CenSFW = CenSFW(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_batch, num_iters);
-            # final_res[i, 2] = res_CenSFW[3];
+
+            println("repeated: $(j), algorithm: CenSCG, T: $(decg_num_iters), time: $(Dates.Time(now()))");
+            res_CenSFW = CenSFW(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_batch, decg_num_iters);
+            final_res[i, 8] = res_CenSFW[3];
 
             final_res[i, 1] = num_iters;
             matwrite("data/movie_main_repeated_auto_save.mat", Dict("final_res" => final_res));

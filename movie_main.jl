@@ -1,10 +1,10 @@
-using LaTeXStrings
+using LaTeXStrings, Dates, MAT
 
 include("facility.jl");
 include("algorithms/CenFW.jl"); include("algorithms/DeCG.jl"); include("algorithms/DeGSFW.jl"); include("algorithms/CenGreedy.jl"); include("algorithms/AccDeGSFW.jl");
 include("comm.jl");
 
-function main(left::Int, interval::Int, right::Int, FIX_COMM::Bool)
+function movie_main(left::Int, interval::Int, right::Int, graph_style::String, FIX_COMM::Bool)
     # Step 1: initialization
     k_int = 10;  # the cardinality constraint
     # num_agents = 100;
@@ -19,9 +19,14 @@ function main(left::Int, interval::Int, right::Int, FIX_COMM::Bool)
 
     # load weights matrix
     # weights = generate_network(num_agents, avg_degree);
-    weights, beta = load_network_50("complete");
+    # weights, beta = load_network_50("complete");
     # weights, beta = load_network_50("line");
     # weights, beta = load_network_50("er");
+    available_graph_style = ["complete", "line", "er"];
+    if ~(graph_style in available_graph_style)
+        error("graph_style should be \"complete\", \"line\", or \"er\"");
+    end
+    weights, beta = load_network_50(graph_style);
     num_out_edges = count(i->(i>0), weights) - num_agents;
 
     dim = num_movies;
@@ -43,7 +48,7 @@ function main(left::Int, interval::Int, right::Int, FIX_COMM::Bool)
     # num_iters_arr = Int[1:1:20;];
     # num_iters_arr = Int[1:1:10;];
     num_iters_arr = left:interval:right;
-    final_res = zeros(length(num_iters_arr), 7);
+    final_res = zeros(length(num_iters_arr), 8);
 
     t_start = time();
     for i = 1 : length(num_iters_arr)
@@ -77,8 +82,9 @@ function main(left::Int, interval::Int, right::Int, FIX_COMM::Bool)
         final_res[i, 6] = res_AccDeGSFW[4];
         final_res[i, 7] = res_AccDeGSFW[3];
 
-        # res_CenFW = CenFW(dim, data_cell, LMO, f_extension_batch, gradient_extension_batch, num_iters);
-        # final_res[i, 2] = res_CenFW[3];
+        println("CenFW, T: $(non_acc_num_iters), time: $(Dates.Time(now()))");
+        res_CenFW = CenFW(dim, data_cell, LMO, f_extension_batch, gradient_extension_batch, non_acc_num_iters);
+        final_res[i, 8] = res_CenFW[3];
 
         final_res[i, 1] = num_iters;
     end
