@@ -1,6 +1,6 @@
 using Dates, MAT
 
-include("nqp.jl");
+include("models/nqp.jl");
 include("algorithms/CenCG.jl"); include("algorithms/DeCG.jl"); include("algorithms/DeGSFW.jl"); include("algorithms/AccDeGSFW.jl");
 include("comm.jl");
 

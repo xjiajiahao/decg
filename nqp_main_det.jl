@@ -1,10 +1,10 @@
 using Dates, MAT
 
-include("nqp.jl");
+include("models/nqp.jl");
 include("algorithms/CenCG.jl"); include("algorithms/DeCG.jl"); include("algorithms/DeGSFW.jl"); include("algorithms/AccDeGSFW.jl");
 include("comm.jl");
 
-function nqp_main(min_num_iters::Int, interval_num_iters::Int, max_num_iters::Int, graph_style::String, num_agents::Int, FIX_COMM::Bool)
+function nqp_main_det(min_num_iters::Int, interval_num_iters::Int, max_num_iters::Int, graph_style::String, num_agents::Int, FIX_COMM::Bool)
 # the number of iterations are [min_num_iters : interval_num_iters : max_num_iters]
 # graph_style: can be "complete" for complete graph, or "er" for Erdos-Renyi random graph, or "line" for line graph
 # num_agents: number of computing agents in the network

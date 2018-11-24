@@ -1,6 +1,6 @@
 using Dates, MAT
 
-include("facility.jl");
+include("models/facility_location.jl");
 include("algorithms/CenCG.jl"); include("algorithms/DeCG.jl"); include("algorithms/DeGSFW.jl"); include("algorithms/CenGreedy.jl"); include("algorithms/AccDeGSFW.jl");
 include("comm.jl");
 

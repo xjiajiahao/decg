@@ -1,12 +1,20 @@
-### Usage
-Launch julia, and then type `include("movie_main.jl");` to test algorithms.
+### Requirements
+* Julia Lang v1.0+
+* Additional Julia packages: MAT, MathProgBase, Clp, Distributions
 
-### Data
-The data is stored in a cell array `user_ratings_cell_arr`. Each entry of the cell array is again a cell array containing `num_users_per_agent` cells. And each cell (which is a num_watched_movies) represents each user's ratings for the movies he/she has watched.
+### Usage
+1. Install the aforementioned packages in Julia with the command `using Pkg; Pkg.add("<package name>")`.
+
+2. Start Julia with `julia -p n` where `n` denotes the number of worker processes.
+
+3. In Julia, type `include("XX_main_YY.jl");` to load a main function, e.g., `include("nqp_main_stochastic.jl");` and then run the main function, e.g., `res_DeSCG, res_DeSGSFW, res_AccDeSGSFW, res_CenSFW =  nqp_main_stochastic(1, 1, 10, 2, "er", 50, false);`. See the main files for detailed descriptions of the function arguments.
+
+### Notes
+The number of computing agents should be 50, otherwise one has to generate the network and the partitioned data set before running the main functions.
 
 ### Directory Structure
-movie_main.jl -- the main function
-comm.jl -- handy functions for loading data and plotting results
-facility.jl -- functions for computing the objective function (called "facility location") and its gradient
-algorithms/ -- containing files that define different algoritms (centralized FW, decentralized FW proposed by Mokhtari, and decentralized SAGA-FW proposed by us).
-data/ -- containing data files and scripts to generate data/network
+{movie, nqp}_main_{det, stochastic}.jl -- main functions to test algorithms
+models/ -- containing files that define different models (facility location and NQP)
+algorithms/ -- containing files that define different algoritms (centralized CG, Decentralized CG proposed by Mokhtari, and DeGSFW proposed by us).
+data/ -- containing data files
+comm.jl -- handy functions for loading data
