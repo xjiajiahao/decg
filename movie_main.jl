@@ -1,55 +1,46 @@
-using LaTeXStrings, Dates, MAT
+using Dates, MAT
 
 include("facility.jl");
 include("algorithms/CenFW.jl"); include("algorithms/DeCG.jl"); include("algorithms/DeGSFW.jl"); include("algorithms/CenGreedy.jl"); include("algorithms/AccDeGSFW.jl");
 include("comm.jl");
 
-function movie_main(left::Int, interval::Int, right::Int, graph_style::String, FIX_COMM::Bool)
-    # Step 1: initialization
-    k_int = 10;  # the cardinality constraint
-    # num_agents = 100;
-    num_agents = 50;
-    # num_iters = Int(2e2);
-    # alpha = 1/sqrt(num_iters);
-    # phi = 1/num_iters^(2/3);
+function movie_main(min_num_iters::Int, interval_num_iters::Int, max_num_iters::Int, graph_style::String, num_agents::Int, cardinality::Int, FIX_COMM::Bool)
+# the number of iterations are [min_num_iters : interval_num_iters : max_num_iters]
+# graph_style: can be "complete" for complete graph, or "er" for Erdos-Renyi random graph, or "line" for line graph
+# num_agents: number of computing agents in the network
+# cardinality: the cardinality constraint parameter of the movie recommendation application
+# FIX_COMM: all algorithms have the same #communication if FIX_COMM==true, otherwise all algorithms have the same #gradient evaluation
+# return value: (res_DeSCG, res_DeSGSFW, res_AccDeSGSFW, res_CenSFW), each res_XXX is a x-by-5 matrix, where x is the length of [min_num_iters : interval_num_iters : max_num_iters], and each row of res_XXX contains [#iterations, elapsed time, #local exact/stochastoc gradient evaluations per node, #doubles transferred in the network, averaged objective function]
 
+    # Step 1: initialization
     # load data
     # data_cell[i][j] is a n_j-by-2 matrix representing the ratings of agent i's jth user
-    data_cell, data_mat, num_movies, num_users = load_movie_partitioned_data(num_agents, "100K");
+    data_cell, data_mat, num_movies, num_users = load_movie_partitioned_data(num_agents, "100K");  # the second argument can be "100K" or "1M"
 
     # load weights matrix
-    # weights = generate_network(num_agents, avg_degree);
-    # weights, beta = load_network_50("complete");
-    # weights, beta = load_network_50("line");
-    # weights, beta = load_network_50("er");
     available_graph_style = ["complete", "line", "er"];
     if ~(graph_style in available_graph_style)
         error("graph_style should be \"complete\", \"line\", or \"er\"");
     end
-    weights, beta = load_network_50(graph_style);
+    weights, beta = load_network(graph_style, num_agents);
     num_out_edges = count(i->(i>0), weights) - num_agents;
 
     dim = num_movies;
-    k = Float64(k_int);
 
     x0 = zeros(dim);
 
     # generate LMO
     d = ones(dim);
     a_2d = ones(1, dim); # a should be a n_constraints-by-dim matrix
-    LMO = generate_linear_prog_function(d, a_2d, k);
+    LMO = generate_linear_prog_function(d, a_2d, cardinality*1.0);
 
-    # num_iters_arr = Int[2e2, 4e2, 6e2, 8e2, 10e2];
-    # num_iters_arr = Int[1e0, 2e0, 3e0, 4e0, 5e0];
-    # num_iters_arr = Int[1:14;];
-    # num_iters_arr = Int[10:10:200;];
-    # num_iters_arr = Int[20;];
-    # num_iters_arr = Int[1:3;];
-    # num_iters_arr = Int[1:1:20;];
-    # num_iters_arr = Int[1:1:10;];
-    num_iters_arr = left:interval:right;
-    final_res = zeros(length(num_iters_arr), 8);
+    num_iters_arr = min_num_iters:interval_num_iters:max_num_iters;
+    res_DeCG= zeros(length(num_iters_arr), 5);
+    res_DeGSFW = zeros(length(num_iters_arr), 5);
+    res_AccDeGSFW = zeros(length(num_iters_arr), 5);
+    res_CenFW = zeros(length(num_iters_arr), 5);
 
+    # Step 2: test algorithms for multiple times and return averaged results
     t_start = time();
     for i = 1 : length(num_iters_arr)
         # set the value of K (the degree of the chebyshev polynomial)
@@ -68,36 +59,17 @@ function movie_main(left::Int, interval::Int, right::Int, graph_style::String, F
         phi = 1/num_iters^(2/3);
 
         println("DeCG, T: $(non_acc_num_iters), time:$(Dates.Time(now()))");
-        res_DeCG = DeCG(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, gradient_extension_batch, non_acc_num_iters, alpha);
-        final_res[i, 2] = res_DeCG[4];
-        final_res[i, 4] = res_DeCG[3];
+        res_DeCG[i, :] = DeCG(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, gradient_extension_batch, non_acc_num_iters, alpha);
 
         println("DeGSFW, T: $(non_acc_num_iters), time: $(Dates.Time(now()))");
-        res_DeGSFW = DeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, gradient_extension_batch, non_acc_num_iters);
-        final_res[i, 3] = res_DeGSFW[4];
-        final_res[i, 5] = res_DeGSFW[3];
+        res_DeGSFW[i, :] = DeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, gradient_extension_batch, non_acc_num_iters);
 
         println("AccDeGSFW, T: $(num_iters), time:$(Dates.Time(now()))");
-        res_AccDeGSFW = AccDeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, gradient_extension_batch, num_iters, beta, K);
-        final_res[i, 6] = res_AccDeGSFW[4];
-        final_res[i, 7] = res_AccDeGSFW[3];
+        res_AccDeGSFW[i, :] = AccDeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, gradient_extension_batch, num_iters, beta, K);
 
         println("CenFW, T: $(non_acc_num_iters), time: $(Dates.Time(now()))");
-        res_CenFW = CenFW(dim, data_cell, LMO, f_extension_batch, gradient_extension_batch, non_acc_num_iters);
-        final_res[i, 8] = res_CenFW[3];
-
-        final_res[i, 1] = num_iters;
+        res_CenFW[i, :] = CenFW(dim, data_cell, LMO, f_extension_batch, gradient_extension_batch, non_acc_num_iters);
     end
 
-    # res_CenGreedy = CenGreedy(dim, data_mat, f_discrete_batch, k_int, f_extension_batch, num_agents, data_cell);
-    # res_CenFW = CenFW(dim, data_cell, LMO, f_extension_batch, gradient_extension_batch, num_iters);
-    #
-    # res_DeCG = DeCG(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, gradient_extension_batch, num_iters, alpha);
-    #
-    # res_DeSCG = DeSCG(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, stochastic_gradient_extension_batch, num_iters, alpha, phi);
-    #
-    # res_DESAGAFW = DeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, gradient_extension_batch, num_iters);
-    #
-    # res_DeSGSFW = DeSGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, stochastic_gradient_extension_batch, num_iters);
-    return final_res;
+    return res_DeCG, res_DeGSFW, res_AccDeGSFW, res_CenFW;
 end

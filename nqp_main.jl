@@ -1,44 +1,41 @@
-using LaTeXStrings
+using Dates, MAT
 
 include("nqp.jl");
 include("algorithms/CenFW.jl"); include("algorithms/DeCG.jl"); include("algorithms/DeGSFW.jl"); include("algorithms/AccDeGSFW.jl");
 include("comm.jl");
 
-function nqp_main(left::Int, interval::Int, right::Int, graph_style::String, FIX_COMM::Bool)
-    # Step 1: initialization
-    num_agents = 50;
-    # num_iters = Int(20);
-    # alpha = 1/sqrt(num_iters);
-    # phi = 1/num_iters^(2/3);
+function nqp_main(min_num_iters::Int, interval_num_iters::Int, max_num_iters::Int, graph_style::String, num_agents::Int, FIX_COMM::Bool)
+# the number of iterations are [min_num_iters : interval_num_iters : max_num_iters]
+# graph_style: can be "complete" for complete graph, or "er" for Erdos-Renyi random graph, or "line" for line graph
+# num_agents: number of computing agents in the network
+# FIX_COMM: all algorithms have the same #communication if FIX_COMM==true, otherwise all algorithms have the same #gradient evaluation
+# return value: (res_DeSCG, res_DeSGSFW, res_AccDeSGSFW, res_CenSFW), each res_XXX is a x-by-5 matrix, where x is the length of [min_num_iters : interval_num_iters : max_num_iters], and each row of res_XXX contains [#iterations, elapsed time, #local exact/stochastoc gradient evaluations per node, #doubles transferred in the network, averaged objective function]
 
+    # Step 1: initialization
     # load data
     # data_cell[i][j] is a dim-by-dim matrix H, i for agent, j for index in the batch
     data_cell, A, dim, u, b = load_nqp_partitioned_data(num_agents);
     # the NQP problem is defined as f_i(x) = ( x/2 - u )^T H_i x, s.t. {x | 0<=x<=u, Ax<=b}, where A is the constraint_mat of size num_constraints-by-dim
 
     # load weights matrix
-    # weights, beta = load_network_50("complete");
-    # weights, beta = load_network_50("line");
-    # weights, beta = load_network_50("er");
     available_graph_style = ["complete", "line", "er"];
     if ~(graph_style in available_graph_style)
         error("graph_style should be \"complete\", \"line\", or \"er\"");
     end
-    weights, beta = load_network_50(graph_style);
+    weights, beta = load_network(graph_style, num_agents);
     num_out_edges = count(i->(i>0), weights) - num_agents;
 
     x0 = zeros(dim);
     # generate LMO
     LMO = generate_linear_prog_function(u, A, b);
 
-    # num_iters_arr = Int[2e2, 4e2, 6e2, 8e2, 10e2];
-    # num_iters_arr = Int[1e0, 2e0, 3e0, 4e0, 5e0];
-    # num_iters_arr = Int[1:14;];
-    # num_iters_arr = Int[10:10:200;];
-    # num_iters_arr = Int[1:20;];
-    num_iters_arr = left:interval:right;
-    final_res = zeros(length(num_iters_arr), 8);
+    num_iters_arr = min_num_iters:interval_num_iters:max_num_iters;
+    res_DeCG= zeros(length(num_iters_arr), 5);
+    res_DeGSFW = zeros(length(num_iters_arr), 5);
+    res_AccDeGSFW = zeros(length(num_iters_arr), 5);
+    res_CenFW = zeros(length(num_iters_arr), 5);
 
+    # Step 2: test algorithms for multiple times and return averaged results
     t_start = time();
     for i = 1 : length(num_iters_arr)
         # set the value of K (the degree of the chebyshev polynomial)
@@ -56,50 +53,18 @@ function nqp_main(left::Int, interval::Int, right::Int, graph_style::String, FIX
         alpha = 1/sqrt(num_iters);
         phi = 1/num_iters^(2/3);
 
-        # res_DeCG = DeCG(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters, alpha);
-        # final_res[i, 2] = res_DeCG[4];
-        # final_res[i, 4] = res_DeCG[3];
-
-        # res_AccDESAGAFW = AccDeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters, beta);
-        # final_res[i, 2] = res_AccDESAGAFW[4];
-        # final_res[i, 4] = res_AccDESAGAFW[3];
-
         println("DeCG, T: $(non_acc_num_iters), time:$(Dates.Time(now()))");
-        res_DeCG = DeCG(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, non_acc_num_iters, alpha);
-        final_res[i, 2] = res_DeCG[4];
-        final_res[i, 4] = res_DeCG[3];
+        res_DeCG[i, :] = DeCG(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, non_acc_num_iters, alpha);
 
         println("DeGSFW, T: $(non_acc_num_iters), time: $(Dates.Time(now()))");
-        res_DeGSFW = DeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, non_acc_num_iters);
-        final_res[i, 3] = res_DeGSFW[4];
-        final_res[i, 5] = res_DeGSFW[3];
+        res_DeGSFW[i, :] = DeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, non_acc_num_iters);
 
         println("AccDeGSFW, T: $(num_iters), time:$(Dates.Time(now()))");
-        res_AccDeGSFW = AccDeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters, beta, K);
-        final_res[i, 6] = res_AccDeGSFW[4];
-        final_res[i, 7] = res_AccDeGSFW[3];
+        res_AccDeGSFW[i, :] = AccDeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters, beta, K);
 
         println("CenFW, T: $(non_acc_num_iters), time: $(Dates.Time(now()))");
-        res_CenFW = CenFW(dim, data_cell, LMO, f_batch, gradient_batch, non_acc_num_iters);
-        final_res[i, 8] = res_CenFW[3];
-
-        final_res[i, 1] = num_iters;
+        res_CenFW[i, :] = CenFW(dim, data_cell, LMO, f_batch, gradient_batch, non_acc_num_iters);
     end
 
-    # res_CenFW = CenFW(dim, data_cell, LMO, f_batch, gradient_batch, num_iters);
-    #
-    # res_DeCG = DeCG(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters, alpha);
-    #
-    # res_DESAGAFW = DeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters);
-    # res_AccDESAGAFW = AccDeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters, beta);
-
-
-
-    # res_CenSFW = CenSFW(dim, data_cell, LMO, f_batch, stochastic_gradient_batch, num_iters);
-    # #
-    # res_DeSCG = DeSCG(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, stochastic_gradient_batch, num_iters, alpha, phi);
-    # #
-    # res_DeSGSFW = DeSGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, stochastic_gradient_batch, num_iters);
-    # res_AccDESSAGAFW = res_AccDeSGSFW = DeSGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, stochastic_gradient_batch, num_iters, beta);
-    return final_res;
+    return res_DeCG, res_DeGSFW, res_AccDeGSFW, res_CenFW;
 end

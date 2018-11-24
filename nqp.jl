@@ -1,4 +1,5 @@
 using Distributed
+@everywhere using Random, Distributions
 @everywhere function f(x, data) # data is a 1-by-batch_size cell where each entry is a dim-by-dim matrix H
     dim = length(x);
     batch_size = length(data);
@@ -44,7 +45,7 @@ end
 @everywhere function stochastic_gradient(x, data, sample_times) # compute stochastic gradient
     dim = length(x);
     u = ones(dim, 1);
-    res = zeros(dim, 1);
+    res = zeros(dim);
     sig = sqrt(10);
     distrib = Normal(0, sig);
     for i = 1 : sample_times
@@ -59,7 +60,9 @@ end
 end
 
 @everywhere function stochastic_gradient_batch(x, data_cell, sample_times = 1)
-    res = 0;
+    dim = length(x);
+    res = zeros(dim);
+
     batch_size = length(data_cell);
     for data in data_cell
         res += stochastic_gradient(x, data, sample_times);

@@ -1,13 +1,12 @@
-# our methods
 function DeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters)
     function gradient_cat(x) # compute local gradients simultaneously
-        grad_x = @sync @distributed (hcat) for i in 1:num_agents # the documentation says that @paralel for can handle situations where each iteration is tiny
+        grad_x = @sync @distributed (hcat) for i in 1:num_agents
             gradient_batch(x[:, i], data_cell[i])
         end
         return grad_x;
     end
 
-    function f_sum(x)  # compute local objective functions simultaneously, and then output the sum
+    function f_sum(x)  # compute the global objective at x
         f_x = @sync @distributed (+) for i in 1:num_agents
             f_batch(x, data_cell[i])
         end
@@ -27,8 +26,7 @@ function DeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch
     g = zeros(dim, num_agents);  # local SAGA-style gradient estimators
     grad_x_old = zeros(dim, num_agents);  # used to store the old local gradients
     num_comm = 0.0;
-    # results = zeros(num_iters+1, 4);
-    # results[1, :] = [0, 0, 0, f_sum(mean(x, 2))];  # [#iter, time, #comm, obj_value]
+    num_local_grad = num_iters;
     for iter in 1:num_iters
         grad_x = gradient_cat(x);  # compute the true local gradients, grad_x is a dim-by-num_agents matrix
         if iter == 1
@@ -40,13 +38,7 @@ function DeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch
         v = LMO_cat(d);  # find argmax <d[i], v> for all agents i simultaneously
         x = x*weights + v / num_iters;  # second communication: exchange local variables
         grad_x_old = grad_x;
-        # evaluate obj function
-        # x_bar = mean(x, 2);
-        # curr_obj = f_sum(x_bar);
-        # t_elapsed = time() - t_start;
         num_comm += 2*dim*num_out_edges;  # 1 for local gradients, 1 for local variables
-        # println("$(iter), $(t_elapsed)");
-        # results[iter+1, :] = [iter, t_elapsed, num_comm, curr_obj];
     end
     t_elapsed = time() - t_start;
     avg_f = 0;
@@ -54,7 +46,8 @@ function DeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch
         avg_f += f_sum(x[:, i]);
     end
     avg_f = avg_f / num_agents;
-    results = [num_iters, t_elapsed, num_comm, avg_f];
+    num_local_grad = num_iters;
+    results = [num_iters, t_elapsed, num_local_grad, num_comm, avg_f];
     return results;
 end
 
@@ -67,14 +60,14 @@ function DeSGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batc
         return grad_x;
     end
 
-    function f_sum(x)  # compute local objective functions simultaneously, and then output the sum
+    function f_sum(x)  # compute the global objective at x
         f_x = @sync @distributed (+) for i in 1:num_agents
             f_batch(x, data_cell[i])
         end
         return f_x;
     end
 
-    function LMO_cat(d)  # perform the linear programming simultaneously
+    function LMO_cat(d)
         res = @sync @distributed (hcat) for i in 1:num_agents
             LMO(d[:, i])
         end
@@ -87,11 +80,11 @@ function DeSGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batc
     g = zeros(dim, num_agents);  # local SAGA-style gradient
     grad_x_old = zeros(dim, num_agents);  # used to store the old gradient
     num_comm = 0.0;
-    # results = zeros(num_iters+1, 4);
-    # results[1, :] = [0, 0, 0, f_sum(mean(x, 2))];  # [#iter, time, #comm, obj_value]
+    num_local_stoch_grad = 1.0;
     for iter in 1:num_iters
         sample_times = iter^2;
         grad_x = gradient_cat(x, sample_times);  # compute the true local gradients, grad_x is a dim-by-num_agents matrix
+        num_local_stoch_grad += sample_times;
         if iter == 1
             g = grad_x;
         else
@@ -101,13 +94,7 @@ function DeSGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batc
         v = LMO_cat(d);  # find argmax <d[i], v> each all agent i
         x = x*weights + v / num_iters;  # second communication: exchange local variables
         grad_x_old = grad_x;
-        # evaluate obj function
-        # x_bar = mean(x, 2);
-        # curr_obj = f_sum(x_bar);
-        # t_elapsed = time() - t_start;
         num_comm += 2*dim*num_out_edges;  # 1 for local gradients, 1 for local variables
-        # println("$(iter), $(t_elapsed)");
-        # results[iter+1, :] = [iter, t_elapsed, num_comm, curr_obj];
     end
     t_elapsed = time() - t_start;
     avg_f = 0;
@@ -115,6 +102,6 @@ function DeSGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batc
         avg_f += f_sum(x[:, i]);
     end
     avg_f = avg_f / num_agents;
-    results = [num_iters, t_elapsed, num_comm, avg_f];
+    results = [num_iters, t_elapsed, num_local_stoch_grad, num_comm, avg_f];
     return results;
 end

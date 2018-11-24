@@ -1,13 +1,13 @@
-# our methods
+# AccDeGSFW or AccDeSGSFW return a 5-by-1 vector [#iterations, elapsed time, #local exact/stochastoc gradient evaluations per node, #doubles transferred in the network, averaged objective function];
 function AccDeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters, beta, K)
     function gradient_cat(x) # compute local gradients simultaneously
-        grad_x = @sync @distributed (hcat) for i in 1:num_agents # the documentation says that @paralel for can handle situations where each iteration is tiny
+        grad_x = @sync @distributed (hcat) for i in 1:num_agents
             gradient_batch(x[:, i], data_cell[i])
         end
         return grad_x;
     end
 
-    function f_sum(x)  # compute local objective functions simultaneously, and then output the sum
+    function f_sum(x)  # compute global objective at x
         f_x = @sync @distributed (+) for i in 1:num_agents
             f_batch(x, data_cell[i])
         end
@@ -27,9 +27,7 @@ function AccDeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_ba
     g = gradient_cat(x);  # local SAGA-style gradient estimators
     grad_x_old = g;  # used to store the old local gradients
     num_comm = 0.0;
-    # results = zeros(num_iters+1, 4);
-    # K = ceil(sqrt((1 + beta)/(1 - beta))) + 1;
-    # results[1, :] = [0, 0, 0, f_sum(mean(x, 2))];  # [#iter, time, #comm, obj_value]
+    num_local_grad = num_iters;
     for iter in 1:num_iters
         xhat, dhat = ChebyshevComm(x, g, weights, beta, K);
         num_comm += K * 2*dim*num_out_edges;  # 1 for local gradients, 1 for local variables
@@ -46,7 +44,8 @@ function AccDeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_ba
         avg_f += f_sum(x[:, i]);
     end
     avg_f = avg_f / num_agents;
-    results = [num_iters, t_elapsed, num_comm, avg_f];
+    num_local_grad = num_iters;
+    results = [num_iters, t_elapsed, num_local_grad, num_comm, avg_f];
     return results;
 end
 
@@ -79,17 +78,20 @@ function AccDeSGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_b
     g = gradient_cat(x, 1);  # local SAGA-style gradient estimators
     grad_x_old = g;  # used to store the old local gradients
     num_comm = 0.0;
-    # results = zeros(num_iters+1, 4);
-    # K = ceil(sqrt((1 + beta)/(1 - beta))) + 1;
-    # results[1, :] = [0, 0, 0, f_sum(mean(x, 2))];  # [#iter, time, #comm, obj_value]
+    num_local_stoch_grad = 1.0;
     for iter in 1:num_iters
         xhat, dhat = ChebyshevComm(x, g, weights, beta, K);
         num_comm += K * 2*dim*num_out_edges;  # 1 for local gradients, 1 for local variables
         v = LMO_cat(dhat);  # find argmax <d[i], v> for all agents i simultaneously
         x = xhat + v / num_iters;  # second communication: exchange local variables
 
+        if iter == num_iters
+            break;
+        end
+
         sample_times = (iter+1)^2;
         grad_x = gradient_cat(x, sample_times);  # compute the true local gradients, grad_x is a dim-by-num_agents matrix
+        num_local_stoch_grad += sample_times;
         g = dhat + grad_x - grad_x_old;
         grad_x_old = grad_x;
     end
@@ -99,7 +101,7 @@ function AccDeSGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_b
         avg_f += f_sum(x[:, i]);
     end
     avg_f = avg_f / num_agents;
-    results = [num_iters, t_elapsed, num_comm, avg_f];
+    results = [num_iters, t_elapsed, num_local_stoch_grad, num_comm, avg_f];
     return results;
 end
 
