@@ -1,5 +1,5 @@
 # centralized frank wolfe, here num_iters denotes #iteration
-function CenFW(dim, data_cell, LMO, f_batch, gradient_batch, num_iters)
+function CenCG(dim, data_cell, LMO, f_batch, gradient_batch, num_iters)
     num_agents = size(data_cell, 2);
     function gradient_sum(x) # compute the sum of local gradients
         grad_x = @sync @distributed (+) for i in 1:num_agents
@@ -32,7 +32,7 @@ end
 
 
 
-function CenSFW(dim, data_cell, LMO, f_batch, gradient_batch, num_iters)
+function CenSCG(dim, data_cell, LMO, f_batch, gradient_batch, num_iters)
     num_agents = size(data_cell, 2);
     function gradient_sum(x) # compute the sum of local gradients
         grad_x = @sync @distributed (+) for i in 1:num_agents

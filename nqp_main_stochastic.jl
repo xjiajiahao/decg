@@ -1,7 +1,7 @@
 using Dates, MAT
 
 include("nqp.jl");
-include("algorithms/CenFW.jl"); include("algorithms/DeCG.jl"); include("algorithms/DeGSFW.jl"); include("algorithms/AccDeGSFW.jl");
+include("algorithms/CenCG.jl"); include("algorithms/DeCG.jl"); include("algorithms/DeGSFW.jl"); include("algorithms/AccDeGSFW.jl");
 include("comm.jl");
 
 function nqp_main_stochastic(min_num_iters::Int, interval_num_iters::Int, max_num_iters::Int, num_trials::Int, graph_style::String, num_agents::Int, FIX_COMM::Bool)
@@ -10,7 +10,7 @@ function nqp_main_stochastic(min_num_iters::Int, interval_num_iters::Int, max_nu
 # graph_style: can be "complete" for complete graph, or "er" for Erdos-Renyi random graph, or "line" for line graph
 # num_agents: number of computing agents in the network
 # FIX_COMM: all algorithms have the same #communication if FIX_COMM==true, otherwise all algorithms have the same #gradient evaluation
-# return value: (res_DeSCG, res_DeSGSFW, res_AccDeSGSFW, res_CenSFW), each res_XXX is a x-by-5 matrix, where x is the length of [min_num_iters : interval_num_iters : max_num_iters], and each row of res_XXX contains [#iterations, elapsed time, #local exact/stochastoc gradient evaluations per node, #doubles transferred in the network, averaged objective function]
+# return value: (res_DeSCG, res_DeSGSFW, res_AccDeSGSFW, res_CenSCG), each res_XXX is a x-by-5 matrix, where x is the length of [min_num_iters : interval_num_iters : max_num_iters], and each row of res_XXX contains [#iterations, elapsed time, #local exact/stochastoc gradient evaluations per node, #doubles transferred in the network, averaged objective function]
 
     # Step 1: initialization
     num_agents = 50;
@@ -36,7 +36,7 @@ function nqp_main_stochastic(min_num_iters::Int, interval_num_iters::Int, max_nu
     res_DeSCG= zeros(length(num_iters_arr), 5);
     res_DeSGSFW = zeros(length(num_iters_arr), 5);
     res_AccDeSGSFW = zeros(length(num_iters_arr), 5);
-    res_CenSFW = zeros(length(num_iters_arr), 5);
+    res_CenSCG = zeros(length(num_iters_arr), 5);
 
     # Step 2: test algorithms for multiple times and return averaged results
     t_start = time();
@@ -73,7 +73,7 @@ function nqp_main_stochastic(min_num_iters::Int, interval_num_iters::Int, max_nu
     res_DeSCG = res_DeSCG ./ num_trials;
     res_DeSGSFW = res_DeSGSFW ./ num_trials;
     res_AccDeSGSFW = res_AccDeSGSFW ./ num_trials;
-    res_CenSFW = res_CenSFW ./ num_trials;
+    res_CenSCG = res_CenSCG ./ num_trials;
 
-    return res_DeSCG, res_DeSGSFW, res_AccDeSGSFW, res_CenSFW;
+    return res_DeSCG, res_DeSGSFW, res_AccDeSGSFW, res_CenSCG;
 end
