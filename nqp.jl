@@ -1,13 +1,14 @@
-@everywhere using Distributions
+using Distributed
 @everywhere function f(x, data) # data is a 1-by-batch_size cell where each entry is a dim-by-dim matrix H
     dim = length(x);
     batch_size = length(data);
-    u = ones(dim, 1);
-    res = 0;
+    u = ones(dim);
+    res = 0.0;
     for H in data
-        res += (0.5 .* x - u)' * H * x;
+        # res += (0.5 .* x - u)' * H * x;
+        res += (x' * H * x) / 2  - (u' * (H' + H) * x) / 2;
     end
-    return reshape(res, 1)[1]/batch_size;
+    return res/batch_size;
 end
 
 @everywhere function f_batch(x, data_cell)
@@ -25,13 +26,14 @@ end
     res = zeros(dim);
     batch_size = length(data);
     for H in data
-        res += H * (x - u);
+        res += (H + H')/2 * (x - u);
     end
-    return squeeze(res, 2)/batch_size;
+    return dropdims(res; dims=2)/batch_size;
 end
 
 @everywhere function gradient_batch(x, data_cell) # compute the true gradient
-    sum_g = 0;
+    dim = length(x);
+    sum_g = zeros(dim);
     batch_size = length(data_cell);
     for data in data_cell
         sum_g += gradient(x, data);
@@ -50,9 +52,9 @@ end
         # H = data[rand_idx];
         H = data[1];
         epsilon = rand(distrib, dim);
-        res += H * ( x - u ) + epsilon;
+        res += (H + H')/2 * (x - u) + epsilon;
     end
-    res = squeeze(res./sample_times, 2);
+    res = dropdims(res./sample_times; dims=2);
     return res;
 end
 

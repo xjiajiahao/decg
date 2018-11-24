@@ -48,7 +48,7 @@ function movie_main(left::Int, interval::Int, right::Int, graph_style::String, F
     # num_iters_arr = Int[1:1:20;];
     # num_iters_arr = Int[1:1:10;];
     num_iters_arr = left:interval:right;
-    final_res = zeros(length(num_iters_arr), 7);
+    final_res = zeros(length(num_iters_arr), 8);
 
     t_start = time();
     for i = 1 : length(num_iters_arr)
@@ -82,8 +82,9 @@ function movie_main(left::Int, interval::Int, right::Int, graph_style::String, F
         final_res[i, 6] = res_AccDeGSFW[4];
         final_res[i, 7] = res_AccDeGSFW[3];
 
-        # res_CenFW = CenFW(dim, data_cell, LMO, f_extension_batch, gradient_extension_batch, num_iters);
-        # final_res[i, 2] = res_CenFW[3];
+        println("CenFW, T: $(non_acc_num_iters), time: $(Dates.Time(now()))");
+        res_CenFW = CenFW(dim, data_cell, LMO, f_extension_batch, gradient_extension_batch, non_acc_num_iters);
+        final_res[i, 8] = res_CenFW[3];
 
         final_res[i, 1] = num_iters;
     end

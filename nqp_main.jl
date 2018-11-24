@@ -4,7 +4,7 @@ include("nqp.jl");
 include("algorithms/CenFW.jl"); include("algorithms/DeCG.jl"); include("algorithms/DeGSFW.jl"); include("algorithms/AccDeGSFW.jl");
 include("comm.jl");
 
-function main(left::Int, interval::Int, right::Int, FIX_COMM::Bool)
+function nqp_main(left::Int, interval::Int, right::Int, graph_style::String, FIX_COMM::Bool)
     # Step 1: initialization
     num_agents = 50;
     # num_iters = Int(20);
@@ -18,8 +18,13 @@ function main(left::Int, interval::Int, right::Int, FIX_COMM::Bool)
 
     # load weights matrix
     # weights, beta = load_network_50("complete");
-    weights, beta = load_network_50("line");
+    # weights, beta = load_network_50("line");
     # weights, beta = load_network_50("er");
+    available_graph_style = ["complete", "line", "er"];
+    if ~(graph_style in available_graph_style)
+        error("graph_style should be \"complete\", \"line\", or \"er\"");
+    end
+    weights, beta = load_network_50(graph_style);
     num_out_edges = count(i->(i>0), weights) - num_agents;
 
     x0 = zeros(dim);
@@ -32,7 +37,7 @@ function main(left::Int, interval::Int, right::Int, FIX_COMM::Bool)
     # num_iters_arr = Int[10:10:200;];
     # num_iters_arr = Int[1:20;];
     num_iters_arr = left:interval:right;
-    final_res = zeros(length(num_iters_arr), 7);
+    final_res = zeros(length(num_iters_arr), 8);
 
     t_start = time();
     for i = 1 : length(num_iters_arr)
@@ -73,6 +78,10 @@ function main(left::Int, interval::Int, right::Int, FIX_COMM::Bool)
         res_AccDeGSFW = AccDeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters, beta, K);
         final_res[i, 6] = res_AccDeGSFW[4];
         final_res[i, 7] = res_AccDeGSFW[3];
+
+        println("CenFW, T: $(non_acc_num_iters), time: $(Dates.Time(now()))");
+        res_CenFW = CenFW(dim, data_cell, LMO, f_batch, gradient_batch, non_acc_num_iters);
+        final_res[i, 8] = res_CenFW[3];
 
         final_res[i, 1] = num_iters;
     end
