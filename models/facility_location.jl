@@ -132,34 +132,40 @@ end
     nnz = size(ratings, 2);
     for i = 1 : nnz
         tmp_idx = round(Int, ratings[1, i]);
-        indices_in_ratings[tmp_idx] = i;
+        indices_in_ratings[i] = tmp_idx;
     end
 
     rand_vec_view = view(rand_vec, 1:nnz);
     for j = 1:sample_times
         Random.rand!(rand_vec_view);
-        index_of_i_in_ratings = 0;
-        for i in 1:dim
-            index_of_i_in_ratings = indices_in_ratings[i];
-            if (index_of_i_in_ratings == 0)
-                continue;
-            end
 
-            tmp_f = 0;
-            for index = 1 : nnz
-                if index == index_of_i_in_ratings # exclude the i'th index
-                    continue;
-                end
-                double_index = ratings[1, index];
-                tmp_index = round(Int, double_index);
-                if rand_vec_view[index] <= x[tmp_index]
-                    tmp_f = ratings[2, index];
+        max_1st_rating_in_S = 0; max_1st_index_in_rating = 0; max_1st_index_in_x = 0;
+        max_2nd_rating_in_S = 0;
+        count = 0;
+        # find the first and second largest rating in S
+        for i = 1 : nnz
+            tmp_index = indices_in_ratings[i];
+            if rand_vec_view[i] <= x[tmp_index]
+                if count == 0
+                    max_1st_rating_in_S = ratings[2, i];
+                    max_1st_index_in_rating = i;
+                    max_1st_index_in_x = tmp_index;
+                    ret_stochastic_grad[max_1st_index_in_x] += max_1st_rating_in_S;
+                    count += 1;
+                else
+                    max_2nd_rating_in_S = ratings[2, i];
+                    ret_stochastic_grad[max_1st_index_in_x] -= max_2nd_rating_in_S;
                     break;
                 end
             end
-            # 2. compute f(X+i) - f(X\i)
-            tmp_res = max(0.0, ratings[2, index_of_i_in_ratings] - tmp_f);
-            ret_stochastic_grad[i] += tmp_res;
+            if count == 0
+                ret_stochastic_grad[tmp_index] += ratings[2, i];
+            end
+        end
+
+        for i = 1 : max_1st_index_in_rating - 1
+            tmp_index = indices_in_ratings[i];
+            ret_stochastic_grad[tmp_index] -= max_1st_rating_in_S;
         end
     end
     nothing
