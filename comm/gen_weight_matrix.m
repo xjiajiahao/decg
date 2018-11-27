@@ -1,4 +1,4 @@
-function weights = gen_weight_matrix(num_nodes, graph_style, pl=0.4)
+function weights = gen_weight_matrix(num_nodes, graph_style, pl)
     ROOT = '../data/';
 
     if strcmp(graph_style, 'er') == true
@@ -17,7 +17,7 @@ function weights = gen_weight_matrix(num_nodes, graph_style, pl=0.4)
         sum_weights = sum(weights, 2);
         weights = weights + diag(1 - sum_weights);
 
-    else if strcmp(graph_style, 'line') == true
+    elseif strcmp(graph_style, 'line') == true
         adj_matrix = zeros(n_nodes);
         for i = 1:n_nodes
             j = mod(i, n_nodes) + 1;
@@ -40,7 +40,7 @@ function weights = gen_weight_matrix(num_nodes, graph_style, pl=0.4)
         sum_weights = sum(weights, 2);
         weights = weights + diag(1 - sum_weights);
 
-    else if strcmp(graph_style, 'complete') == true
+    elseif strcmp(graph_style, 'complete') == true
         adj_matrix = ones(n_nodes);
         adj_matrix = adj_matrix - diag(ones(n_nodes, 1));
 
@@ -63,6 +63,6 @@ function weights = gen_weight_matrix(num_nodes, graph_style, pl=0.4)
         error('graph_style must be ''er'', ''line'', or ''complete''!');
     end
 
-    filename = [ROOT, 'weights_er_50.mat'];
+    filename = [ROOT, 'weights_', graph_style, '_', num2str(num_nodes), '.mat'];
     save(filename, 'weights');
 end

@@ -4,6 +4,6 @@ This folder contains Matlab scripts to generate weight matrices and partitioned 
 
 * To generate partitioned data sets for the NQP problem, call the function `[data_cell, A, dim, u, b] = generate_nqp_data(dim, num_agents, batch_size, num_constraints, magnitude_data)`. See the file `generate_nqp_data.m` for detailed descriptions of arguments.
 
-* To generate partitioned data sets for the movie recommendation, call the function `[user_ratings_cell_arr, num_movies, num_users, num_agents] = gen_partitioned_data_100K(num_agents)`. See the file `gen_partitioned_data_100K.m` for detailed descriptions of arguments.
+* To generate partitioned data sets for the movie recommendation, call the function `[user_ratings_cell_arr, num_movies, num_users, num_agents] = gen_partitioned_data_movie_100K(num_agents)`. See the file `gen_partitioned_data_movie_100K.m` for detailed descriptions of arguments.
 
-Note that there are two datasets for the movie recommendation application, one contains 100K entries of rating, and another contains 1M. The file `gen_partitioned_data_1M.m` is for the larger data set.
+Note that there are two datasets for the movie recommendation application, one contains 100K entries of rating, and another contains 1M. The file `gen_partitioned_data_movie_1M.m` is for the larger data set. Both data sets can be downloaded from https://grouplens.org/datasets/movielens/.
