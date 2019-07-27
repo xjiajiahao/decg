@@ -5,11 +5,11 @@ function [user_ratings_cell_arr, num_movies, num_users, num_agents] = gen_partit
 ROOT = '../data/';
 num_movies = 3883;
 num_users = 6040;
-num_genres = 18;
 
-load('data/Movies_1M.mat');
+load([ROOT, 'Movies_1M.mat']);
 rng(1); % For reproducibility
 % indices = randperm(num_users);
+indices = [1:num_users];
 
 num_users_per_agent = floor(num_users / num_agents);
 user_ratings_cell_arr = cell(1, num_agents);

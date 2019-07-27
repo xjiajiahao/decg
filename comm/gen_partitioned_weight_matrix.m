@@ -1,4 +1,4 @@
-function weights = gen_weight_matrix(num_nodes, graph_style, pl)
+function weights = gen_partitioned_weight_matrix(num_nodes, graph_style)
     num_nodes = int32(num_nodes);
     ROOT = '../data/';
     filename = [ROOT, 'weights_', graph_style, '_', num2str(num_nodes), '.mat'];

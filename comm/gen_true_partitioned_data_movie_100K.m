@@ -1,4 +1,4 @@
-function gen_partitioned_data_100K(num_agents)
+function gen_true_partitioned_data_100K(num_agents)
 % data_cell[i][j] is a n_j-by-2 matrix representing the ratings of agent i's jth user
 
 %% initialization
