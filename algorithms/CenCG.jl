@@ -32,11 +32,12 @@ end
 
 
 
-function CenSCG(dim, data_cell, LMO, f_batch, gradient_mini_batch, num_iters, rho_coef, rho_exp)
+function CenSCG(dim, data_cell, LMO, f_batch, gradient_mini_batch, mini_batch_size, num_iters, rho_coef, rho_exp)
     num_agents = size(data_cell, 2);
     function gradient_sum(x) # compute the sum of local gradients
-        mini_batch_indices = # @TODO
         grad_x = @sync @distributed (+) for i in 1:num_agents
+            num_users = length(data_cell[i]);
+            mini_batch_indices = rand(1:num_users, mini_batch_size);
             gradient_mini_batch(x, data_cell[i], mini_batch_indices)
         end
         return grad_x;

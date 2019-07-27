@@ -32,11 +32,13 @@ end
 
 
 
-function CenPSGD(dim, data_cell, PO, f_batch, gradient_batch, num_iters, eta_coef, eta_exp)
+function CenPSGD(dim, data_cell, PO, f_batch, gradient_mini_batch, mini_batch_size, num_iters, eta_coef, eta_exp)
     num_agents = size(data_cell, 2);
     function gradient_sum(x) # compute the sum of local gradients
         grad_x = @sync @distributed (+) for i in 1:num_agents
-            gradient_batch(x, data_cell[i])
+            num_users = length(data_cell[i]);
+            mini_batch_indices = rand(1:num_users, mini_batch_size);
+            gradient_mini_batch(x, data_cell[i], mini_batch_indices)
         end
         return grad_x;
     end

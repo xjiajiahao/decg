@@ -186,7 +186,7 @@ end
 @everywhere function stochastic_gradient_extension_mini_batch(x, batch_ratings, mini_batch_indices, sample_times = 1) # ratings is a n-by-2 matrix sorted in descendant order, where n denotes #movies some user has rated
     dim = length(x);
     num_users = length(batch_ratings);
-    batch_size = length(mini_batch_indices);
+    mini_batch_size = length(mini_batch_indices);
     stochastic_gradient = zeros(dim);
     indices_in_ratings = zeros(Int64, dim);
     rand_vec = zeros(dim);
@@ -194,7 +194,7 @@ end
         ratings = batch_ratings[i];
         stochastic_gradient_extension!(x, ratings, sample_times, indices_in_ratings, stochastic_gradient, rand_vec);
     end
-    stochastic_gradient = stochastic_gradient ./ sample_times .* (num_users / batch_size);
+    stochastic_gradient = stochastic_gradient ./ sample_times .* (num_users / mini_batch_size);
     return stochastic_gradient;
 end
 
