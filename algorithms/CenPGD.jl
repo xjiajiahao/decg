@@ -1,5 +1,5 @@
 # centralized frank wolfe, here num_iters denotes #iteration
-function CenCG(dim, data_cell, LMO, f_batch, gradient_batch, num_iters)
+function CenPGD(dim, data_cell, PO, f_batch, gradient_batch, num_iters, eta_coef, eta_exp)
     num_agents = size(data_cell, 2);
     function gradient_sum(x) # compute the sum of local gradients
         grad_x = @sync @distributed (+) for i in 1:num_agents
@@ -19,8 +19,8 @@ function CenCG(dim, data_cell, LMO, f_batch, gradient_batch, num_iters)
     x = zeros(dim);
     for iter in 1:num_iters
         grad_x = gradient_sum(x);
-        v = LMO(grad_x);  # find argmax <grad_x, v>
-        x += v / num_iters;
+        eta = eta_coef * 1.0 / (iter * 1.0)^eta_exp;
+        x = PO(x + eta * grad_x);
     end
     t_elapsed = time() - t_start;
     curr_obj = f_sum(x);
@@ -32,7 +32,7 @@ end
 
 
 
-function CenSCG(dim, data_cell, LMO, f_batch, gradient_batch, num_iters, rho_coef, rho_exp)
+function CenPSGD(dim, data_cell, PO, f_batch, gradient_batch, num_iters, eta_coef, eta_exp)
     num_agents = size(data_cell, 2);
     function gradient_sum(x) # compute the sum of local gradients
         grad_x = @sync @distributed (+) for i in 1:num_agents
@@ -51,12 +51,10 @@ function CenSCG(dim, data_cell, LMO, f_batch, gradient_batch, num_iters, rho_coe
     t_start = time();
     x = zeros(dim);
     results = zeros(num_iters+1, 3);
-    grad_x = zeros(dim);
     for iter in 1:num_iters
-        rho = rho_coef/(iter + rho_coef - 1)^rho_exp;
-        grad_x = (1 - rho) * grad_x + rho * gradient_sum(x);
-        v = LMO(grad_x);  # find argmax <grad_x, v>
-        x += v / num_iters;
+        grad_x = gradient_sum(x);
+        eta = eta_coef * 1.0 / (iter * 1.0 + 1)^eta_exp;
+        x = PO(x + eta * grad_x);
     end
     t_elapsed = time() - t_start;
     curr_obj = f_sum(x);
