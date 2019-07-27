@@ -16,13 +16,22 @@ function movie_main_stochastic_cen(min_num_iters::Int, interval_num_iters::Int, 
     # load data
     # data_cell[i][j] is a n_j-by-2 matrix representing the ratings of agent i's jth user, data_mat is a sparse matrix containing the same data set
     num_agents = 1;
-    data_cell, data_mat, num_movies, num_users = load_movie_partitioned_data(num_agents, "100K");  # the second argument can be "100K" or "1M"
+    data_cell, data_mat, num_movies, num_users = load_movie_partitioned_data(num_agents, "1M");  # the second argument can be "100K" or "1M"
 
-    # PSGD parameters
-    eta_coef_PSGD = 1.0;
+    # # PSGD parameters (100K)
+    # eta_coef_PSGD = 1e-2;
+    # eta_exp_PSGD = 1/2;
+    #
+    # # SCG parameters (100K)
+    # rho_coef_SCG = 1.0;
+    # rho_exp_SCG = 2/3;
+
+    # PSGD parameters (1M)
+    eta_coef_PSGD = 1e-4;
     eta_exp_PSGD = 1/2;
 
-    rho_coef_SCG = 2.0;
+    # SCG parameters (1M)
+    rho_coef_SCG = 1.0;
     rho_exp_SCG = 2/3;
 
     # load weights matrix
@@ -56,7 +65,7 @@ function movie_main_stochastic_cen(min_num_iters::Int, interval_num_iters::Int, 
             end
 
             println("CenSCG, T: $(num_iters_SCG), time: $(Dates.Time(now()))");
-            res_CenSCG[i, :] = res_CenSCG[i, :] + CenSCG(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_batch, num_iters_SCG, rho_coef_SCG, rho_exp_SCG);
+            res_CenSCG[i, :] = res_CenSCG[i, :] + CenSCG(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, num_iters_SCG, rho_coef_SCG, rho_exp_SCG);
 
             println("CenPSGD, T: $(num_iters_PSGD), time: $(Dates.Time(now()))");
             res_CenPSGD[i, :] = res_CenPSGD[i, :] + CenPSGD(dim, data_cell, PO, f_extension_batch, stochastic_gradient_extension_batch, num_iters_PSGD, eta_coef_PSGD, eta_exp_PSGD);

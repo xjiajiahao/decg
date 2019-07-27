@@ -53,7 +53,7 @@ function CenSCG(dim, data_cell, LMO, f_batch, gradient_batch, num_iters, rho_coe
     results = zeros(num_iters+1, 3);
     grad_x = zeros(dim);
     for iter in 1:num_iters
-        rho = rho_coef/(iter + rho_coef - 1)^rho_exp;
+        rho = rho_coef/(iter + 1)^rho_exp;
         grad_x = (1 - rho) * grad_x + rho * gradient_sum(x);
         v = LMO(grad_x);  # find argmax <grad_x, v>
         x += v / num_iters;
