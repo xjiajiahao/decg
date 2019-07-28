@@ -26,7 +26,7 @@ function movie_main_stochastic_cen(min_num_iters::Int, interval_num_iters::Int, 
     # rho_coef_SCG = 1.0;
     # rho_exp_SCG = 2/3;
 
-    mini_batch_size = 64;
+    mini_batch_size = 512;
 
     # PSGD parameters (1M)
     eta_coef_PSGD = 1e-4;
