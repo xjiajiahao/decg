@@ -1,7 +1,7 @@
 using Dates, MAT
 
 include("models/facility_location.jl");
-include("algorithms/CenCG.jl"); include("algorithms/DeCG.jl"); include("algorithms/DeGSFW.jl"); include("algorithms/CenGreedy.jl"); include("algorithms/AccDeGSFW.jl"); include("algorithms/CenPGD.jl");
+include("algorithms/CenCG.jl"); include("algorithms/DeCG.jl"); include("algorithms/DeGSFW.jl"); include("algorithms/CenGreedy.jl"); include("algorithms/AccDeGSFW.jl"); include("algorithms/CenPGD.jl"); include("algorithms/CenSTORM.jl");
 include("comm.jl");
 
 
@@ -36,6 +36,11 @@ function movie_main_stochastic_cen(min_num_iters::Int, interval_num_iters::Int, 
     rho_coef_SCG = 1.0;
     rho_exp_SCG = 2/3;
 
+    # STORM parameters (1M)
+    # rho_coef_STORM = 7.5e-1;
+    rho_coef_STORM = 8e-1;
+    rho_exp_STORM = 1.0;
+
     # load weights matrix
     dim = num_movies;
 
@@ -51,6 +56,7 @@ function movie_main_stochastic_cen(min_num_iters::Int, interval_num_iters::Int, 
     num_iters_arr = min_num_iters:interval_num_iters:max_num_iters;
     res_CenSCG = zeros(length(num_iters_arr), 5);
     res_CenPSGD = zeros(length(num_iters_arr), 5);
+    res_CenSTORM = zeros(length(num_iters_arr), 5);
 
     # Step 2: test algorithms for multiple times and return averaged results
     t_start = time();
@@ -61,22 +67,28 @@ function movie_main_stochastic_cen(min_num_iters::Int, interval_num_iters::Int, 
             if FIX_COMP
                 num_iters_SCG = num_iters_base;
                 num_iters_PSGD = num_iters_base;
+                num_iters_STORM = num_iters_base;
             else
                 num_iters_SCG = num_iters_base;
                 num_iters_PSGD = num_iters_base;
+                num_iters_STORM = num_iters_base;
             end
 
-            println("CenSCG, T: $(num_iters_SCG), time: $(Dates.Time(now()))");
-            res_CenSCG[i, :] = res_CenSCG[i, :] + CenSCG(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, mini_batch_size, num_iters_SCG, rho_coef_SCG, rho_exp_SCG);
+            # println("CenSCG, T: $(num_iters_SCG), time: $(Dates.Time(now()))");
+            # res_CenSCG[i, :] = res_CenSCG[i, :] + CenSCG(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, mini_batch_size, num_iters_SCG, rho_coef_SCG, rho_exp_SCG);
 
             # println("CenPSGD, T: $(num_iters_PSGD), time: $(Dates.Time(now()))");
             # res_CenPSGD[i, :] = res_CenPSGD[i, :] + CenPSGD(dim, data_cell, PO, f_extension_batch, stochastic_gradient_extension_mini_batch, mini_batch_size, num_iters_PSGD, eta_coef_PSGD, eta_exp_PSGD);
 
-            matwrite("data/movie_main_stochastic_auto_save.mat", Dict("res_CenSCG" => res_CenSCG ./ j, "res_CenPSGD" => res_CenPSGD ./ j));
+            println("CenSTORM, T: $(num_iters_STORM), time: $(Dates.Time(now()))");
+            res_CenSTORM[i, :] = res_CenSTORM[i, :] + CenSTORM(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, stochastic_gradient_diff_extension_mini_batch, mini_batch_size, num_iters_STORM, rho_coef_STORM, rho_exp_STORM);
+
+            matwrite("data/movie_main_stochastic_auto_save.mat", Dict("res_CenSCG" => res_CenSCG ./ j, "res_CenPSGD" => res_CenPSGD ./ j, "res_CenSTORM" => res_CenSTORM ./ j));
         end
     end
     res_CenSCG = res_CenSCG ./ num_trials; res_CenSCG[:, 5] = res_CenSCG[:, 5] / num_users;
     res_CenPSGD = res_CenPSGD ./ num_trials;; res_CenPSGD[:, 5] = res_CenPSGD[:, 5] / num_users;
+    res_CenSTORM = res_CenSTORM ./ num_trials; res_CenSTORM[:, 5] = res_CenSTORM[:, 5] / num_users;
 
-    return res_CenSCG, res_CenPSGD;
+    return res_CenSCG, res_CenPSGD, res_CenSTORM;
 end

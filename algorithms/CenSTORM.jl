@@ -1,9 +1,9 @@
 # centralized STORM-FW, here num_iters denotes #iteration
-function CenSTORM(dim, data_cell, LMO, f_batch, gradient_batch, num_iters, eta_coef, eta_exp, rho_coef, rho_exp)
+function CenSTORM(dim, data_cell, LMO, f_batch, gradient_mini_batch, gradient_diff_mini_batch, mini_batch_size, num_iters, rho_coef, rho_exp)
     num_agents = size(data_cell, 2);
-    function gradient_sum(x) # compute the sum of local gradients
+    function gradient(x, mini_batch_indices_arr) # compute the sum of local gradients
         grad_x = @sync @distributed (+) for i in 1:num_agents
-            gradient_batch(x, data_cell[i])
+            gradient_mini_batch(x, data_cell[i], mini_batch_indices_arr[i])
         end
         return grad_x;
     end
@@ -15,15 +15,40 @@ function CenSTORM(dim, data_cell, LMO, f_batch, gradient_batch, num_iters, eta_c
         return f_x;
     end
 
+    function generate_mini_batches()
+        mini_batch_indices_arr = [[] for i=1:num_agents];
+        for i in 1:num_agents
+            num_users = length(data_cell[i]);
+            mini_batch_indices_arr[i] = rand(1:num_users, mini_batch_size);
+        end
+        return mini_batch_indices_arr;
+    end
+
+    function gradient_diff(x, y, mini_batch_indices_arr) # compute the sum of local gradients
+        ret = @sync @distributed (+) for i in 1:num_agents
+            gradient_diff_mini_batch(x, y, data_cell[i], mini_batch_indices_arr[i])
+        end
+        return ret;
+    end
+
     t_start = time();
     x = zeros(dim);
     results = zeros(num_iters+1, 3);
-    grad_x = zeros(dim);
+    # initialize grad_estimate
+    mini_batch_indices_arr = generate_mini_batches();
+    grad_estimate = gradient(x, mini_batch_indices_arr);
     for iter in 1:num_iters
-        rho = rho_coef/(iter + 1)^rho_exp;
-        grad_x = (1 - rho) * grad_x + rho * gradient_sum(x);
-        v = LMO(grad_x);  # find argmax <grad_x, v>
+        # LMO
+        v = LMO(grad_estimate);  # find argmax <grad_x, v>
+        # update x
+        x_old = x;
         x += v / num_iters;
+        # sample a mini_batch
+        mini_batch_indices_arr = generate_mini_batches();
+        rho = rho_coef/(iter + 1)^rho_exp;
+        grad_x = gradient(x, mini_batch_indices_arr);
+        hvp_x = gradient_diff(x, x_old, mini_batch_indices_arr);
+        grad_estimate = (1 - rho) * (grad_estimate + hvp_x) + rho * grad_x;
     end
     t_elapsed = time() - t_start;
     curr_obj = f_sum(x);
