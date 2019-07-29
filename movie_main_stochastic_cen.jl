@@ -5,12 +5,13 @@ include("algorithms/CenCG.jl"); include("algorithms/DeCG.jl"); include("algorith
 include("comm.jl");
 
 
-function movie_main_stochastic_cen(min_num_iters::Int, interval_num_iters::Int, max_num_iters::Int, num_trials::Int, cardinality::Int, FIX_COMP::Bool)
-# the number of iterations are [min_num_iters : interval_num_iters : max_num_iters]
+function movie_main_stochastic_cen(num_iters::Int, print_freq::Int, num_trials::Int, cardinality::Int, FIX_COMP::Bool)
+# num_iters: the number of iterations
+# print_freq: the frequency to evaluate the loss value
 # num_trials: the number of trials/repetitions
 # cardinality: the cardinality constraint parameter of the movie recommendation application
 # FIX_COMP: all algorithms have the same #gradient evaluations, otherwise the same #iterations
-# return value: (res_CenSCG), each res_XXX is a x-by-5 matrix, where x is the length of [min_num_iters : interval_num_iters : max_num_iters], and each row of res_XXX contains [#iterations, elapsed time, #local exact/stochastoc gradient evaluations per node, #doubles transferred in the network, averaged objective function]
+# return value: (res_CenSCG), each res_XXX is a x-by-5 matrix, where x is the length of div(num_iters / print_freq) + 1, and each row of res_XXX contains [#iterations, elapsed time, #eavluations of simple functions, #doubles transferred in the network, averaged objective function]
 
     # Step 1: initialization
     # load data
@@ -27,6 +28,7 @@ function movie_main_stochastic_cen(min_num_iters::Int, interval_num_iters::Int, 
     # rho_exp_SCG = 2/3;
 
     mini_batch_size = 512;
+    sample_times = 20;
 
     # PSGD parameters (1M)
     eta_coef_PSGD = 1e-4;
@@ -40,6 +42,7 @@ function movie_main_stochastic_cen(min_num_iters::Int, interval_num_iters::Int, 
     # rho_coef_STORM = 7.5e-1;
     rho_coef_STORM = 8e-1;
     rho_exp_STORM = 1.0;
+    interpolate_times_STORM = 1;
 
     # load weights matrix
     dim = num_movies;
@@ -53,38 +56,46 @@ function movie_main_stochastic_cen(min_num_iters::Int, interval_num_iters::Int, 
     # generate PO
     PO = generate_projection_function(d, a_2d, cardinality*1.0);
 
-    num_iters_arr = min_num_iters:interval_num_iters:max_num_iters;
-    res_CenSCG = zeros(length(num_iters_arr), 5);
-    res_CenPSGD = zeros(length(num_iters_arr), 5);
-    res_CenSTORM = zeros(length(num_iters_arr), 5);
+    #
+    res_CenSCG = zeros(1, 5);
+    res_CenPSGD = zeros(1, 5);
+    res_CenSTORM = zeros(1, 5);
 
     # Step 2: test algorithms for multiple times and return averaged results
     t_start = time();
     for j = 1 : num_trials
         println("trial: $(j)");
-        for i = 1 : length(num_iters_arr)
-            num_iters_base = num_iters_arr[i];
-            if FIX_COMP
-                num_iters_SCG = num_iters_base;
-                num_iters_PSGD = num_iters_base;
-                num_iters_STORM = num_iters_base;
-            else
-                num_iters_SCG = num_iters_base;
-                num_iters_PSGD = num_iters_base;
-                num_iters_STORM = num_iters_base;
-            end
+        num_iters_base = num_iters;
+        if FIX_COMP
+            num_iters_SCG = num_iters_base * (cardinality + 1);
+            print_freq_SCG = print_freq * (cardinality + 1);
 
-            println("CenSCG, T: $(num_iters_SCG), time: $(Dates.Time(now()))");
-            res_CenSCG[i, :] = res_CenSCG[i, :] + CenSCG(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, mini_batch_size, num_iters_SCG, rho_coef_SCG, rho_exp_SCG);
+            num_iters_PSGD = num_iters_base * (cardinality + 1);
+            print_freq_PSGD = print_freq * (cardinality + 1);
 
-            # println("CenPSGD, T: $(num_iters_PSGD), time: $(Dates.Time(now()))");
-            # res_CenPSGD[i, :] = res_CenPSGD[i, :] + CenPSGD(dim, data_cell, PO, f_extension_batch, stochastic_gradient_extension_mini_batch, mini_batch_size, num_iters_PSGD, eta_coef_PSGD, eta_exp_PSGD);
+            num_iters_STORM = num_iters_base;
+            print_freq_STORM = print_freq;
+        else
+            num_iters_SCG = num_iters_base;
+            print_freq_SCG = print_freq;
 
-            # println("CenSTORM, T: $(num_iters_STORM), time: $(Dates.Time(now()))");
-            # res_CenSTORM[i, :] = res_CenSTORM[i, :] + CenSTORM(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, stochastic_gradient_diff_extension_mini_batch, mini_batch_size, num_iters_STORM, rho_coef_STORM, rho_exp_STORM, cardinality);
+            num_iters_PSGD = num_iters_base;
+            print_freq_PSGD = print_freq;
 
-            matwrite("data/movie_main_stochastic_auto_save.mat", Dict("res_CenSCG" => res_CenSCG ./ j, "res_CenPSGD" => res_CenPSGD ./ j, "res_CenSTORM" => res_CenSTORM ./ j));
+            num_iters_STORM = num_iters_base;
+            print_freq_STORM = print_freq;
         end
+
+        println("CenSCG, T: $(num_iters_SCG), time: $(Dates.Time(now()))");
+        res_CenSCG = CenSCG(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, mini_batch_size, num_iters_SCG, rho_coef_SCG, rho_exp_SCG, print_freq_SCG, sample_times);
+
+        # println("CenPSGD, T: $(num_iters_PSGD), time: $(Dates.Time(now()))");
+        # res_CenPSGD = CenPSGD(dim, data_cell, PO, f_extension_batch, stochastic_gradient_extension_mini_batch, mini_batch_size, num_iters_PSGD, eta_coef_PSGD, eta_exp_PSGD, print_freq_SCG, sample_times);
+
+        println("CenSTORM, T: $(num_iters_STORM), time: $(Dates.Time(now()))");
+        res_CenSTORM = CenSTORM(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, stochastic_gradient_diff_extension_mini_batch, mini_batch_size, num_iters_STORM, rho_coef_STORM, rho_exp_STORM, cardinality, print_freq_STORM, interpolate_times_STORM, sample_times);
+
+        matwrite("data/movie_main_stochastic_auto_save.mat", Dict("res_CenSCG" => res_CenSCG ./ j, "res_CenPSGD" => res_CenPSGD ./ j, "res_CenSTORM" => res_CenSTORM ./ j));
     end
     res_CenSCG = res_CenSCG ./ num_trials; res_CenSCG[:, 5] = res_CenSCG[:, 5] / num_users;
     res_CenPSGD = res_CenPSGD ./ num_trials;; res_CenPSGD[:, 5] = res_CenPSGD[:, 5] / num_users;

@@ -1,5 +1,5 @@
 # centralized STORM-FW, here num_iters denotes #iteration
-function CenSTORM(dim, data_cell, LMO, f_batch, gradient_mini_batch, gradient_diff_mini_batch, mini_batch_size, num_iters, rho_coef, rho_exp, cardinality, interpolate_times = 1, sample_times = 1)
+function CenSTORM(dim, data_cell, LMO, f_batch, gradient_mini_batch, gradient_diff_mini_batch, mini_batch_size, num_iters, rho_coef, rho_exp, cardinality, print_freq = 100, interpolate_times = 1, sample_times = 1)
     num_agents = size(data_cell, 2);  # num_agents should be 1
     function gradient(x, mini_batch_indices_arr, sample_times) # compute the sum of local gradients
         grad_x = @sync @distributed (+) for i in 1:num_agents
@@ -33,7 +33,13 @@ function CenSTORM(dim, data_cell, LMO, f_batch, gradient_mini_batch, gradient_di
 
     t_start = time();
     x = zeros(dim);
-    results = zeros(num_iters+1, 3);
+
+    results = zeros(div(num_iters, print_freq) + 1, 5);
+    num_comm = 0.0;
+    curr_obj = f_sum(x);
+    num_simple_fn = 0.0;
+    results[1, :] = [0, 0.0, num_simple_fn, num_comm, curr_obj];
+
     # initialize grad_estimate
     mini_batch_indices_arr = generate_mini_batches();
     grad_estimate = gradient(x, mini_batch_indices_arr, sample_times);
@@ -49,11 +55,13 @@ function CenSTORM(dim, data_cell, LMO, f_batch, gradient_mini_batch, gradient_di
         grad_x = gradient(x, mini_batch_indices_arr, sample_times);
         hvp_x = gradient_diff(x, x_old, mini_batch_indices_arr, interpolate_times, sample_times);
         grad_estimate = (1 - rho) * (grad_estimate + hvp_x) + rho * grad_x;
+
+        if mod(iter, print_freq) == 0
+            t_elapsed = time() - t_start;
+            curr_obj = f_sum(x);
+            num_simple_fn = iter * (1 + cardinality * interpolate_times) * num_agents * mini_batch_size * sample_times;
+            results[div(iter, print_freq) + 1, :] = [iter, t_elapsed, num_simple_fn, num_comm, curr_obj];
+        end
     end
-    t_elapsed = time() - t_start;
-    curr_obj = f_sum(x);
-    num_comm = 0.0;
-    num_simple_fn = (num_iters + cardinality * interpolate_times) * num_agents * mini_batch_size * sample_times;
-    results = [num_iters, t_elapsed, num_simple_fn, num_comm, curr_obj];
     return results;
 end
