@@ -74,14 +74,14 @@ function movie_main_stochastic_cen(min_num_iters::Int, interval_num_iters::Int, 
                 num_iters_STORM = num_iters_base;
             end
 
-            # println("CenSCG, T: $(num_iters_SCG), time: $(Dates.Time(now()))");
-            # res_CenSCG[i, :] = res_CenSCG[i, :] + CenSCG(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, mini_batch_size, num_iters_SCG, rho_coef_SCG, rho_exp_SCG);
+            println("CenSCG, T: $(num_iters_SCG), time: $(Dates.Time(now()))");
+            res_CenSCG[i, :] = res_CenSCG[i, :] + CenSCG(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, mini_batch_size, num_iters_SCG, rho_coef_SCG, rho_exp_SCG);
 
             # println("CenPSGD, T: $(num_iters_PSGD), time: $(Dates.Time(now()))");
             # res_CenPSGD[i, :] = res_CenPSGD[i, :] + CenPSGD(dim, data_cell, PO, f_extension_batch, stochastic_gradient_extension_mini_batch, mini_batch_size, num_iters_PSGD, eta_coef_PSGD, eta_exp_PSGD);
 
-            println("CenSTORM, T: $(num_iters_STORM), time: $(Dates.Time(now()))");
-            res_CenSTORM[i, :] = res_CenSTORM[i, :] + CenSTORM(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, stochastic_gradient_diff_extension_mini_batch, mini_batch_size, num_iters_STORM, rho_coef_STORM, rho_exp_STORM);
+            # println("CenSTORM, T: $(num_iters_STORM), time: $(Dates.Time(now()))");
+            # res_CenSTORM[i, :] = res_CenSTORM[i, :] + CenSTORM(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, stochastic_gradient_diff_extension_mini_batch, mini_batch_size, num_iters_STORM, rho_coef_STORM, rho_exp_STORM, cardinality);
 
             matwrite("data/movie_main_stochastic_auto_save.mat", Dict("res_CenSCG" => res_CenSCG ./ j, "res_CenPSGD" => res_CenPSGD ./ j, "res_CenSTORM" => res_CenSTORM ./ j));
         end
