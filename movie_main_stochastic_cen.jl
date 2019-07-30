@@ -17,36 +17,37 @@ function movie_main_stochastic_cen(num_iters::Int, print_freq::Int, num_trials::
     # load data
     # data_cell[i][j] is a n_j-by-2 matrix representing the ratings of agent i's jth user, data_mat is a sparse matrix containing the same data set
     num_agents = 1;
-    data_cell, data_mat, num_movies, num_users = load_movie_partitioned_data(num_agents, "1M");  # the second argument can be "100K" or "1M"
+    # data_cell, data_mat, num_movies, num_users = load_movie_partitioned_data(num_agents, "1M");  # the second argument can be "100K" or "1M"
+    data_cell, data_mat, num_movies, num_users = load_movie_partitioned_data(num_agents, "100K");  # the second argument can be "100K" or "1M"
 
-    # # PSGD parameters (100K)
-    # eta_coef_PSGD = 1e-2;
-    # eta_exp_PSGD = 1/2;
-    #
-    # # SCG parameters (100K)
-    # rho_coef_SCG = 1.0;
-    # rho_exp_SCG = 2/3;
+    # PSGD parameters (100K)
+    eta_coef_PSGD = 1e-2;
+    eta_exp_PSGD = 1/2;
+    
+    # SCG parameters (100K)
+    rho_coef_SCG = 1.0;
+    rho_exp_SCG = 2/3;
 
     # mini_batch_size = 128;
     mini_batch_size = 20;
     sample_times = 10;
 
-    # PSGD parameters (1M)
-    eta_coef_PSGD = 1e-4;
-    eta_exp_PSGD = 1/2;
+    # # PSGD parameters (1M)
+    # eta_coef_PSGD = 1e-4;
+    # eta_exp_PSGD = 1/2;
 
-    # SCG parameters (1M)
-    rho_coef_SCG = 1.0;
-    rho_exp_SCG = 2/3;
+    # # SCG parameters (1M)
+    # rho_coef_SCG = 1.0;
+    # rho_exp_SCG = 2/3;
 
     # STORM parameters (1M)
     rho_coef_STORM = 2e0;
     rho_exp_STORM = 1.0;
     # rho_coef_STORM = 5e-1;
     # rho_exp_STORM = 1/2;
-    mini_batch_size_STORM = 10;
-    interpolate_times_STORM = 10;
-    sample_times_STORM = 1;
+    mini_batch_size_STORM = 20;
+    interpolate_times_STORM = 1;
+    sample_times_STORM = 10;
 
     # load weights matrix
     dim = num_movies;
@@ -92,11 +93,11 @@ function movie_main_stochastic_cen(num_iters::Int, print_freq::Int, num_trials::
     for j = 1 : num_trials
         println("trial: $(j)");
 
-        println("CenSCG, T: $(num_iters_SCG), time: $(Dates.Time(now()))");
-        res_CenSCG = res_CenSCG + CenSCG(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, mini_batch_size, num_iters_SCG, rho_coef_SCG, rho_exp_SCG, gradient_extension_batch, print_freq_SCG, sample_times);
+        # println("CenSCG, T: $(num_iters_SCG), time: $(Dates.Time(now()))");
+        # res_CenSCG = res_CenSCG + CenSCG(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, mini_batch_size, num_iters_SCG, rho_coef_SCG, rho_exp_SCG, gradient_extension_batch, print_freq_SCG, sample_times);
 
-        # println("CenPSGD, T: $(num_iters_PSGD), time: $(Dates.Time(now()))");
-        # res_CenPSGD = res_CenPSGD + CenPSGD(dim, data_cell, PO, f_extension_batch, stochastic_gradient_extension_mini_batch, mini_batch_size, num_iters_PSGD, eta_coef_PSGD, eta_exp_PSGD, print_freq_SCG, sample_times);
+        println("CenPSGD, T: $(num_iters_PSGD), time: $(Dates.Time(now()))");
+        res_CenPSGD = res_CenPSGD + CenPSGD(dim, data_cell, PO, f_extension_batch, stochastic_gradient_extension_mini_batch, mini_batch_size, num_iters_PSGD, eta_coef_PSGD, eta_exp_PSGD, print_freq_SCG, sample_times);
 
         # println("CenSTORM, T: $(num_iters_STORM), time: $(Dates.Time(now()))");
         # res_CenSTORM = res_CenSTORM + CenSTORM(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, stochastic_gradient_diff_extension_mini_batch, mini_batch_size_STORM, num_iters_STORM, rho_coef_STORM, rho_exp_STORM, cardinality, gradient_extension_batch, print_freq_STORM, interpolate_times_STORM, sample_times_STORM);
