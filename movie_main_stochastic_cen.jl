@@ -27,7 +27,8 @@ function movie_main_stochastic_cen(num_iters::Int, print_freq::Int, num_trials::
     # rho_coef_SCG = 1.0;
     # rho_exp_SCG = 2/3;
 
-    mini_batch_size = 128;
+    # mini_batch_size = 128;
+    mini_batch_size = 20;
     sample_times = 10;
 
     # PSGD parameters (1M)
@@ -56,44 +57,44 @@ function movie_main_stochastic_cen(num_iters::Int, print_freq::Int, num_trials::
     # generate PO
     PO = generate_projection_function(d, a_2d, cardinality*1.0);
 
-    #
-    res_CenSCG = zeros(1, 5);
-    res_CenPSGD = zeros(1, 5);
-    res_CenSTORM = zeros(1, 5);
+    # initialization
+    num_iters_base = num_iters;
+    if FIX_COMP
+        num_iters_SCG = num_iters_base * (cardinality * 2 + 1);
+        print_freq_SCG = print_freq * (cardinality * 2 + 1);
+
+        num_iters_PSGD = num_iters_base * (cardinality * 2 + 1);
+        print_freq_PSGD = print_freq * (cardinality * 2 + 1);
+
+        num_iters_STORM = num_iters_base;
+        print_freq_STORM = print_freq;
+    else
+        num_iters_SCG = num_iters_base;
+        print_freq_SCG = print_freq;
+
+        num_iters_PSGD = num_iters_base;
+        print_freq_PSGD = print_freq;
+
+        num_iters_STORM = num_iters_base;
+        print_freq_STORM = print_freq;
+    end
+    res_CenSCG = zeros(div(num_iters_SCG, print_freq_SCG) + 1, 5);
+    res_CenPSGD = zeros(div(num_iters_PSGD, print_freq_PSGD) + 1, 5);
+    res_CenSTORM = zeros(div(num_iters_STORM, print_freq_STORM) + 1, 5);
 
     # Step 2: test algorithms for multiple times and return averaged results
+
     t_start = time();
     for j = 1 : num_trials
         println("trial: $(j)");
-        num_iters_base = num_iters;
-        if FIX_COMP
-            num_iters_SCG = num_iters_base * (cardinality * 2 + 1);
-            print_freq_SCG = print_freq * (cardinality * 2 + 1);
-
-            num_iters_PSGD = num_iters_base * (cardinality * 2 + 1);
-            print_freq_PSGD = print_freq * (cardinality * 2 + 1);
-
-            num_iters_STORM = num_iters_base;
-            print_freq_STORM = print_freq;
-        else
-            num_iters_SCG = num_iters_base;
-            print_freq_SCG = print_freq;
-
-            num_iters_PSGD = num_iters_base;
-            print_freq_PSGD = print_freq;
-
-            num_iters_STORM = num_iters_base;
-            print_freq_STORM = print_freq;
-        end
-
         # println("CenSCG, T: $(num_iters_SCG), time: $(Dates.Time(now()))");
-        # res_CenSCG = CenSCG(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, mini_batch_size, num_iters_SCG, rho_coef_SCG, rho_exp_SCG, print_freq_SCG, sample_times);
+        # res_CenSCG = res_CenPSCG + CenSCG(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, mini_batch_size, num_iters_SCG, rho_coef_SCG, rho_exp_SCG, print_freq_SCG, sample_times);
 
         println("CenPSGD, T: $(num_iters_PSGD), time: $(Dates.Time(now()))");
-        res_CenPSGD = CenPSGD(dim, data_cell, PO, f_extension_batch, stochastic_gradient_extension_mini_batch, mini_batch_size, num_iters_PSGD, eta_coef_PSGD, eta_exp_PSGD, print_freq_SCG, sample_times);
+        res_CenPSGD = res_CenPSGD + CenPSGD(dim, data_cell, PO, f_extension_batch, stochastic_gradient_extension_mini_batch, mini_batch_size, num_iters_PSGD, eta_coef_PSGD, eta_exp_PSGD, print_freq_SCG, sample_times);
 
         # println("CenSTORM, T: $(num_iters_STORM), time: $(Dates.Time(now()))");
-        # res_CenSTORM = CenSTORM(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, stochastic_gradient_diff_extension_mini_batch, mini_batch_size, num_iters_STORM, rho_coef_STORM, rho_exp_STORM, cardinality, print_freq_STORM, interpolate_times_STORM, sample_times);
+        # res_CenSTORM = res_CenSTORM + CenSTORM(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, stochastic_gradient_diff_extension_mini_batch, mini_batch_size, num_iters_STORM, rho_coef_STORM, rho_exp_STORM, cardinality, print_freq_STORM, interpolate_times_STORM, sample_times);
 
         matwrite("data/movie_main_stochastic_auto_save.mat", Dict("res_CenSCG" => res_CenSCG ./ j, "res_CenPSGD" => res_CenPSGD ./ j, "res_CenSTORM" => res_CenSTORM ./ j));
     end
