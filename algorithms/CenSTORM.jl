@@ -17,6 +17,9 @@ function CenSTORM(dim, data_cell, LMO, f_batch, gradient_mini_batch, gradient_di
 
     function generate_mini_batches()
         mini_batch_indices_arr = [[] for i=1:num_agents];
+        if mini_batch_size == 0
+            return mini_batch_indices_arr;
+        end
         for i in 1:num_agents
             num_users = length(data_cell[i]);
             mini_batch_indices_arr[i] = rand(1:num_users, mini_batch_size);
@@ -53,7 +56,7 @@ function CenSTORM(dim, data_cell, LMO, f_batch, gradient_mini_batch, gradient_di
     t_elapsed = time() - t_start;
     curr_obj = f_sum(x);
     num_comm = 0.0;
-    num_simple_fn = (num_iters + cardinality * interpolate_times) * num_agents * mini_batch_size * sample_times;
+    num_simple_fn = num_iters * (1 + cardinality * 2 * interpolate_times) * num_agents * mini_batch_size * sample_times;
     results = [num_iters, t_elapsed, num_simple_fn, num_comm, curr_obj];
     return results;
 end

@@ -190,11 +190,18 @@ end
     stochastic_gradient = zeros(dim);
     indices_in_ratings = zeros(Int64, dim);
     rand_vec = zeros(dim);
-    for i in mini_batch_indices
-        ratings = batch_ratings[i];
-        stochastic_gradient_extension!(x, ratings, sample_times, indices_in_ratings, stochastic_gradient, rand_vec);
+    if length(mini_batch_indices) > 0
+        for i in mini_batch_indices
+            ratings = batch_ratings[i];
+            stochastic_gradient_extension!(x, ratings, sample_times, indices_in_ratings, stochastic_gradient, rand_vec);
+        end
+        stochastic_gradient = stochastic_gradient ./ sample_times .* (num_users / mini_batch_size);
+    else
+        for ratings in batch_ratings
+            stochastic_gradient_extension!(x, ratings, sample_times, indices_in_ratings, stochastic_gradient, rand_vec);
+        end
+        stochastic_gradient = stochastic_gradient ./ sample_times;
     end
-    stochastic_gradient = stochastic_gradient ./ sample_times .* (num_users / mini_batch_size);
     return stochastic_gradient;
 end
 
@@ -233,12 +240,23 @@ end
     for curr_interpolate = 1 : interpolate_times
         convex_combination_ratio = rand();
         x_y_interpolate = y + convex_combination_ratio * x_y_diff;
-        for i in mini_batch_indices
-            ratings = batch_ratings[i];
-            stochastic_hvp_extension!(x_y_interpolate, x_y_diff, ratings, sample_times, indices_in_ratings, stochastic_gradient_diff, rand_vec);
+        if length(mini_batch_indices) > 0
+            for i in mini_batch_indices
+                ratings = batch_ratings[i];
+                stochastic_hvp_extension!(x_y_interpolate, x_y_diff, ratings, sample_times, indices_in_ratings, stochastic_gradient_diff, rand_vec);
+            end
+        else
+            for ratings in batch_ratings
+                stochastic_hvp_extension!(x_y_interpolate, x_y_diff, ratings, sample_times, indices_in_ratings, stochastic_gradient_diff, rand_vec);
+            end
         end
     end
-    stochastic_gradient_diff = stochastic_gradient_diff ./ interpolate_times ./ sample_times .* (num_users / mini_batch_size);
+
+    if length(mini_batch_indices) > 0
+        stochastic_gradient_diff = stochastic_gradient_diff ./ interpolate_times ./ sample_times .* (num_users / mini_batch_size);
+    else
+        stochastic_gradient_diff = stochastic_gradient_diff ./ interpolate_times ./ sample_times;
+    end
     return stochastic_gradient_diff;
 end
 
