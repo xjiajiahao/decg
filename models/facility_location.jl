@@ -272,13 +272,14 @@ end
 
     rand_vec_view = view(rand_vec, 1:nnz);
     for curr_sample_count = 1:sample_times
-        Random.rand!(rand_vec_view);
+        # Random.rand!(rand_vec_view);
 
         for j = 1:dim  # add/subtract the element j to/from the sampled set S
             curr_scalar = v[j];
             if -1e-8 <= curr_scalar && curr_scalar <= 1e-8
                 continue;
             end
+            Random.rand!(rand_vec_view);
 
             # evaluate the gradient of f(S + {j})
             max_1st_rating_in_S = 0; max_1st_index_in_rating = 0; max_1st_index_in_x = 0;
@@ -292,11 +293,15 @@ end
                         max_1st_rating_in_S = ratings[2, i];
                         max_1st_index_in_rating = i;
                         max_1st_index_in_x = tmp_index;
-                        ret_stochastic_hvp[max_1st_index_in_x] += curr_scalar * max_1st_rating_in_S;
+                        if max_1st_index_in_x != j
+                            ret_stochastic_hvp[max_1st_index_in_x] += curr_scalar * max_1st_rating_in_S;
+                        end
                         count += 1;
                     else
                         max_2nd_rating_in_S = ratings[2, i];
-                        ret_stochastic_hvp[max_1st_index_in_x] -= curr_scalar * max_2nd_rating_in_S;
+                        if max_1st_index_in_x != j
+                            ret_stochastic_hvp[max_1st_index_in_x] -= curr_scalar * max_2nd_rating_in_S;
+                        end
                         break;
                     end
                 end

@@ -2,29 +2,29 @@
 function CenSCGPP(dim, data_cell, LMO, f_batch, gradient_mini_batch, gradient_diff_mini_batch, mini_batch_size, initial_sample_times, num_iters, cardinality, interpolate_times = 1, sample_times = 1)
     num_agents = size(data_cell, 2);  # num_agents should be 1
     function gradient(x, mini_batch_indices_arr, sample_times) # compute the sum of local gradients
-        grad_x = @sync @distributed (+) for i in 1:num_agents
+        grad_x_ret = @sync @distributed (+) for i in 1:num_agents
             gradient_mini_batch(x, data_cell[i], mini_batch_indices_arr[i], sample_times)
         end
-        return grad_x;
+        return grad_x_ret;
     end
 
     function f_sum(x) # compute the global objective at x
-        f_x = @sync @distributed (+) for i in 1:num_agents
+        f_x_ret = @sync @distributed (+) for i in 1:num_agents
             f_batch(x, data_cell[i])
         end
-        return f_x;
+        return f_x_ret;
     end
 
     function generate_mini_batches()
-        mini_batch_indices_arr = [[] for i=1:num_agents];
+        mini_batch_indices_arr_ret = [[] for i=1:num_agents];
         if mini_batch_size == 0
-            return mini_batch_indices_arr;
+            return mini_batch_indices_arr_ret;
         end
         for i in 1:num_agents
             num_users = length(data_cell[i]);
-            mini_batch_indices_arr[i] = rand(1:num_users, mini_batch_size);
+            mini_batch_indices_arr_ret[i] = rand(1:num_users, mini_batch_size);
         end
-        return mini_batch_indices_arr;
+        return mini_batch_indices_arr_ret;
     end
 
     function gradient_diff(x, y, mini_batch_indices_arr, interpolate_times, sample_times) # compute the sum of local gradients
@@ -36,7 +36,7 @@ function CenSCGPP(dim, data_cell, LMO, f_batch, gradient_mini_batch, gradient_di
 
     t_start = time();
     x = zeros(dim);
-    results = zeros(num_iters+1, 3);
+    results = zeros(num_iters+1, 5);
     x_old = zeros(dim);
     grad_estimate = zeros(dim);
     for iter = 1 : num_iters
