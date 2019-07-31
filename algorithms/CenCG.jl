@@ -25,7 +25,7 @@ function CenCG(dim, data_cell, LMO, f_batch, gradient_batch, num_iters)
     for iter in 1:num_iters
         grad_x = gradient_sum(x);
         v = LMO(grad_x);  # find argmax <grad_x, v>
-        x += v / num_iters;
+        x .+= v / num_iters;
     end
     t_elapsed = time() - t_start;
     curr_obj = f_sum(x);
@@ -63,7 +63,7 @@ function CenSCG(dim, data_cell, LMO, f_batch, gradient_mini_batch, mini_batch_si
         rho = rho_coef/(iter + 1)^rho_exp;
         grad_x = (1 - rho) * grad_x + rho * gradient_sum(x, sample_times);
         v = LMO(grad_x);  # find argmax <grad_x, v>
-        x += v / num_iters;
+        x .+= v / num_iters;
     end
     t_elapsed = time() - t_start;
     curr_obj = f_sum(x);

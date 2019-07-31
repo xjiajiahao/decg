@@ -55,13 +55,25 @@ end
 
 # Linear Maximization Oracle (LMO):
 # find min c^T x, s.t. a^T x < k, 0 <= x <= d, where x \in R^n, A is a m-by-n matrix, where m denotes the number of constraints
-function generate_linear_prog_function(d::Vector{Float64}, A::Array{Float64, 2}, b)
+# function generate_linear_prog_function(d::Vector{Float64}, A::Array{Float64, 2}, b)
+#     function linear_prog(x0) # linear programming
+#         sol = linprog(-x0, A, '<', b, 0.0, d, ClpSolver());
+#         if sol.status == :Optimal
+#             return sol.sol;
+#         end
+#         error("No solution was found.");
+#     end
+#     return linear_prog;
+# end
+#
+# find max <c, x>, s.t. sum(x) <= cardinality, 0 <= x <= 1
+function generate_linear_prog_function(d::Vector{Float64}, cardinality::Int64)
     function linear_prog(x0) # linear programming
-        sol = linprog(-x0, A, '<', b, 0.0, d, ClpSolver());
-        if sol.status == :Optimal
-            return sol.sol;
-        end
-        error("No solution was found.");
+        dim = length(x0);
+        ret = spzeros(dim);
+        max_indices = partialsortperm(x0, 1:cardinality, rev=true);
+        ret[max_indices] = ones(cardinality);
+        return ret;
     end
     return linear_prog;
 end

@@ -45,7 +45,7 @@ function CenSTORM(dim, data_cell, LMO, f_batch, gradient_mini_batch, gradient_di
         v = LMO(grad_estimate);  # find argmax <grad_x, v>
         # update x
         x_old = x;
-        x += v / num_iters;
+        x .+= v / num_iters;
         # sample a mini_batch
         mini_batch_indices_arr = generate_mini_batches();
         rho = rho_coef/(iter + 1)^rho_exp;

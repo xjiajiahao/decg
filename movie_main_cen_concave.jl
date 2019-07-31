@@ -52,7 +52,8 @@ function movie_main_cen_concave(min_num_iters::Int, interval_num_iters::Int, max
 
     # SCG parameters (1M)
     # rho_coef_SCG = 1.0;  # for k = 5, concave_modular
-    rho_coef_SCG = 0.5;  # for k = 10, concave_modular
+    rho_coef_SCG = 0.25;  # for k = 5, concave_modular
+    # rho_coef_SCG = 0.5;  # for k = 10, concave_modular
     rho_exp_SCG = 2/3;
 
     # STORM parameters (1M)
@@ -77,7 +78,8 @@ function movie_main_cen_concave(min_num_iters::Int, interval_num_iters::Int, max
     # generate LMO
     d = ones(dim);
     a_2d = ones(1, dim); # a should be a n_constraints-by-dim matrix
-    LMO = generate_linear_prog_function(d, a_2d, cardinality*1.0);
+    # LMO = generate_linear_prog_function(d, a_2d, cardinality*1.0);
+    LMO = generate_linear_prog_function(d, cardinality);
     # generate PO
     PO = generate_projection_function(d, a_2d, cardinality*1.0);
 
@@ -105,17 +107,17 @@ function movie_main_cen_concave(min_num_iters::Int, interval_num_iters::Int, max
                 num_iters_SCGPP = num_iters_base;
             end
 
-            # println("CenSCG, T: $(num_iters_SCG), time: $(Dates.Time(now()))");
-            # tmp_res = CenSCG(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, mini_batch_size_base, num_iters_SCG, rho_coef_SCG, rho_exp_SCG, sample_times);
-            # res_CenSCG[i, :] = res_CenSCG[i, :] + tmp_res;
+            println("CenSCG, T: $(num_iters_SCG), time: $(Dates.Time(now()))");
+            tmp_res = CenSCG(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, mini_batch_size_base, num_iters_SCG, rho_coef_SCG, rho_exp_SCG, sample_times);
+            res_CenSCG[i, :] = res_CenSCG[i, :] + tmp_res;
 
             # println("CenPSGD, T: $(num_iters_PSGD), time: $(Dates.Time(now()))");
             # tmp_res = CenPSGD(dim, data_cell, PO, f_extension_batch, stochastic_gradient_extension_mini_batch, mini_batch_size_base, num_iters_PSGD, eta_coef_PSGD, eta_exp_PSGD, sample_times);
             # res_CenPSGD[i, :] = res_CenPSGD[i, :] + tmp_res;
 
-            println("CenSTORM, T: $(num_iters_STORM), time: $(Dates.Time(now()))");
-            tmp_res = CenSTORM(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, stochastic_gradient_diff_extension_mini_batch, mini_batch_size_STORM, num_iters_STORM, rho_coef_STORM, rho_exp_STORM, cardinality, interpolate_times_STORM, sample_times);
-            res_CenSTORM[i, :] = res_CenSTORM[i, :] +  tmp_res;
+            # println("CenSTORM, T: $(num_iters_STORM), time: $(Dates.Time(now()))");
+            # tmp_res = CenSTORM(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, stochastic_gradient_diff_extension_mini_batch, mini_batch_size_STORM, num_iters_STORM, rho_coef_STORM, rho_exp_STORM, cardinality, interpolate_times_STORM, sample_times);
+            # res_CenSTORM[i, :] = res_CenSTORM[i, :] +  tmp_res;
 
             # println("CenSCGPP, T: $(num_iters_SCGPP), time: $(Dates.Time(now()))");
             # tmp_res = CenSCGPP(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, stochastic_gradient_diff_extension_mini_batch, mini_batch_size_SCGPP, initial_sample_times_SCGPP, num_iters_SCGPP, interpolate_times_SCGPP, sample_times);
