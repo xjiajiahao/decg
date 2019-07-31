@@ -136,8 +136,6 @@ function movie_main_cen_concave(num_iters::Int, print_freq::Int, num_trials::Int
         # tmp_res = CenSCGPP(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, stochastic_gradient_diff_extension_mini_batch, mini_batch_size_SCGPP, initial_sample_times_SCGPP, num_iters_SCGPP, interpolate_times_SCGPP, sample_times);
         # res_CenSCGPP += tmp_res;
 
-        tmp_res[:, 5] = tmp_res[:, 5] / num_users;
-        println("$(tmp_res)");
         matwrite("data/movie_main_concave_auto_save.mat", Dict("res_CenSCG" => res_CenSCG ./ j, "res_CenPSGD" => res_CenPSGD ./ j, "res_CenSTORM" => res_CenSTORM ./ j, "res_CenSCGPP" => res_CenSCGPP ./ j));
     end
 
