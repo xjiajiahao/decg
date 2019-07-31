@@ -48,7 +48,7 @@ function CenSTORM(dim, data_cell, LMO, f_batch, gradient_mini_batch, gradient_di
         x .+= v / num_iters;
         # sample a mini_batch
         mini_batch_indices_arr = generate_mini_batches();
-        rho = rho_coef/(iter + 1)^rho_exp;
+        rho = min(rho_coef/(iter + 1)^rho_exp, 1);
         grad_x = gradient(x, mini_batch_indices_arr, sample_times);
         hvp_x = gradient_diff(x, x_old, mini_batch_indices_arr, interpolate_times, sample_times);
         grad_estimate = (1 - rho) * (grad_estimate + hvp_x) + rho * grad_x;

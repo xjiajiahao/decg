@@ -41,7 +41,7 @@ function movie_main_cen_concave(min_num_iters::Int, interval_num_iters::Int, max
     # interpolate_times_SCGPP = 10;
 
     # mini_batch_size = 128;
-    mini_batch_size_base = 200;
+    mini_batch_size_base = 20;
     sample_times = 1;
     # mini_batch_size = 64;
     # sample_times = 20;
@@ -51,19 +51,19 @@ function movie_main_cen_concave(min_num_iters::Int, interval_num_iters::Int, max
     eta_exp_PSGD = 1/2;
 
     # SCG parameters (1M)
-    # rho_coef_SCG = 1.0;  # for k = 5, concave_modular
-    rho_coef_SCG = 0.25;  # for k = 5, concave_modular
-    # rho_coef_SCG = 0.5;  # for k = 10, concave_modular
+    # rho_coef_SCG = 2.0;  # for k = 5, concave_modular
+    # rho_coef_SCG = 0.25;  # for k = 5, concave_modular
+    rho_coef_SCG = 0.5;  # for k = 10, concave_modular
     rho_exp_SCG = 2/3;
 
     # STORM parameters (1M)
     # rho_coef_STORM = 7.5e-1;
     # rho_coef_STORM = 2e0;
-    rho_coef_STORM = 2e0;
-    rho_exp_STORM = 1.0;
+    rho_coef_STORM = 3e0;
+    rho_exp_STORM = 0.95;
     interpolate_times_STORM = 1;
     sample_times = 1;
-    mini_batch_size_STORM = 100;
+    mini_batch_size_STORM = 40;
 
     # SCGPP parameters (1M)
     mini_batch_size_SCGPP = 10;
