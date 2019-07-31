@@ -51,7 +51,8 @@ function movie_main_cen_concave(min_num_iters::Int, interval_num_iters::Int, max
     eta_exp_PSGD = 1/2;
 
     # SCG parameters (1M)
-    rho_coef_SCG = 1.0;
+    # rho_coef_SCG = 1.0;  # for k = 5, concave_modular
+    rho_coef_SCG = 0.5;  # for k = 10, concave_modular
     rho_exp_SCG = 2/3;
 
     # STORM parameters (1M)
