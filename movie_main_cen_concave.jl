@@ -122,24 +122,22 @@ function movie_main_cen_concave(num_iters::Int, print_freq::Int, num_trials::Int
 
         # println("CenSCG, T: $(num_iters_SCG), time: $(Dates.Time(now()))");
         # tmp_res = CenSCG(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, mini_batch_size_base, num_iters_SCG, rho_coef_SCG, rho_exp_SCG, sample_times);
-        # res_CenSCG[i, :] = res_CenSCG[i, :] + tmp_res;
-        # println("$(tmp_res)");
+        # res_CenSCG += tmp_res;
 
         println("CenPSGD, T: $(num_iters_PSGD), time: $(Dates.Time(now()))");
-        tmp_res = CenPSGD(dim, data_cell, PO, f_extension_batch, stochastic_gradient_extension_mini_batch, mini_batch_size_base, num_iters_PSGD, eta_coef_PSGD, eta_exp_PSGD, sample_times);
-        res_CenPSGD[i, :] = res_CenPSGD[i, :] + tmp_res;
-        println("$(tmp_res)");
+        tmp_res = CenPSGD(dim, data_cell, PO, f_extension_batch, stochastic_gradient_extension_mini_batch, mini_batch_size_base, num_iters_PSGD, eta_coef_PSGD, eta_exp_PSGD, print_freq_PSGD, sample_times);
+        res_CenPSGD += tmp_res;
 
         # println("CenSTORM, T: $(num_iters_STORM), time: $(Dates.Time(now()))");
         # tmp_res = CenSTORM(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, stochastic_gradient_diff_extension_mini_batch, mini_batch_size_STORM, num_iters_STORM, rho_coef_STORM, rho_exp_STORM, cardinality, interpolate_times_STORM, sample_times);
-        # res_CenSTORM[i, :] = res_CenSTORM[i, :] +  tmp_res;
-        # println("$(tmp_res)");
+        # res_CenSTORM += tmp_res;
 
         # println("CenSCGPP, T: $(num_iters_SCGPP), time: $(Dates.Time(now()))");
         # tmp_res = CenSCGPP(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, stochastic_gradient_diff_extension_mini_batch, mini_batch_size_SCGPP, initial_sample_times_SCGPP, num_iters_SCGPP, interpolate_times_SCGPP, sample_times);
-        # res_CenSCGPP[i, :] = res_CenSCGPP[i, :] + tmp_res;
-        # println("$(tmp_res)");
+        # res_CenSCGPP += tmp_res;
 
+        tmp_res[:, 5] = tmp_res[:, 5] / num_users;
+        println("$(tmp_res)");
         matwrite("data/movie_main_concave_auto_save.mat", Dict("res_CenSCG" => res_CenSCG ./ j, "res_CenPSGD" => res_CenPSGD ./ j, "res_CenSTORM" => res_CenSTORM ./ j, "res_CenSCGPP" => res_CenSCGPP ./ j));
     end
 
