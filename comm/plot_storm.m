@@ -3,15 +3,16 @@ ROOT = '../data/';
 
 % STORM
 % filename = [ROOT, 'storm_results/', 'movie_1M_STORM_200_batch_size_128_sample_10_trial_50.mat'];
-filename = [ROOT, 'storm_results/', 'movie_1M_STORM_10000_batch_size_20_sample_10_k_30_trial_3.mat'];
+% filename = [ROOT, 'storm_results/', 'movie_1M_STORM_10000_batch_size_20_sample_10_k_30_trial_3.mat'];
+filename = [ROOT, 'storm_results/', 'movie_1M_STORM_3000_batch_size_20_sample_1_k_10_trial_50.mat'];
 load(filename);
 plot(res_CenSTORM(:, 3), res_CenSTORM(:, 5), 'DisplayName', 'STORM'); hold on;
 
 % SCG
 
 % filename = [ROOT, 'storm_results/', 'movie_1M_SCG_200_batch_size_128_sample_10.mat'];
-filename = [ROOT, 'storm_results/', 'movie_1M_SCG_10000_batch_size_20_sample_10_k_30_trial_3.mat'];
-load(filename);
+% filename = [ROOT, 'storm_results/', 'movie_1M_SCG_10000_batch_size_20_sample_10_k_30_trial_3.mat'];
+% load(filename);
 plot(res_CenSCG(:, 3), res_CenSCG(:, 5), 'DisplayName', 'SCG'); hold on;
 
 % % PSGD
