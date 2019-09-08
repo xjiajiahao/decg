@@ -23,6 +23,6 @@ See the main files for detailed descriptions of the function arguments.
 ### Directory Structure
 * {movie, nqp}_main_{det, stochastic}.jl -- main functions to test algorithms, where {"movie", "nqp"} is the set of available problems, "det" ("stochastic") denotes that the main file is used to test deterministic ("stochastic") methods.
 * models/ -- containing files that define different models (facility location and NQP)
-* algorithms/ -- containing files that define different algoritms (centralized CG, Decentralized CG proposed by Mokhtari, and DeGSFW proposed by us).
+* algorithms/ -- containing files that define different algoritms (centralized CG, Decentralized CG proposed by Mokhtari, and DeGTFW proposed by us).
 * data/ -- containing data files
 * comm.jl -- handy functions for loading data

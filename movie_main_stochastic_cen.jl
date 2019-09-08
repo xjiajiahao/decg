@@ -1,7 +1,7 @@
 using Dates, MAT
 
 include("models/facility_location.jl");
-include("algorithms/CenCG.jl"); include("algorithms/DeCG.jl"); include("algorithms/DeGSFW.jl"); include("algorithms/CenGreedy.jl"); include("algorithms/AccDeGSFW.jl"); include("algorithms/CenPGD.jl"); include("algorithms/CenSTORM.jl"); include("algorithms/CenSCGPP.jl");
+include("algorithms/CenCG.jl"); include("algorithms/DeCG.jl"); include("algorithms/DeGTFW.jl"); include("algorithms/CenGreedy.jl"); include("algorithms/AccDeGTFW.jl"); include("algorithms/CenPGD.jl"); include("algorithms/CenSTORM.jl"); include("algorithms/CenSCGPP.jl");
 include("comm.jl");
 
 

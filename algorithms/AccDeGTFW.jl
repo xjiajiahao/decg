@@ -1,5 +1,5 @@
-# AccDeGSFW or AccDeSGSFW return a 5-by-1 vector [#iterations, elapsed time, #local exact/stochastoc gradient evaluations per node, #doubles transferred in the network, averaged objective function];
-function AccDeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters, beta, K)
+# AccDeGTFW or AccDeSGTFW return a 5-by-1 vector [#iterations, elapsed time, #local exact/stochastoc gradient evaluations per node, #doubles transferred in the network, averaged objective function];
+function AccDeGTFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters, beta, K)
     function gradient_cat(x) # compute local gradients simultaneously
         grad_x = @sync @distributed (hcat) for i in 1:num_agents
             gradient_batch(x[:, i], data_cell[i])
@@ -50,7 +50,7 @@ function AccDeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_ba
 end
 
 
-function AccDeSGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters, beta, K)
+function AccDeSGTFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters, beta, K)
     function gradient_cat(x, sample_times) # compute local gradients simultaneously
         grad_x = @sync @distributed (hcat) for i in 1:num_agents
             gradient_batch(x[:, i], data_cell[i], sample_times)  # @TODO t^2 should be smaller than the batch size b

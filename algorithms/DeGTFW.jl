@@ -1,4 +1,4 @@
-function DeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters)
+function DeGTFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters)
     function gradient_cat(x) # compute local gradients simultaneously
         grad_x = @sync @distributed (hcat) for i in 1:num_agents
             gradient_batch(x[:, i], data_cell[i])
@@ -52,7 +52,7 @@ function DeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch
 end
 
 
-function DeSGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters)
+function DeSGTFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters)
     function gradient_cat(x, sample_times) # compute local gradients simultaneously
         grad_x = @sync @distributed (hcat) for i in 1:num_agents
             gradient_batch(x[:, i], data_cell[i], sample_times)  # @TODO t^2 should be smaller than the batch size b

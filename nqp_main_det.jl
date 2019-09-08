@@ -1,7 +1,7 @@
 using Dates, MAT
 
 include("models/nqp.jl");
-include("algorithms/CenCG.jl"); include("algorithms/DeCG.jl"); include("algorithms/DeGSFW.jl"); include("algorithms/AccDeGSFW.jl");
+include("algorithms/CenCG.jl"); include("algorithms/DeCG.jl"); include("algorithms/DeGTFW.jl"); include("algorithms/AccDeGTFW.jl");
 include("comm.jl");
 
 function nqp_main_det(min_num_iters::Int, interval_num_iters::Int, max_num_iters::Int, graph_style::String, num_agents::Int, FIX_COMM::Bool)
@@ -9,7 +9,7 @@ function nqp_main_det(min_num_iters::Int, interval_num_iters::Int, max_num_iters
 # graph_style: can be "complete" for complete graph, or "er" for Erdos-Renyi random graph, or "line" for line graph
 # num_agents: number of computing agents in the network
 # FIX_COMM: all algorithms have the same #communication if FIX_COMM==true, otherwise all algorithms have the same #gradient evaluation
-# return value: (res_DeSCG, res_DeSGSFW, res_AccDeSGSFW, res_CenSCG), each res_XXX is a x-by-5 matrix, where x is the length of [min_num_iters : interval_num_iters : max_num_iters], and each row of res_XXX contains [#iterations, elapsed time, #local exact/stochastoc gradient evaluations per node, #doubles transferred in the network, averaged objective function]
+# return value: (res_DeSCG, res_DeSGTFW, res_AccDeSGTFW, res_CenSCG), each res_XXX is a x-by-5 matrix, where x is the length of [min_num_iters : interval_num_iters : max_num_iters], and each row of res_XXX contains [#iterations, elapsed time, #local exact/stochastoc gradient evaluations per node, #doubles transferred in the network, averaged objective function]
 
     # Step 1: initialization
     # load data
@@ -31,8 +31,8 @@ function nqp_main_det(min_num_iters::Int, interval_num_iters::Int, max_num_iters
 
     num_iters_arr = min_num_iters:interval_num_iters:max_num_iters;
     res_DeCG= zeros(length(num_iters_arr), 5);
-    res_DeGSFW = zeros(length(num_iters_arr), 5);
-    res_AccDeGSFW = zeros(length(num_iters_arr), 5);
+    res_DeGTFW = zeros(length(num_iters_arr), 5);
+    res_AccDeGTFW = zeros(length(num_iters_arr), 5);
     res_CenCG = zeros(length(num_iters_arr), 5);
 
     # Step 2: test algorithms for multiple times and return averaged results
@@ -56,15 +56,15 @@ function nqp_main_det(min_num_iters::Int, interval_num_iters::Int, max_num_iters
         println("DeCG, T: $(non_acc_num_iters), time:$(Dates.Time(now()))");
         res_DeCG[i, :] = DeCG(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, non_acc_num_iters, alpha);
 
-        println("DeGSFW, T: $(non_acc_num_iters), time: $(Dates.Time(now()))");
-        res_DeGSFW[i, :] = DeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, non_acc_num_iters);
+        println("DeGTFW, T: $(non_acc_num_iters), time: $(Dates.Time(now()))");
+        res_DeGTFW[i, :] = DeGTFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, non_acc_num_iters);
 
-        println("AccDeGSFW, T: $(num_iters), time:$(Dates.Time(now()))");
-        res_AccDeGSFW[i, :] = AccDeGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters, beta, K);
+        println("AccDeGTFW, T: $(num_iters), time:$(Dates.Time(now()))");
+        res_AccDeGTFW[i, :] = AccDeGTFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, gradient_batch, num_iters, beta, K);
 
         println("CenCG, T: $(non_acc_num_iters), time: $(Dates.Time(now()))");
         res_CenCG[i, :] = CenCG(dim, data_cell, LMO, f_batch, gradient_batch, non_acc_num_iters);
     end
 
-    return res_DeCG, res_DeGSFW, res_AccDeGSFW, res_CenCG;
+    return res_DeCG, res_DeGTFW, res_AccDeGTFW, res_CenCG;
 end

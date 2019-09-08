@@ -1,7 +1,7 @@
 using Dates, MAT
 
 include("models/facility_location.jl");
-include("algorithms/CenCG.jl"); include("algorithms/DeCG.jl"); include("algorithms/DeGSFW.jl"); include("algorithms/CenGreedy.jl"); include("algorithms/AccDeGSFW.jl");
+include("algorithms/CenCG.jl"); include("algorithms/DeCG.jl"); include("algorithms/DeGTFW.jl"); include("algorithms/CenGreedy.jl"); include("algorithms/AccDeGTFW.jl");
 include("comm.jl");
 
 
@@ -12,7 +12,7 @@ function movie_main_stochastic(min_num_iters::Int, interval_num_iters::Int, max_
 # num_agents: number of computing agents in the network
 # cardinality: the cardinality constraint parameter of the movie recommendation application
 # FIX_COMM: all algorithms have the same #communication if FIX_COMM==true, otherwise all algorithms have the same #gradient evaluation
-# return value: (res_DeSCG, res_DeSGSFW, res_AccDeSGSFW, res_CenSCG), each res_XXX is a x-by-5 matrix, where x is the length of [min_num_iters : interval_num_iters : max_num_iters], and each row of res_XXX contains [#iterations, elapsed time, #local exact/stochastoc gradient evaluations per node, #doubles transferred in the network, averaged objective function]
+# return value: (res_DeSCG, res_DeSGTFW, res_AccDeSGTFW, res_CenSCG), each res_XXX is a x-by-5 matrix, where x is the length of [min_num_iters : interval_num_iters : max_num_iters], and each row of res_XXX contains [#iterations, elapsed time, #local exact/stochastoc gradient evaluations per node, #doubles transferred in the network, averaged objective function]
 
     # Step 1: initialization
     # load data
@@ -38,8 +38,8 @@ function movie_main_stochastic(min_num_iters::Int, interval_num_iters::Int, max_
 
     num_iters_arr = min_num_iters:interval_num_iters:max_num_iters;
     res_DeSCG= zeros(length(num_iters_arr), 5);
-    res_DeSGSFW = zeros(length(num_iters_arr), 5);
-    res_AccDeSGSFW = zeros(length(num_iters_arr), 5);
+    res_DeSGTFW = zeros(length(num_iters_arr), 5);
+    res_AccDeSGTFW = zeros(length(num_iters_arr), 5);
     res_CenSCG = zeros(length(num_iters_arr), 5);
 
     # Step 2: test algorithms for multiple times and return averaged results
@@ -67,22 +67,22 @@ function movie_main_stochastic(min_num_iters::Int, interval_num_iters::Int, max_
             println("DeSCG, T: $(decg_num_iters), time: $(Dates.Time(now()))");
             res_DeSCG[i, :] = res_DeSCG[i, :] + DeSCG(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, stochastic_gradient_extension_batch, decg_num_iters, alpha, phi);
 
-            println("DeSGSFW, T: $(non_acc_num_iters), time:$(Dates.Time(now()))");
-            res_DeSGSFW[i, :] = res_DeSGSFW[i, :] + DeSGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, stochastic_gradient_extension_batch, non_acc_num_iters);
+            println("DeSGTFW, T: $(non_acc_num_iters), time:$(Dates.Time(now()))");
+            res_DeSGTFW[i, :] = res_DeSGTFW[i, :] + DeSGTFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, stochastic_gradient_extension_batch, non_acc_num_iters);
 
-            println("AccDeSGSFW, T: $(num_iters), time: $(Dates.hour(now())):$(Dates.minute(now())):$(Dates.second(now()))");
-            res_AccDeSGSFW[i, :] = res_AccDeSGSFW[i, :] + AccDeSGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, stochastic_gradient_extension_batch, num_iters, beta, K);
+            println("AccDeSGTFW, T: $(num_iters), time: $(Dates.hour(now())):$(Dates.minute(now())):$(Dates.second(now()))");
+            res_AccDeSGTFW[i, :] = res_AccDeSGTFW[i, :] + AccDeSGTFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, stochastic_gradient_extension_batch, num_iters, beta, K);
 
             println("CenSCG, T: $(decg_num_iters), time: $(Dates.Time(now()))");
             res_CenSCG[i, :] = res_CenSCG[i, :] + CenSCG(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_batch, decg_num_iters);
 
-            matwrite("data/movie_main_stochastic_auto_save.mat", Dict("res_DeSCG" => res_DeSCG ./ j, "res_DeSGSFW" => res_DeSGSFW ./ j, "res_AccDeSGSFW" => res_AccDeSGSFW ./ j, "res_CenSCG" => res_CenSCG ./ j));
+            matwrite("data/movie_main_stochastic_auto_save.mat", Dict("res_DeSCG" => res_DeSCG ./ j, "res_DeSGTFW" => res_DeSGTFW ./ j, "res_AccDeSGTFW" => res_AccDeSGTFW ./ j, "res_CenSCG" => res_CenSCG ./ j));
         end
     end
     res_DeSCG = res_DeSCG ./ num_trials;
-    res_DeSGSFW = res_DeSGSFW ./ num_trials;
-    res_AccDeSGSFW = res_AccDeSGSFW ./ num_trials;
+    res_DeSGTFW = res_DeSGTFW ./ num_trials;
+    res_AccDeSGTFW = res_AccDeSGTFW ./ num_trials;
     res_CenSCG = res_CenSCG ./ num_trials;
 
-    return res_DeSCG, res_DeSGSFW, res_AccDeSGSFW, res_CenSCG;
+    return res_DeSCG, res_DeSGTFW, res_AccDeSGTFW, res_CenSCG;
 end
