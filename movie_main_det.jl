@@ -2,7 +2,7 @@ using Dates, MAT
 
 include("models/facility_location.jl");
 include("algorithms/CenCG.jl"); include("algorithms/DeCG.jl"); include("algorithms/DeGTFW.jl"); include("algorithms/CenGreedy.jl"); include("algorithms/AccDeGTFW.jl");
-include("comm.jl");
+include("utils/comm.jl");
 
 function movie_main_det(min_num_iters::Int, interval_num_iters::Int, max_num_iters::Int, graph_style::String, num_agents::Int, cardinality::Int, FIX_COMM::Bool)
 # the number of iterations are [min_num_iters : interval_num_iters : max_num_iters]

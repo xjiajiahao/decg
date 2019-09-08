@@ -2,7 +2,7 @@ using Dates, MAT
 
 include("models/facility_location.jl");
 include("algorithms/CenCG.jl"); include("algorithms/DeCG.jl"); include("algorithms/DeGTFW.jl"); include("algorithms/CenGreedy.jl"); include("algorithms/AccDeGTFW.jl"); include("algorithms/CenPGD.jl"); include("algorithms/CenSTORM.jl"); include("algorithms/CenSCGPP.jl");
-include("comm.jl");
+include("utils/comm.jl");
 
 
 function movie_main_stochastic_cen(min_num_iters::Int, interval_num_iters::Int, max_num_iters::Int, num_trials::Int, cardinality::Int, FIX_COMP::Bool)
@@ -115,7 +115,7 @@ function movie_main_stochastic_cen(min_num_iters::Int, interval_num_iters::Int, 
             println("CenSCGPP, T: $(num_iters_SCGPP), time: $(Dates.Time(now()))");
             res_CenSCGPP[i, :] = res_CenSCGPP[i, :] + CenSCGPP(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, stochastic_gradient_diff_extension_mini_batch, mini_batch_size_SCGPP, initial_sample_times_SCGPP, num_iters_SCGPP, interpolate_times_SCGPP, sample_times);
 
-            matwrite("data/movie_main_stochastic_auto_save.mat", Dict("res_CenSCG" => res_CenSCG ./ j, "res_CenPSGD" => res_CenPSGD ./ j, "res_CenSTORM" => res_CenSTORM ./ j, "res_CenSCGPP" => res_CenSCGPP ./ j));
+            matwrite("data/result_movie_main_cen_facility.mat", Dict("res_CenSCG" => res_CenSCG ./ j, "res_CenPSGD" => res_CenPSGD ./ j, "res_CenSTORM" => res_CenSTORM ./ j, "res_CenSCGPP" => res_CenSCGPP ./ j));
         end
     end
     res_CenSCG = res_CenSCG ./ num_trials; res_CenSCG[:, 5] = res_CenSCG[:, 5] / num_users;

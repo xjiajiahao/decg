@@ -2,7 +2,7 @@ using Dates, MAT
 
 include("models/facility_location.jl");
 include("algorithms/CenCG.jl"); include("algorithms/DeCG.jl"); include("algorithms/DeGTFW.jl"); include("algorithms/CenGreedy.jl"); include("algorithms/AccDeGTFW.jl");
-include("comm.jl");
+include("utils/comm.jl");
 
 
 function movie_main_stochastic(min_num_iters::Int, interval_num_iters::Int, max_num_iters::Int, num_trials::Int, graph_style::String, num_agents::Int, cardinality::Int, FIX_COMM::Bool)
@@ -76,7 +76,7 @@ function movie_main_stochastic(min_num_iters::Int, interval_num_iters::Int, max_
             println("CenSCG, T: $(decg_num_iters), time: $(Dates.Time(now()))");
             res_CenSCG[i, :] = res_CenSCG[i, :] + CenSCG(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_batch, decg_num_iters);
 
-            matwrite("data/movie_main_stochastic_auto_save.mat", Dict("res_DeSCG" => res_DeSCG ./ j, "res_DeSGTFW" => res_DeSGTFW ./ j, "res_AccDeSGTFW" => res_AccDeSGTFW ./ j, "res_CenSCG" => res_CenSCG ./ j));
+            matwrite("data/result_movie_main_stochastic.mat", Dict("res_DeSCG" => res_DeSCG ./ j, "res_DeSGTFW" => res_DeSGTFW ./ j, "res_AccDeSGTFW" => res_AccDeSGTFW ./ j, "res_CenSCG" => res_CenSCG ./ j));
         end
     end
     res_DeSCG = res_DeSCG ./ num_trials;

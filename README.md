@@ -18,11 +18,15 @@ See the main files for detailed descriptions of the function arguments.
 ### Notes
 * The number of computing agents should be 50, otherwise one has to generate the network and the partitioned data set before running the main functions.
 
-* There are two data sets for the movie recommendation application, one contains 100K entries of rating, and another contains 1M. The "100K" data set is used by default. To use the "1M" data set, please changed "100K" to "1M" in the main files.
+* There are two data sets for the movie recommendation application, one contains 100K entries of rating, and another contains 1M. The "100K" data set is used by default. To use the "1M" data set, one can change "100K" to "1M" in the main files.
 
 ### Directory Structure
-* {movie, nqp}_main_{det, stochastic}.jl -- main functions to test algorithms, where {"movie", "nqp"} is the set of available problems, "det" ("stochastic") denotes that the main file is used to test deterministic ("stochastic") methods.
+* `{movie, nqp}\_main\_{det, stochastic}.jl` -- main functions to test algorithms, where {"movie", "nqp"} is the set of available problems, "det" ("stochastic") denotes that the main file is used to test deterministic ("stochastic") methods.
 * models/ -- containing files that define different models (facility location and NQP)
-* algorithms/ -- containing files that define different algoritms (centralized CG, Decentralized CG proposed by Mokhtari, and DeGTFW proposed by us).
+* algorithms/ -- containing files that define different algoritms (centralized CG, Decentralized CG proposed by [1], and DeGTFW proposed by [2]).
 * data/ -- containing data files
 * comm.jl -- handy functions for loading data
+
+[1] Mokhtari, A., Hassani, H. & Karbasi, A.. (2018). Decentralized Submodular Maximization: Bridging Discrete and Continuous Settings. Proceedings of the 35th International Conference on Machine Learning, in PMLR 80:3616-3625
+
+[2] Xie, J., Zhang, C., Shen, Z., Mi, C. & Qian, H.. (2019). Decentralized Gradient Tracking for Continuous DR-Submodular Maximization. Proceedings of Machine Learning Research, in PMLR 89:2897-2906
