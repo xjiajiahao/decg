@@ -47,12 +47,6 @@ include("movie_main_stochastic.jl");
 res_DeSCG, res_DeSGSFW, res_AccDeSGSFW, res_CenSCG =  movie_main_stochastic(10, 10, 100, 2, "er", 16, 10, false);  # see the main file for detailed descriptions of the function arguments.
 ```
 
-
-### Notes
-* There are two data sets for the movie recommendation application, one contains 100K entries of rating, and the other contains 1M entries.
-The "100K" dataset is used by default.
-To use the "1M" data set, one can change "100K" to "1M" in the main files.
-
 ### Directory Structure
 ``` bash
 ├── README.md
@@ -92,4 +86,4 @@ To use the "1M" data set, one can change "100K" to "1M" in the main files.
 
 [2] Mokhtari, A., Hassani, H. & Karbasi, A.. (2018). Decentralized Submodular Maximization: Bridging Discrete and Continuous Settings. Proceedings of the 35th International Conference on Machine Learning, in PMLR 80:3616-3625.
 
-[3] Xie, J., Zhang, C., Shen, Z., Mi, C. & Qian, H.. (2019). Decentralized Gradient Tracking for Continuous DR-Submodular Maximization. Proceedings of Machine Learning Research, in PMLR 89:2897-2906
+[3] Xie, J., Zhang, C., Shen, Z., Mi, C. & Qian, H.. (2019). Decentralized Gradient Tracking for Continuous DR-Submodular Maximization. Proceedings of Machine Learning Research, in PMLR 89:2897-2906.
