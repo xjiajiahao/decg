@@ -183,7 +183,29 @@ end
     return stochastic_gradient;
 end
 
-# the following function is equivilant to the above one, but implemented in C which is surprising slower
+@everywhere function stochastic_gradient_extension_mini_batch(x, batch_ratings, mini_batch_indices, sample_times = 1) # ratings is a n-by-2 matrix sorted in descendant order, where n denotes #movies some user has rated
+    dim = length(x);
+    num_users = length(batch_ratings);
+    mini_batch_size = length(mini_batch_indices);
+    stochastic_gradient = zeros(dim);
+    indices_in_ratings = zeros(Int64, dim);
+    rand_vec = zeros(dim);
+    if length(mini_batch_indices) > 0
+        for i in mini_batch_indices
+            ratings = batch_ratings[i];
+            stochastic_gradient_extension!(x, ratings, sample_times, indices_in_ratings, stochastic_gradient, rand_vec);
+        end
+        stochastic_gradient = stochastic_gradient ./ sample_times .* (num_users / mini_batch_size);
+    else
+        for ratings in batch_ratings
+            stochastic_gradient_extension!(x, ratings, sample_times, indices_in_ratings, stochastic_gradient, rand_vec);
+        end
+        stochastic_gradient = stochastic_gradient ./ sample_times;
+    end
+    return stochastic_gradient;
+end
+
+# the following function is equivilant to the above one, but implemented in C which is surprisingly slower
 @everywhere function stochastic_gradient_extension_batch_C(x, batch_ratings, sample_times = 1) # ratings is a n-by-2 matrix sorted in descendant order, where n denotes #movies some user has rated
     dim = length(x);
     num_rows = 2;
@@ -204,4 +226,125 @@ end
     end
     stochastic_gradient = stochastic_gradient ./ sample_times;
     return stochastic_gradient;
+end
+
+@everywhere function stochastic_gradient_diff_extension_mini_batch(x, y, batch_ratings, mini_batch_indices, interpolate_times = 1, sample_times = 1) # ratings is a n-by-2 matrix sorted in descendant order, where n denotes #movies some user has rated
+    dim = length(x);
+    num_users = length(batch_ratings);
+    mini_batch_size = length(mini_batch_indices);
+    stochastic_gradient_diff = zeros(dim);
+    indices_in_ratings = zeros(Int64, dim);
+    rand_vec = zeros(dim);
+    x_y_diff = x - y;
+    # interpolate between y and x
+    for curr_interpolate = 1 : interpolate_times
+        convex_combination_ratio = rand();
+        x_y_interpolate = y + convex_combination_ratio * x_y_diff;
+        if length(mini_batch_indices) > 0
+            for i in mini_batch_indices
+                ratings = batch_ratings[i];
+                stochastic_hvp_extension!(x_y_interpolate, x_y_diff, ratings, sample_times, indices_in_ratings, stochastic_gradient_diff, rand_vec);
+            end
+        else
+            for ratings in batch_ratings
+                stochastic_hvp_extension!(x_y_interpolate, x_y_diff, ratings, sample_times, indices_in_ratings, stochastic_gradient_diff, rand_vec);
+            end
+        end
+    end
+
+    if length(mini_batch_indices) > 0
+        stochastic_gradient_diff = stochastic_gradient_diff ./ interpolate_times ./ sample_times .* (num_users / mini_batch_size);
+    else
+        stochastic_gradient_diff = stochastic_gradient_diff ./ interpolate_times ./ sample_times;
+    end
+    return stochastic_gradient_diff;
+end
+
+@everywhere function stochastic_hvp_extension!(x::Vector{Float64}, v::Vector{Float64}, ratings::Array{Float64, 2}, sample_times::Int64, indices_in_ratings::Vector{Int64}, ret_stochastic_hvp::Vector{Float64}, rand_vec::Vector{Float64})  # to estimate the hessian-vector product \nabla^2 f(x) v
+    dim = length(x);
+    fill!(indices_in_ratings, zero(Int));
+    tmp_idx = 0;
+    nnz = size(ratings, 2);
+    for i = 1 : nnz
+        tmp_idx = round(Int, ratings[1, i]);
+        indices_in_ratings[i] = tmp_idx;
+    end
+
+    rand_vec_view = view(rand_vec, 1:nnz);
+    for curr_sample_count = 1:sample_times
+        # Random.rand!(rand_vec_view);
+
+        for j = 1:dim  # add/subtract the element j to/from the sampled set S
+            curr_scalar = v[j];
+            if -1e-8 <= curr_scalar && curr_scalar <= 1e-8
+                continue;
+            end
+            Random.rand!(rand_vec_view);
+
+            # evaluate the gradient of f(S + {j})
+            max_1st_rating_in_S = 0; max_1st_index_in_rating = 0; max_1st_index_in_x = 0;
+            max_2nd_rating_in_S = 0;
+            count = 0;
+            # find the first and second largest rating in S
+            for i = 1 : nnz
+                tmp_index = indices_in_ratings[i];
+                if rand_vec_view[i] <= x[tmp_index] || indices_in_ratings[i] == j
+                    if count == 0
+                        max_1st_rating_in_S = ratings[2, i];
+                        max_1st_index_in_rating = i;
+                        max_1st_index_in_x = tmp_index;
+                        if max_1st_index_in_x != j
+                            ret_stochastic_hvp[max_1st_index_in_x] += curr_scalar * max_1st_rating_in_S;
+                        end
+                        count += 1;
+                    else
+                        max_2nd_rating_in_S = ratings[2, i];
+                        if max_1st_index_in_x != j
+                            ret_stochastic_hvp[max_1st_index_in_x] -= curr_scalar * max_2nd_rating_in_S;
+                        end
+                        break;
+                    end
+                end
+                if count == 0
+                    ret_stochastic_hvp[tmp_index] += curr_scalar * ratings[2, i];
+                end
+            end
+
+            for i = 1 : max_1st_index_in_rating - 1
+                tmp_index = indices_in_ratings[i];
+                ret_stochastic_hvp[tmp_index] -= curr_scalar * max_1st_rating_in_S;
+            end
+
+            # evaluate the gradient of f(S - {j})
+            max_1st_rating_in_S = 0; max_1st_index_in_rating = 0; max_1st_index_in_x = 0;
+            max_2nd_rating_in_S = 0;
+            count = 0;
+            # find the first and second largest rating in S
+            for i = 1 : nnz
+                tmp_index = indices_in_ratings[i];
+                if rand_vec_view[i] <= x[tmp_index] && indices_in_ratings[i] != j
+                    if count == 0
+                        max_1st_rating_in_S = ratings[2, i];
+                        max_1st_index_in_rating = i;
+                        max_1st_index_in_x = tmp_index;
+                        ret_stochastic_hvp[max_1st_index_in_x] += -curr_scalar * max_1st_rating_in_S;
+                        count += 1;
+                    else
+                        max_2nd_rating_in_S = ratings[2, i];
+                        ret_stochastic_hvp[max_1st_index_in_x] -= -curr_scalar * max_2nd_rating_in_S;
+                        break;
+                    end
+                end
+                if count == 0
+                    ret_stochastic_hvp[tmp_index] += -curr_scalar * ratings[2, i];
+                end
+            end
+
+            for i = 1 : max_1st_index_in_rating - 1
+                tmp_index = indices_in_ratings[i];
+                ret_stochastic_hvp[tmp_index] -= -curr_scalar * max_1st_rating_in_S;
+            end
+        end
+    end
+    nothing
 end

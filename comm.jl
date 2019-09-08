@@ -1,6 +1,6 @@
-using MAT, LinearAlgebra
+using MAT
 using Distributed
-@everywhere using MathProgBase, Clp
+@everywhere using LinearAlgebra, SparseArrays, MathProgBase, Clp, Ipopt
 
 const e  = exp(1);
 
@@ -54,14 +54,40 @@ function load_network(network_type="er", num_agents=50)
 end
 
 # Linear Maximization Oracle (LMO):
-# find min c^T x, s.t. a^T x < k, 0 <= x <= d, where x \in R^n, a is a m-by-n matrix, where m denotes the number of constraints
-function generate_linear_prog_function(d::Vector{Float64}, a::Array{Float64, 2}, k)
-    function linear_prog(x0) # quadratic programming: min_x ||x - x0 ||/2
-        sol = linprog(-x0, a, '<', k, 0.0, d, ClpSolver());
-        if sol.status == :Optimal
-            return sol.sol;
-        end
-        error("No solution was found.");
+# find min c^T x, s.t. a^T x < k, 0 <= x <= d, where x \in R^n, A is a m-by-n matrix, where m denotes the number of constraints
+# function generate_linear_prog_function(d::Vector{Float64}, A::Array{Float64, 2}, b)
+#     function linear_prog(x0) # linear programming
+#         sol = linprog(-x0, A, '<', b, 0.0, d, ClpSolver());
+#         if sol.status == :Optimal
+#             return sol.sol;
+#         end
+#         error("No solution was found.");
+#     end
+#     return linear_prog;
+# end
+#
+# find max <c, x>, s.t. sum(x) <= cardinality, 0 <= x <= 1
+function generate_linear_prog_function(d::Vector{Float64}, cardinality::Int64)
+    function linear_prog(x0) # linear programming
+        dim = length(x0);
+        ret = spzeros(dim);
+        max_indices = partialsortperm(x0, 1:cardinality, rev=true);
+        ret[max_indices] = ones(cardinality);
+        return ret;
     end
     return linear_prog;
+end
+
+# Projection Oracle (PO):
+# find min || x - x_0 ||, s.t. A x < b, 0 <= x <= d, where x \in R^n, a is a m-by-n matrix and m denotes the number of constraints
+function generate_projection_function(d::Vector{Float64}, A::Array{Float64, 2}, b)
+    n = size(A)[2]
+    function projection(x0) # quadratic programming: min_x ||x - x_0 ||/2
+        sol = quadprog(-x0, sparse(1.0I, n, n), A, '<', b, 0.0, d, IpoptSolver(print_level=0))
+        if sol.status == :Optimal
+            return sol.sol
+        end
+        error("No solution was found.")
+    end
+    return projection
 end

@@ -1,7 +1,7 @@
 using Dates, MAT
 
 include("models/nqp.jl");
-include("algorithms/CenCG.jl"); include("algorithms/DeCG.jl"); include("algorithms/DeGSFW.jl"); include("algorithms/AccDeGSFW.jl");
+include("algorithms/CenCG.jl"); include("algorithms/DeCG.jl"); include("algorithms/DeGTFW.jl"); include("algorithms/AccDeGTFW.jl");
 include("comm.jl");
 
 function nqp_main_stochastic(min_num_iters::Int, interval_num_iters::Int, max_num_iters::Int, num_trials::Int, graph_style::String, num_agents::Int, FIX_COMM::Bool)
@@ -10,7 +10,7 @@ function nqp_main_stochastic(min_num_iters::Int, interval_num_iters::Int, max_nu
 # graph_style: can be "complete" for complete graph, or "er" for Erdos-Renyi random graph, or "line" for line graph
 # num_agents: number of computing agents in the network
 # FIX_COMM: all algorithms have the same #communication if FIX_COMM==true, otherwise all algorithms have the same #gradient evaluation
-# return value: (res_DeSCG, res_DeSGSFW, res_AccDeSGSFW, res_CenSCG), each res_XXX is a x-by-5 matrix, where x is the length of [min_num_iters : interval_num_iters : max_num_iters], and each row of res_XXX contains [#iterations, elapsed time, #local exact/stochastoc gradient evaluations per node, #doubles transferred in the network, averaged objective function]
+# return value: (res_DeSCG, res_DeSGTFW, res_AccDeSGTFW, res_CenSCG), each res_XXX is a x-by-5 matrix, where x is the length of [min_num_iters : interval_num_iters : max_num_iters], and each row of res_XXX contains [#iterations, elapsed time, #local exact/stochastoc gradient evaluations per node, #doubles transferred in the network, averaged objective function]
 
     # Step 1: initialization
     num_agents = 50;
@@ -34,8 +34,8 @@ function nqp_main_stochastic(min_num_iters::Int, interval_num_iters::Int, max_nu
 
     num_iters_arr = min_num_iters:interval_num_iters:max_num_iters;
     res_DeSCG= zeros(length(num_iters_arr), 5);
-    res_DeSGSFW = zeros(length(num_iters_arr), 5);
-    res_AccDeSGSFW = zeros(length(num_iters_arr), 5);
+    res_DeSGTFW = zeros(length(num_iters_arr), 5);
+    res_AccDeSGTFW = zeros(length(num_iters_arr), 5);
     res_CenSCG = zeros(length(num_iters_arr), 5);
 
     # Step 2: test algorithms for multiple times and return averaged results
@@ -63,17 +63,17 @@ function nqp_main_stochastic(min_num_iters::Int, interval_num_iters::Int, max_nu
             println("DeSCG, T: $(decg_num_iters), time: $(Dates.Time(now()))");
             res_DeSCG[i, :] = res_DeSCG[i, :] + DeSCG(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, stochastic_gradient_batch, decg_num_iters, alpha, phi);
 
-            println("DeSGSFW, T: $(non_acc_num_iters), time:$(Dates.Time(now()))");
-            res_DeSGSFW[i, :] = res_DeSGSFW[i, :] + DeSGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, stochastic_gradient_batch, non_acc_num_iters);
+            println("DeSGTFW, T: $(non_acc_num_iters), time:$(Dates.Time(now()))");
+            res_DeSGTFW[i, :] = res_DeSGTFW[i, :] + DeSGTFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, stochastic_gradient_batch, non_acc_num_iters);
 
-            println("AccDeSGSFW, T: $(num_iters), time: $(Dates.hour(now())):$(Dates.minute(now())):$(Dates.second(now()))");
-            res_AccDeSGSFW[i, :] = res_AccDeSGSFW[i, :] + AccDeSGSFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, stochastic_gradient_batch, num_iters, beta, K);
+            println("AccDeSGTFW, T: $(num_iters), time: $(Dates.hour(now())):$(Dates.minute(now())):$(Dates.second(now()))");
+            res_AccDeSGTFW[i, :] = res_AccDeSGTFW[i, :] + AccDeSGTFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_batch, stochastic_gradient_batch, num_iters, beta, K);
         end
     end
     res_DeSCG = res_DeSCG ./ num_trials;
-    res_DeSGSFW = res_DeSGSFW ./ num_trials;
-    res_AccDeSGSFW = res_AccDeSGSFW ./ num_trials;
+    res_DeSGTFW = res_DeSGTFW ./ num_trials;
+    res_AccDeSGTFW = res_AccDeSGTFW ./ num_trials;
     res_CenSCG = res_CenSCG ./ num_trials;
 
-    return res_DeSCG, res_DeSGSFW, res_AccDeSGSFW, res_CenSCG;
+    return res_DeSCG, res_DeSGTFW, res_AccDeSGTFW, res_CenSCG;
 end

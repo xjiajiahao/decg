@@ -18,9 +18,9 @@ function weights = gen_weight_matrix(num_nodes, graph_style, pl)
         weights = weights + diag(1 - sum_weights);
 
     elseif strcmp(graph_style, 'line') == true
-        adj_matrix = zeros(n_nodes);
-        for i = 1:n_nodes
-            j = mod(i, n_nodes) + 1;
+        adj_matrix = zeros(num_nodes);
+        for i = 1:num_nodes
+            j = mod(i, num_nodes) + 1;
             if j == 1
                 continue;
             end
@@ -28,9 +28,9 @@ function weights = gen_weight_matrix(num_nodes, graph_style, pl)
             adj_matrix(j, i) = 1;
         end
         degrees = sum(adj_matrix, 2);
-        weights = zeros(n_nodes);
-        for i = 1 : n_nodes
-            for j = 1 : n_nodes
+        weights = zeros(num_nodes);
+        for i = 1 : num_nodes
+            for j = 1 : num_nodes
                 if (adj_matrix(i, j) == 0)
                     continue;
                 end
@@ -41,14 +41,14 @@ function weights = gen_weight_matrix(num_nodes, graph_style, pl)
         weights = weights + diag(1 - sum_weights);
 
     elseif strcmp(graph_style, 'complete') == true
-        adj_matrix = ones(n_nodes);
-        adj_matrix = adj_matrix - diag(ones(n_nodes, 1));
+        adj_matrix = ones(num_nodes);
+        adj_matrix = adj_matrix - diag(ones(num_nodes, 1));
 
         degrees = sum(adj_matrix, 2);
 
-        weights = zeros(n_nodes);
-        for i = 1 : n_nodes
-            for j = 1 : n_nodes
+        weights = zeros(num_nodes);
+        for i = 1 : num_nodes
+            for j = 1 : num_nodes
                 if (adj_matrix(i, j) == 0)
                     continue;
                 end

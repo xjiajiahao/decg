@@ -7,7 +7,13 @@
 
 2. Start Julia with `julia -p n` where `n` denotes the number of worker processes.
 
-3. In Julia, type `include("XX_main_YY.jl");` to load a main function, e.g., `include("nqp_main_stochastic.jl");` and then run the main function, e.g., `res_DeSCG, res_DeSGSFW, res_AccDeSGSFW, res_CenSFW =  nqp_main_stochastic(1, 1, 10, 2, "er", 50, false);`. See the main files for detailed descriptions of the function arguments.
+3. In Julia, type `include("XX_main_YY.jl");` to load a main function and then run the main function, e.g.,
+``` julia
+# Example: run centralized methods: SCG, Projected SGD, STORM, and SCG++
+include("movie_main_cen_concave.jl");
+res_CenSCG, res_CenPSGD, res_CenSTORM, res_CenSCGPP = movie_main_cen_concave(2000, 1900, 5, 10, 10, true);
+```
+See the main files for detailed descriptions of the function arguments.
 
 ### Notes
 * The number of computing agents should be 50, otherwise one has to generate the network and the partitioned data set before running the main functions.
@@ -17,6 +23,6 @@
 ### Directory Structure
 * {movie, nqp}_main_{det, stochastic}.jl -- main functions to test algorithms, where {"movie", "nqp"} is the set of available problems, "det" ("stochastic") denotes that the main file is used to test deterministic ("stochastic") methods.
 * models/ -- containing files that define different models (facility location and NQP)
-* algorithms/ -- containing files that define different algoritms (centralized CG, Decentralized CG proposed by Mokhtari, and DeGSFW proposed by us).
+* algorithms/ -- containing files that define different algoritms (centralized CG, Decentralized CG proposed by Mokhtari, and DeGTFW proposed by us).
 * data/ -- containing data files
 * comm.jl -- handy functions for loading data
