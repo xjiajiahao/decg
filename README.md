@@ -13,15 +13,6 @@ gen_data_movie_100K;  % generate the base dataset ./data/Movies_100K.mat
 
 2. Install the aforementioned packages in Julia using the command `using Pkg; Pkg.add("<package name>")`.
 
-2. Start Julia with `julia -p n` where `n` denotes the number of worker processes.
-
-3. In Julia, type `include("XX_main_YY.jl");` to load a main function and then run the main function, e.g.,
-``` julia
-# Example: run centralized methods: SCG, Projected SGD, STORM, and SCG++
-include("movie_main_cen_concave.jl");
-res_CenSCG, res_CenPSGD, res_CenSTORM, res_CenSCGPP = movie_main_cen_concave(2000, 1900, 5, 10, 10, true);
-```
-
 3. Generate the data file and run the main script.
 ``` julia
 # Example 1. test centralized methods on the concave over modular loss
@@ -46,6 +37,7 @@ gen_weight_matrix(num_nodes, 'er', 0.4);  # generate the weight matrix of the ne
 include("movie_main_stochastic.jl");
 res_DeSCG, res_DeSGSFW, res_AccDeSGSFW, res_CenSCG =  movie_main_stochastic(10, 10, 100, 2, "er", 16, 10, false);  # see the main file for detailed descriptions of the function arguments.
 ```
+Note that in Example 2, one should use the command `julia -p auto` to launch JULIA in a multithread node.
 
 ### Directory Structure
 ``` bash
