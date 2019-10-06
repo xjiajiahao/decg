@@ -1,7 +1,13 @@
 using Dates, MAT
 
 include("models/concave_over_modular.jl");
-include("algorithms/CenCG.jl"); include("algorithms/DeCG.jl"); include("algorithms/DeGTFW.jl"); include("algorithms/CenGreedy.jl"); include("algorithms/AccDeGTFW.jl"); include("algorithms/CenPGD.jl"); include("algorithms/CenSTORM.jl"); include("algorithms/CenSCGPP.jl");
+include("algorithms/CenCG.jl");
+include("algorithms/DeCG.jl"); include("algorithms/DeGTFW.jl");
+include("algorithms/AccDeGTFW.jl");
+include("algorithms/CenPGD.jl");
+include("algorithms/CenSTORM.jl");
+include("algorithms/CenSCGPP.jl");
+include("algorithms/CenSFW.jl");
 include("utils/comm.jl");
 
 
@@ -70,6 +76,10 @@ function movie_main_cen_concave(min_num_iters::Int, interval_num_iters::Int, max
     initial_sample_times_SCGPP = 10000;
     interpolate_times_SCGPP = 100;
 
+    # SFW paramters
+    is_batch_size_increasing_SFW = true;
+    mini_batch_size_SFW = 40;
+
     # load weights matrix
     dim = num_movies;
 
@@ -88,6 +98,7 @@ function movie_main_cen_concave(min_num_iters::Int, interval_num_iters::Int, max
     res_CenPSGD = zeros(length(num_iters_arr), 5);
     res_CenSTORM = zeros(length(num_iters_arr), 5);
     res_CenSCGPP = zeros(length(num_iters_arr), 5);
+    res_CenSFW = zeros(length(num_iters_arr), 5);
 
     # Step 2: test algorithms for multiple times and return averaged results
     t_start = time();
@@ -99,12 +110,20 @@ function movie_main_cen_concave(min_num_iters::Int, interval_num_iters::Int, max
                 num_iters_SCG = Int(ceil(num_iters_base * (cardinality * 2 * interpolate_times_STORM + 1) * (mini_batch_size_STORM  * 1.0 / mini_batch_size_base)));
                 num_iters_PSGD = Int(ceil(num_iters_base * (cardinality * 2 * interpolate_times_STORM + 1) * (mini_batch_size_STORM * 1.0 / mini_batch_size_base)));
                 num_iters_STORM = num_iters_base;
+
                 num_iters_SCGPP = Int(ceil((num_iters_base * (cardinality * 2 * interpolate_times_STORM + 1) * mini_batch_size_STORM * sample_times - mini_batch_size_SCGPP * initial_sample_times_SCGPP) / ((cardinality * interpolate_times_SCGPP + 1) * mini_batch_size_SCGPP * sample_times) + 1));
+
+                if is_batch_size_increasing_SFW
+                    num_iters_SFW = Int(ceil((3 * (num_iters_base * (cardinality * 2 * interpolate_times_STORM + 1) * mini_batch_size_STORM / mini_batch_size_SFW))^(1/3)));
+                else
+                    num_iters_SFW = Int(ceil(num_iters_base * (cardinality * 2 * interpolate_times_STORM + 1) * mini_batch_size_STORM / mini_batch_size_SFW));
+                end
             else
                 num_iters_SCG = num_iters_base;
                 num_iters_PSGD = num_iters_base;
                 num_iters_STORM = num_iters_base;
                 num_iters_SCGPP = num_iters_base;
+                num_iters_SFW = num_iters_base;
             end
 
             println("CenSCG, T: $(num_iters_SCG), time: $(Dates.Time(now()))");
@@ -129,13 +148,21 @@ function movie_main_cen_concave(min_num_iters::Int, interval_num_iters::Int, max
             # tmp_res = CenSCGPP(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, stochastic_gradient_diff_extension_mini_batch, mini_batch_size_SCGPP, initial_sample_times_SCGPP, num_iters_SCGPP, interpolate_times_SCGPP, sample_times);
             # res_CenSCGPP[i, :] = res_CenSCGPP[i, :] + tmp_res;
 
-            matwrite("data/result_movie_main_cen_concave.mat", Dict("res_CenSCG" => res_CenSCG ./ j, "res_CenPSGD" => res_CenPSGD ./ j, "res_CenSTORM" => res_CenSTORM ./ j, "res_CenSCGPP" => res_CenSCGPP ./ j));
+            println("CenSFW, T: $(num_iters_SFW), time: $(Dates.Time(now()))");
+            tmp_res = CenSFW(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, stochastic_gradient_diff_extension_mini_batch, mini_batch_size_SFW, num_iters_SFW, is_batch_size_increasing_SFW, cardinality, sample_times);
+            res_CenSFW[i, :] = res_CenSFW[i, :] +  tmp_res;
+            tmp_res[5] = tmp_res[5] / num_users;
+            println("$(tmp_res)");
+
+            matwrite("data/result_movie_main_cen_concave.mat", Dict("res_CenSCG" => res_CenSCG ./ j, "res_CenPSGD" => res_CenPSGD ./ j, "res_CenSTORM" => res_CenSTORM ./ j, "res_CenSCGPP" => res_CenSCGPP ./ j, "res_CenSFW" => res_CenSFW ./ j));
         end
     end
     res_CenSCG = res_CenSCG ./ num_trials; res_CenSCG[:, 5] = res_CenSCG[:, 5] / num_users;
     res_CenPSGD = res_CenPSGD ./ num_trials;; res_CenPSGD[:, 5] = res_CenPSGD[:, 5] / num_users;
     res_CenSTORM = res_CenSTORM ./ num_trials; res_CenSTORM[:, 5] = res_CenSTORM[:, 5] / num_users;
     res_CenSCGPP = res_CenSCGPP ./ num_trials; res_CenSCGPP[:, 5] = res_CenSCGPP[:, 5] / num_users;
+    res_CenSFW = res_CenSFW ./ num_trials; res_CenSFW[:, 5] = res_CenSFW[:, 5] / num_users;
 
-    return res_CenSCG, res_CenPSGD, res_CenSTORM, res_CenSCGPP;
+
+    return res_CenSCG, res_CenPSGD, res_CenSTORM, res_CenSCGPP, res_CenSFW;
 end
