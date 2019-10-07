@@ -66,7 +66,7 @@ function movie_main_cen_concave(min_num_iters::Int, interval_num_iters::Int, max
     # STORM parameters (1M)
     # rho_coef_STORM = 7.5e-1;
     # rho_coef_STORM = 2e0;
-    rho_coef_STORM = 1e0;
+    rho_coef_STORM = 5e-1;
     rho_exp_STORM = 2/3;
     interpolate_times_STORM = 1;
     sample_times = 1;
@@ -155,6 +155,8 @@ function movie_main_cen_concave(min_num_iters::Int, interval_num_iters::Int, max
             res_CenSFW[i, :] = res_CenSFW[i, :] +  tmp_res;
             tmp_res[5] = tmp_res[5] / num_users;
             println("$(tmp_res)");
+
+            println("\n");
 
             matwrite("data/result_movie_main_cen_concave.mat", Dict("res_CenSCG" => res_CenSCG ./ j, "res_CenPSGD" => res_CenPSGD ./ j, "res_CenSTORM" => res_CenSTORM ./ j, "res_CenSCGPP" => res_CenSCGPP ./ j, "res_CenSFW" => res_CenSFW ./ j));
         end
