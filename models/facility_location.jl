@@ -274,77 +274,82 @@ end
     for curr_sample_count = 1:sample_times
         # Random.rand!(rand_vec_view);
 
-        for j = 1:dim  # add/subtract the element j to/from the sampled set S
-            curr_scalar = v[j];
-            if -1e-8 <= curr_scalar && curr_scalar <= 1e-8
-                continue;
-            end
-            Random.rand!(rand_vec_view);
+        index_nonzero = findall(x->x!=0, v);
+        nnz_v = length(index_nonzero);
+        rand_index = rand(1:nnz_v);
+        j = index_nonzero[rand_index];
 
-            # evaluate the gradient of f(S + {j})
-            max_1st_rating_in_S = 0; max_1st_index_in_rating = 0; max_1st_index_in_x = 0;
-            max_2nd_rating_in_S = 0;
-            count = 0;
-            # find the first and second largest rating in S
-            for i = 1 : nnz
-                tmp_index = indices_in_ratings[i];
-                if rand_vec_view[i] <= x[tmp_index] || indices_in_ratings[i] == j
-                    if count == 0
-                        max_1st_rating_in_S = ratings[2, i];
-                        max_1st_index_in_rating = i;
-                        max_1st_index_in_x = tmp_index;
-                        if max_1st_index_in_x != j
-                            ret_stochastic_hvp[max_1st_index_in_x] += curr_scalar * max_1st_rating_in_S;
-                        end
-                        count += 1;
-                    else
-                        max_2nd_rating_in_S = ratings[2, i];
-                        if max_1st_index_in_x != j
-                            ret_stochastic_hvp[max_1st_index_in_x] -= curr_scalar * max_2nd_rating_in_S;
-                        end
-                        break;
-                    end
-                end
+        # for j = 1:dim  # add/subtract the element j to/from the sampled set S
+        curr_scalar = v[j] * nnz_v;
+        if -1e-8 <= curr_scalar && curr_scalar <= 1e-8
+            continue;
+        end
+        Random.rand!(rand_vec_view);
+
+        # evaluate the gradient of f(S + {j})
+        max_1st_rating_in_S = 0; max_1st_index_in_rating = 0; max_1st_index_in_x = 0;
+        max_2nd_rating_in_S = 0;
+        count = 0;
+        # find the first and second largest rating in S
+        for i = 1 : nnz
+            tmp_index = indices_in_ratings[i];
+            if rand_vec_view[i] <= x[tmp_index] || indices_in_ratings[i] == j
                 if count == 0
-                    ret_stochastic_hvp[tmp_index] += curr_scalar * ratings[2, i];
-                end
-            end
-
-            for i = 1 : max_1st_index_in_rating - 1
-                tmp_index = indices_in_ratings[i];
-                ret_stochastic_hvp[tmp_index] -= curr_scalar * max_1st_rating_in_S;
-            end
-
-            # evaluate the gradient of f(S - {j})
-            max_1st_rating_in_S = 0; max_1st_index_in_rating = 0; max_1st_index_in_x = 0;
-            max_2nd_rating_in_S = 0;
-            count = 0;
-            # find the first and second largest rating in S
-            for i = 1 : nnz
-                tmp_index = indices_in_ratings[i];
-                if rand_vec_view[i] <= x[tmp_index] && indices_in_ratings[i] != j
-                    if count == 0
-                        max_1st_rating_in_S = ratings[2, i];
-                        max_1st_index_in_rating = i;
-                        max_1st_index_in_x = tmp_index;
-                        ret_stochastic_hvp[max_1st_index_in_x] += -curr_scalar * max_1st_rating_in_S;
-                        count += 1;
-                    else
-                        max_2nd_rating_in_S = ratings[2, i];
-                        ret_stochastic_hvp[max_1st_index_in_x] -= -curr_scalar * max_2nd_rating_in_S;
-                        break;
+                    max_1st_rating_in_S = ratings[2, i];
+                    max_1st_index_in_rating = i;
+                    max_1st_index_in_x = tmp_index;
+                    if max_1st_index_in_x != j
+                        ret_stochastic_hvp[max_1st_index_in_x] += curr_scalar * max_1st_rating_in_S;
                     end
-                end
-                if count == 0
-                    ret_stochastic_hvp[tmp_index] += -curr_scalar * ratings[2, i];
+                    count += 1;
+                else
+                    max_2nd_rating_in_S = ratings[2, i];
+                    if max_1st_index_in_x != j
+                        ret_stochastic_hvp[max_1st_index_in_x] -= curr_scalar * max_2nd_rating_in_S;
+                    end
+                    break;
                 end
             end
-
-            for i = 1 : max_1st_index_in_rating - 1
-                tmp_index = indices_in_ratings[i];
-                ret_stochastic_hvp[tmp_index] -= -curr_scalar * max_1st_rating_in_S;
+            if count == 0
+                ret_stochastic_hvp[tmp_index] += curr_scalar * ratings[2, i];
             end
         end
+
+        for i = 1 : max_1st_index_in_rating - 1
+            tmp_index = indices_in_ratings[i];
+            ret_stochastic_hvp[tmp_index] -= curr_scalar * max_1st_rating_in_S;
+        end
+
+        # evaluate the gradient of f(S - {j})
+        max_1st_rating_in_S = 0; max_1st_index_in_rating = 0; max_1st_index_in_x = 0;
+        max_2nd_rating_in_S = 0;
+        count = 0;
+        # find the first and second largest rating in S
+        for i = 1 : nnz
+            tmp_index = indices_in_ratings[i];
+            if rand_vec_view[i] <= x[tmp_index] && indices_in_ratings[i] != j
+                if count == 0
+                    max_1st_rating_in_S = ratings[2, i];
+                    max_1st_index_in_rating = i;
+                    max_1st_index_in_x = tmp_index;
+                    ret_stochastic_hvp[max_1st_index_in_x] += -curr_scalar * max_1st_rating_in_S;
+                    count += 1;
+                else
+                    max_2nd_rating_in_S = ratings[2, i];
+                    ret_stochastic_hvp[max_1st_index_in_x] -= -curr_scalar * max_2nd_rating_in_S;
+                    break;
+                end
+            end
+            if count == 0
+                ret_stochastic_hvp[tmp_index] += -curr_scalar * ratings[2, i];
+            end
+        end
+
+        for i = 1 : max_1st_index_in_rating - 1
+            tmp_index = indices_in_ratings[i];
+            ret_stochastic_hvp[tmp_index] -= -curr_scalar * max_1st_rating_in_S;
+        end
+        # end
     end
     nothing
 end

@@ -56,7 +56,8 @@ function CenSTORM(dim, data_cell, LMO, f_batch, gradient_mini_batch, gradient_di
     t_elapsed = time() - t_start;
     curr_obj = f_sum(x);
     num_comm = 0.0;
-    num_simple_fn = num_iters * (1 + cardinality * 2 * interpolate_times) * num_agents * mini_batch_size * sample_times;
+    # num_simple_fn = num_iters * (1 + cardinality * 2 * interpolate_times) * num_agents * mini_batch_size * sample_times;
+    num_simple_fn = num_iters * (1 + 1 * 2 * interpolate_times) * num_agents * mini_batch_size * sample_times;
     results = [num_iters, t_elapsed, num_simple_fn, num_comm, curr_obj];
     return results;
 end

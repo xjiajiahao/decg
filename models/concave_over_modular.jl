@@ -177,53 +177,58 @@ end
     for curr_sample_count = 1:sample_times
         # Random.rand!(rand_vec_view);
 
-        for j = 1:dim  # add/subtract the element j to/from the sampled set S
-            curr_scalar = v[j];
-            if -1e-8 <= curr_scalar && curr_scalar <= 1e-8
-                continue;
-            end
-            Random.rand!(rand_vec_view);
+        index_nonzero = findall(x->x!=0, v);
+        nnz_v = length(index_nonzero);
+        rand_index = rand(1:nnz_v);
+        j = index_nonzero[rand_index];
 
-            # 1. evaluate the sum of ratings of S+{j}
-            base_sum = 0;
-            for i = 1 : nnz
-                tmp_index = indices_in_ratings[i];
-                if rand_vec_view[i] <= x[tmp_index] || indices_in_ratings[i] == j
-                    base_sum += ratings[2, i];
-                end
-            end
-            sqrt_base_sum = sqrt(base_sum);
+        # for j = 1:dim  # add/subtract the element j to/from the sampled set S
+        curr_scalar = v[j] * nnz_v;
+        if -1e-8 <= curr_scalar && curr_scalar <= 1e-8
+            continue;
+        end
+        Random.rand!(rand_vec_view);
 
-            # 2. compute the partial derivative of each coordinate
-            for i = 1 : nnz
-                tmp_index = indices_in_ratings[i];
-                if rand_vec_view[i] <= x[tmp_index] && indices_in_ratings[i] != j  # @NOTE the diagonal entries of the hessian matrix is 0
-                    ret_stochastic_hvp[tmp_index] += curr_scalar * (sqrt_base_sum - sqrt(base_sum - ratings[2, i]));
-                elseif rand_vec_view[i] > x[tmp_index]
-                    ret_stochastic_hvp[tmp_index] += curr_scalar * (sqrt(base_sum + ratings[2, i]) - sqrt_base_sum);
-                end
-            end
-
-            # 3. evaluate the sum of ratings of S\{j}
-            base_sum = 0;
-            for i = 1 : nnz
-                tmp_index = indices_in_ratings[i];
-                if rand_vec_view[i] <= x[tmp_index] && indices_in_ratings[i] != j
-                    base_sum += ratings[2, i];
-                end
-            end
-            sqrt_base_sum = sqrt(base_sum);
-
-            # 4. compute the partial derivative of each coordinate
-            for i = 1 : nnz
-                tmp_index = indices_in_ratings[i];
-                if rand_vec_view[i] <= x[tmp_index] && indices_in_ratings[i] != j  # @NOTE the diagonal entries of the hessian matrix is 0
-                    ret_stochastic_hvp[tmp_index] += - curr_scalar * (sqrt_base_sum - sqrt(base_sum - ratings[2, i]));
-                elseif rand_vec_view[i] > x[tmp_index]
-                    ret_stochastic_hvp[tmp_index] += - curr_scalar * (sqrt(base_sum + ratings[2, i]) - sqrt_base_sum);
-                end
+        # 1. evaluate the sum of ratings of S+{j}
+        base_sum = 0;
+        for i = 1 : nnz
+            tmp_index = indices_in_ratings[i];
+            if rand_vec_view[i] <= x[tmp_index] || indices_in_ratings[i] == j
+                base_sum += ratings[2, i];
             end
         end
+        sqrt_base_sum = sqrt(base_sum);
+
+        # 2. compute the partial derivative of each coordinate
+        for i = 1 : nnz
+            tmp_index = indices_in_ratings[i];
+            if rand_vec_view[i] <= x[tmp_index] && indices_in_ratings[i] != j  # @NOTE the diagonal entries of the hessian matrix is 0
+                ret_stochastic_hvp[tmp_index] += curr_scalar * (sqrt_base_sum - sqrt(base_sum - ratings[2, i]));
+            elseif rand_vec_view[i] > x[tmp_index]
+                ret_stochastic_hvp[tmp_index] += curr_scalar * (sqrt(base_sum + ratings[2, i]) - sqrt_base_sum);
+            end
+        end
+
+        # 3. evaluate the sum of ratings of S\{j}
+        base_sum = 0;
+        for i = 1 : nnz
+            tmp_index = indices_in_ratings[i];
+            if rand_vec_view[i] <= x[tmp_index] && indices_in_ratings[i] != j
+                base_sum += ratings[2, i];
+            end
+        end
+        sqrt_base_sum = sqrt(base_sum);
+
+        # 4. compute the partial derivative of each coordinate
+        for i = 1 : nnz
+            tmp_index = indices_in_ratings[i];
+            if rand_vec_view[i] <= x[tmp_index] && indices_in_ratings[i] != j  # @NOTE the diagonal entries of the hessian matrix is 0
+                ret_stochastic_hvp[tmp_index] += - curr_scalar * (sqrt_base_sum - sqrt(base_sum - ratings[2, i]));
+            elseif rand_vec_view[i] > x[tmp_index]
+                ret_stochastic_hvp[tmp_index] += - curr_scalar * (sqrt(base_sum + ratings[2, i]) - sqrt_base_sum);
+            end
+        end
+        # end
     end
     nothing
 end

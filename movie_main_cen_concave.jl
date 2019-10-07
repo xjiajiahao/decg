@@ -2,7 +2,8 @@ using Dates, MAT
 
 include("models/concave_over_modular.jl");
 include("algorithms/CenCG.jl");
-include("algorithms/DeCG.jl"); include("algorithms/DeGTFW.jl");
+include("algorithms/DeCG.jl");
+include("algorithms/DeGTFW.jl");
 include("algorithms/AccDeGTFW.jl");
 include("algorithms/CenPGD.jl");
 include("algorithms/CenSTORM.jl");
@@ -47,7 +48,7 @@ function movie_main_cen_concave(min_num_iters::Int, interval_num_iters::Int, max
     # interpolate_times_SCGPP = 10;
 
     # mini_batch_size = 128;
-    mini_batch_size_base = 21*40;
+    mini_batch_size_base = 40;
     sample_times = 1;
     # mini_batch_size = 64;
     # sample_times = 20;
@@ -65,11 +66,11 @@ function movie_main_cen_concave(min_num_iters::Int, interval_num_iters::Int, max
     # STORM parameters (1M)
     # rho_coef_STORM = 7.5e-1;
     # rho_coef_STORM = 2e0;
-    rho_coef_STORM = 3e0;
-    rho_exp_STORM = 0.95;
+    rho_coef_STORM = 1e0;
+    rho_exp_STORM = 2/3;
     interpolate_times_STORM = 1;
     sample_times = 1;
-    mini_batch_size_STORM = 40;
+    mini_batch_size_STORM = 20;
 
     # SCGPP parameters (1M)
     mini_batch_size_SCGPP = 10;
@@ -107,16 +108,16 @@ function movie_main_cen_concave(min_num_iters::Int, interval_num_iters::Int, max
         for i = 1 : length(num_iters_arr)
             num_iters_base = num_iters_arr[i];
             if FIX_COMP
-                num_iters_SCG = Int(ceil(num_iters_base * (cardinality * 2 * interpolate_times_STORM + 1) * (mini_batch_size_STORM  * 1.0 / mini_batch_size_base)));
-                num_iters_PSGD = Int(ceil(num_iters_base * (cardinality * 2 * interpolate_times_STORM + 1) * (mini_batch_size_STORM * 1.0 / mini_batch_size_base)));
+                num_iters_SCG = Int(ceil(num_iters_base * (1 * 2 * interpolate_times_STORM + 1) * (mini_batch_size_STORM  * 1.0 / mini_batch_size_base)));
+                num_iters_PSGD = Int(ceil(num_iters_base * (1 * 2 * interpolate_times_STORM + 1) * (mini_batch_size_STORM * 1.0 / mini_batch_size_base)));
                 num_iters_STORM = num_iters_base;
 
-                num_iters_SCGPP = Int(ceil((num_iters_base * (cardinality * 2 * interpolate_times_STORM + 1) * mini_batch_size_STORM * sample_times - mini_batch_size_SCGPP * initial_sample_times_SCGPP) / ((cardinality * interpolate_times_SCGPP + 1) * mini_batch_size_SCGPP * sample_times) + 1));
+                num_iters_SCGPP = Int(ceil((num_iters_base * (1 * 2 * interpolate_times_STORM + 1) * mini_batch_size_STORM * sample_times - mini_batch_size_SCGPP * initial_sample_times_SCGPP) / ((1 * interpolate_times_SCGPP + 1) * mini_batch_size_SCGPP * sample_times) + 1));
 
                 if is_batch_size_increasing_SFW
-                    num_iters_SFW = Int(ceil((3 * (num_iters_base * (cardinality * 2 * interpolate_times_STORM + 1) * mini_batch_size_STORM / mini_batch_size_SFW))^(1/3)));
+                    num_iters_SFW = Int(ceil((3 * (num_iters_base * (1 * 2 * interpolate_times_STORM + 1) * mini_batch_size_STORM / mini_batch_size_SFW))^(1/3)));
                 else
-                    num_iters_SFW = Int(ceil(num_iters_base * (cardinality * 2 * interpolate_times_STORM + 1) * mini_batch_size_STORM / mini_batch_size_SFW));
+                    num_iters_SFW = Int(ceil(num_iters_base * (1 * 2 * interpolate_times_STORM + 1) * mini_batch_size_STORM / mini_batch_size_SFW));
                 end
             else
                 num_iters_SCG = num_iters_base;

@@ -1,7 +1,14 @@
 using Dates, MAT
 
 include("models/facility_location.jl");
-include("algorithms/CenCG.jl"); include("algorithms/DeCG.jl"); include("algorithms/DeGTFW.jl"); include("algorithms/CenGreedy.jl"); include("algorithms/AccDeGTFW.jl"); include("algorithms/CenPGD.jl"); include("algorithms/CenSTORM.jl"); include("algorithms/CenSCGPP.jl");
+include("algorithms/CenCG.jl");
+include("algorithms/DeCG.jl");
+include("algorithms/DeGTFW.jl");
+include("algorithms/AccDeGTFW.jl");
+include("algorithms/CenPGD.jl");
+include("algorithms/CenSTORM.jl");
+include("algorithms/CenSCGPP.jl");
+include("algorithms/CenSFW.jl");
 include("utils/comm.jl");
 
 
@@ -41,8 +48,8 @@ function movie_main_stochastic_cen(min_num_iters::Int, interval_num_iters::Int, 
     # interpolate_times_SCGPP = 10;
 
     # mini_batch_size = 128;
-    mini_batch_size_base = 20;
-    sample_times = 10;
+    mini_batch_size_base = 40;
+    sample_times = 1;
     # mini_batch_size = 64;
     # sample_times = 20;
 
@@ -57,15 +64,23 @@ function movie_main_stochastic_cen(min_num_iters::Int, interval_num_iters::Int, 
     # STORM parameters (1M)
     # rho_coef_STORM = 7.5e-1;
     # rho_coef_STORM = 2e0;
-    rho_coef_STORM = 2e0;
-    rho_exp_STORM = 1.0;
+    # rho_coef_STORM = 2e0;
+    # rho_exp_STORM = 1.0;
+    rho_coef_STORM = 0.5;
+    rho_exp_STORM = 2/3;
     interpolate_times_STORM = 1;
-    mini_batch_size_STORM = 10;
+    # mini_batch_size_STORM = 10;
+    mini_batch_size_STORM = 20;
 
     # SCGPP parameters (1M)
-    mini_batch_size_SCGPP = 10;
+    # mini_batch_size_SCGPP = 10;
+    mini_batch_size_SCGPP = 50;
     initial_sample_times_SCGPP = 10000;
     interpolate_times_SCGPP = 100;
+
+    # SFW paramters
+    is_batch_size_increasing_SFW = true;
+    mini_batch_size_SFW = 40;
 
     # load weights matrix
     dim = num_movies;
@@ -75,7 +90,8 @@ function movie_main_stochastic_cen(min_num_iters::Int, interval_num_iters::Int, 
     # generate LMO
     d = ones(dim);
     a_2d = ones(1, dim); # a should be a n_constraints-by-dim matrix
-    LMO = generate_linear_prog_function(d, a_2d, cardinality*1.0);
+    # LMO = generate_linear_prog_function(d, a_2d, cardinality*1.0);
+    LMO = generate_linear_prog_function(d, cardinality);
     # generate PO
     PO = generate_projection_function(d, a_2d, cardinality*1.0);
 
@@ -84,6 +100,7 @@ function movie_main_stochastic_cen(min_num_iters::Int, interval_num_iters::Int, 
     res_CenPSGD = zeros(length(num_iters_arr), 5);
     res_CenSTORM = zeros(length(num_iters_arr), 5);
     res_CenSCGPP = zeros(length(num_iters_arr), 5);
+    res_CenSFW = zeros(length(num_iters_arr), 5);
 
     # Step 2: test algorithms for multiple times and return averaged results
     t_start = time();
@@ -92,36 +109,62 @@ function movie_main_stochastic_cen(min_num_iters::Int, interval_num_iters::Int, 
         for i = 1 : length(num_iters_arr)
             num_iters_base = num_iters_arr[i];
             if FIX_COMP
-                num_iters_SCG = Int(ceil(num_iters_base * (cardinality * 2 * interpolate_times_STORM + 1) * (mini_batch_size_STORM  * 1.0 / mini_batch_size_base)));
-                num_iters_PSGD = Int(ceil(num_iters_base * (cardinality * 2 * interpolate_times_STORM + 1) * (mini_batch_size_STORM * 1.0 / mini_batch_size_base)));
+                num_iters_SCG = Int(ceil(num_iters_base * (1 * 2 * interpolate_times_STORM + 1) * (mini_batch_size_STORM  * 1.0 / mini_batch_size_base)));
+                num_iters_PSGD = Int(ceil(num_iters_base * (1 * 2 * interpolate_times_STORM + 1) * (mini_batch_size_STORM * 1.0 / mini_batch_size_base)));
                 num_iters_STORM = num_iters_base;
-                num_iters_SCGPP = Int(ceil((num_iters_base * (cardinality * 2 * interpolate_times_STORM + 1) * mini_batch_size_STORM * sample_times - mini_batch_size_SCGPP * initial_sample_times_SCGPP) / ((cardinality * interpolate_times_SCGPP + 1) * mini_batch_size_SCGPP * sample_times) + 1));
+                num_iters_SCGPP = Int(ceil((num_iters_base * (1 * 2 * interpolate_times_STORM + 1) * mini_batch_size_STORM * sample_times - mini_batch_size_SCGPP * initial_sample_times_SCGPP) / ((1 * interpolate_times_SCGPP + 1) * mini_batch_size_SCGPP * sample_times) + 1));
+
+                if is_batch_size_increasing_SFW
+                    num_iters_SFW = Int(ceil((3 * (num_iters_base * (1 * 2 * interpolate_times_STORM + 1) * mini_batch_size_STORM / mini_batch_size_SFW))^(1/3)));
+                else
+                    num_iters_SFW = Int(ceil(num_iters_base * (1 * 2 * interpolate_times_STORM + 1) * mini_batch_size_STORM / mini_batch_size_SFW));
+                end
             else
                 num_iters_SCG = num_iters_base;
                 num_iters_PSGD = num_iters_base;
                 num_iters_STORM = num_iters_base;
                 num_iters_SCGPP = num_iters_base;
+                num_iters_SFW = num_iters_base;
             end
 
-            # println("CenSCG, T: $(num_iters_SCG), time: $(Dates.Time(now()))");
-            # res_CenSCG[i, :] = res_CenSCG[i, :] + CenSCG(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, mini_batch_size_base, num_iters_SCG, rho_coef_SCG, rho_exp_SCG, sample_times);
+            println("CenSCG, T: $(num_iters_SCG), time: $(Dates.Time(now()))");
+            tmp_res = res_CenSCG[i, :] + CenSCG(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, mini_batch_size_base, num_iters_SCG, rho_coef_SCG, rho_exp_SCG, sample_times);
+            res_CenSCG[i, :] = res_CenSCG[i, :] + tmp_res;
+            tmp_res[5] = tmp_res[5] / num_users;
+            println("$(tmp_res)");
 
             # println("CenPSGD, T: $(num_iters_PSGD), time: $(Dates.Time(now()))");
-            # res_CenPSGD[i, :] = res_CenPSGD[i, :] + CenPSGD(dim, data_cell, PO, f_extension_batch, stochastic_gradient_extension_mini_batch, mini_batch_size_base, num_iters_PSGD, eta_coef_PSGD, eta_exp_PSGD, sample_times);
+            # tmp_res = res_CenPSGD[i, :] + CenPSGD(dim, data_cell, PO, f_extension_batch, stochastic_gradient_extension_mini_batch, mini_batch_size_base, num_iters_PSGD, eta_coef_PSGD, eta_exp_PSGD, sample_times);
+            # res_CenPSGD[i, :] = res_CenPSGD[i, :] + tmp_res;
+            # tmp_res[5] = tmp_res[5] / num_users;
+            # println("$(tmp_res)");
 
             # println("CenSTORM, T: $(num_iters_STORM), time: $(Dates.Time(now()))");
-            # res_CenSTORM[i, :] = res_CenSTORM[i, :] + CenSTORM(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, stochastic_gradient_diff_extension_mini_batch, mini_batch_size_STORM, num_iters_STORM, rho_coef_STORM, rho_exp_STORM, cardinality, interpolate_times_STORM, sample_times);
+            # tmp_res = res_CenSTORM[i, :] + CenSTORM(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, stochastic_gradient_diff_extension_mini_batch, mini_batch_size_STORM, num_iters_STORM, rho_coef_STORM, rho_exp_STORM, cardinality, interpolate_times_STORM, sample_times);
+            # res_CenSTORM[i, :] = res_CenSTORM[i, :] + tmp_res;
+            # tmp_res[5] = tmp_res[5] / num_users;
+            # println("$(tmp_res)");
 
             println("CenSCGPP, T: $(num_iters_SCGPP), time: $(Dates.Time(now()))");
-            res_CenSCGPP[i, :] = res_CenSCGPP[i, :] + CenSCGPP(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, stochastic_gradient_diff_extension_mini_batch, mini_batch_size_SCGPP, initial_sample_times_SCGPP, num_iters_SCGPP, interpolate_times_SCGPP, sample_times);
+            tmp_res = res_CenSCGPP[i, :] + CenSCGPP(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, stochastic_gradient_diff_extension_mini_batch, mini_batch_size_SCGPP, initial_sample_times_SCGPP, num_iters_SCGPP, interpolate_times_SCGPP, sample_times);
+            res_CenSCGPP[i, :] = res_CenSCGPP[i, :] + tmp_res;
+            tmp_res[5] = tmp_res[5] / num_users;
+            println("$(tmp_res)");
 
-            matwrite("data/result_movie_main_cen_facility.mat", Dict("res_CenSCG" => res_CenSCG ./ j, "res_CenPSGD" => res_CenPSGD ./ j, "res_CenSTORM" => res_CenSTORM ./ j, "res_CenSCGPP" => res_CenSCGPP ./ j));
+            println("CenSFW, T: $(num_iters_SFW), time: $(Dates.Time(now()))");
+            tmp_res = CenSFW(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, stochastic_gradient_diff_extension_mini_batch, mini_batch_size_SFW, num_iters_SFW, is_batch_size_increasing_SFW, cardinality, sample_times);
+            res_CenSFW[i, :] = res_CenSFW[i, :] +  tmp_res;
+            tmp_res[5] = tmp_res[5] / num_users;
+            println("$(tmp_res)");
+
+            matwrite("data/result_movie_main_cen_facility.mat", Dict("res_CenSCG" => res_CenSCG ./ j, "res_CenPSGD" => res_CenPSGD ./ j, "res_CenSTORM" => res_CenSTORM ./ j, "res_CenSCGPP" => res_CenSCGPP ./ j, "res_CenSFW" => res_CenSFW ./ j));
         end
     end
     res_CenSCG = res_CenSCG ./ num_trials; res_CenSCG[:, 5] = res_CenSCG[:, 5] / num_users;
     res_CenPSGD = res_CenPSGD ./ num_trials;; res_CenPSGD[:, 5] = res_CenPSGD[:, 5] / num_users;
     res_CenSTORM = res_CenSTORM ./ num_trials; res_CenSTORM[:, 5] = res_CenSTORM[:, 5] / num_users;
     res_CenSCGPP = res_CenSCGPP ./ num_trials; res_CenSCGPP[:, 5] = res_CenSCGPP[:, 5] / num_users;
+    res_CenSFW = res_CenSFW ./ num_trials; res_CenSFW[:, 5] = res_CenSFW[:, 5] / num_users;
 
-    return res_CenSCG, res_CenPSGD, res_CenSTORM, res_CenSCGPP;
+    return res_CenSCG, res_CenPSGD, res_CenSTORM, res_CenSCGPP, res_CenSFW;
 end
