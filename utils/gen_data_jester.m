@@ -1,4 +1,4 @@
-function gen_data_jester2plus()
+function gen_data_jester()
 ROOT = '../data/jester/';
 OUTPUT_DIR = '../data/';
 
@@ -13,7 +13,9 @@ num_users = size(user_ratings_matrix, 2);
 % rescale and sparsify the matrix
 user_ratings_matrix = user_ratings_matrix + 10.0;   % rescale from [-10, 10] to [0, 20]
 user_ratings_matrix(user_ratings_matrix == 99.0 + 10.0) = 0.0;
+user_ratings_matrix(isnan(user_ratings_matrix)) = 0.0;  % replace NAN with 0
 user_ratings_matrix = sparse(user_ratings_matrix);
+% user_ratings_matrix = user_ratings_matrix / 20.0 * 5.0;
 
 % for each user, sort the movie ratings from high to low
 user_ratings_cell = cell(1, num_users);
