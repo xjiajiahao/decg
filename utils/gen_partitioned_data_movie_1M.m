@@ -16,7 +16,7 @@ user_ratings_cell_arr = cell(1, num_agents);
 % compute the true num_users
 num_users = num_users_per_agent * num_agents;
 
-user_ratings_mat = user_ratings_matrix(:, indices(1:num_users));
+user_ratings_matrix = user_ratings_matrix(:, indices(1:num_users));
 
 for i = 1 : num_agents
     tmp_idx = indices((i-1)*num_users_per_agent + 1: i*num_users_per_agent);
@@ -24,6 +24,6 @@ for i = 1 : num_agents
 end
 
 filename = [ROOT, 'Movies_1M_', num2str(num_agents), '_agents.mat'];
-save(filename, 'user_ratings_cell_arr', 'user_ratings_mat', 'num_movies', 'num_users', 'num_agents');
+save(filename, 'user_ratings_cell_arr', 'user_ratings_matrix', 'num_movies', 'num_users', 'num_agents');
 
 end
