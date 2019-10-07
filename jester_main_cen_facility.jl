@@ -33,14 +33,19 @@ function jester_main_cen_facility(min_num_iters::Int, interval_num_iters::Int, m
     eta_exp_PSGD = 1/2;
 
     # SCG parameters
+    # rho_coef_SCG = 1.0;
+    # rho_exp_SCG = 2/3;
+    # rho_coef_SCG = 0.5;
     rho_coef_SCG = 1.0;
+    # rho_exp_SCG = 0.5;
     rho_exp_SCG = 2/3;
 
     # STORM parameters
     rho_coef_STORM = 0.5;
+    # rho_coef_STORM = 0.5;
     rho_exp_STORM = 2/3;
     interpolate_times_STORM = 1;
-    mini_batch_size_STORM = 20;
+    mini_batch_size_STORM = 40;
 
     # SCGPP parameters
     mini_batch_size_SCGPP = 50;
