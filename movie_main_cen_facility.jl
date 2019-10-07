@@ -70,7 +70,7 @@ function movie_main_cen_facility(min_num_iters::Int, interval_num_iters::Int, ma
     rho_exp_STORM = 2/3;
     interpolate_times_STORM = 1;
     # mini_batch_size_STORM = 10;
-    mini_batch_size_STORM = 20;
+    mini_batch_size_STORM = 40;
 
     # SCGPP parameters (1M)
     # mini_batch_size_SCGPP = 10;
