@@ -83,6 +83,7 @@ for i = 1 : num_users
         user_ratings_matrix(tmp_matrix(j, 1), i) = tmp_matrix(j, 2);
     end
     user_ratings_cell{i} = sortrows(user_ratings_cell{i}, 2, 'descend');
+    user_ratings_cell{i} = user_ratings_cell{i}';
 end
 
 user_ratings_matrix = sparse(user_ratings_matrix);

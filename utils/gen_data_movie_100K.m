@@ -1,4 +1,4 @@
-function gen_data_movielens_1M()
+function gen_data_movielens_100K()
 %% initialization
 ROOT = '../data/ml-100k/';
 OUTPUT_DIR = '../data/';

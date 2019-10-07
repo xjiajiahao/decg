@@ -50,7 +50,7 @@ function CenSFW(dim, data_cell, LMO, f_batch, gradient_mini_batch, gradient_diff
     curr_obj = f_sum(x);
     num_comm = 0.0;
     if is_batch_size_increasing
-        num_simple_fn = num_iters * (num_agents * (num_agents + 1) * (2 * num_agents + 1) / 6) * mini_batch_size * sample_times;
+        num_simple_fn = (num_iters * (num_iters + 1) * (2 * num_iters + 1) / 6) * num_agents * mini_batch_size * sample_times;
     else
         num_simple_fn = num_iters * num_agents * mini_batch_size * sample_times;
     end
