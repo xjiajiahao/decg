@@ -25,7 +25,7 @@ function jester_main_cen_concave(min_num_iters::Int, interval_num_iters::Int, ma
     num_agents = 1;
     data_cell, data_mat, num_movies, num_users = load_jester_partitioned_data(num_agents, 1);  # the second argument can be 1 or 2, which indicates the version of the Jester dataset
 
-    mini_batch_size_base = 40;
+    mini_batch_size_base = 160;
     sample_times = 1;
 
     # PSGD parameters
@@ -35,17 +35,20 @@ function jester_main_cen_concave(min_num_iters::Int, interval_num_iters::Int, ma
     # SCG parameters
     # rho_coef_SCG = 1.0;
     # rho_exp_SCG = 2/3;
-    # rho_coef_SCG = 0.5;
-    rho_coef_SCG = 1.0;
+    rho_coef_SCG = 0.5;
+    # rho_coef_SCG = 0.25;
+    # rho_coef_SCG = 1.0;
     # rho_exp_SCG = 0.5;
     rho_exp_SCG = 2/3;
+    # rho_exp_SCG = 1.0;
 
     # STORM parameters
-    rho_coef_STORM = 0.5;
-    # rho_coef_STORM = 0.5;
+    rho_coef_STORM = 0.25;
     rho_exp_STORM = 2/3;
+    # rho_coef_STORM = 0.3;
+    # rho_exp_STORM = 0.5;
     interpolate_times_STORM = 1;
-    mini_batch_size_STORM = 40;
+    mini_batch_size_STORM = 160;
 
     # SCGPP parameters
     mini_batch_size_SCGPP = 50;
@@ -54,7 +57,7 @@ function jester_main_cen_concave(min_num_iters::Int, interval_num_iters::Int, ma
 
     # SFW paramters
     is_batch_size_increasing_SFW = true;
-    mini_batch_size_SFW = 40;
+    mini_batch_size_SFW = 160;
 
     # load weights matrix
     dim = num_movies;
@@ -102,9 +105,9 @@ function jester_main_cen_concave(min_num_iters::Int, interval_num_iters::Int, ma
             end
 
             # println("CenSCG, T: $(num_iters_SCG), time: $(Dates.Time(now()))");
-            tmp_res = CenSCG(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, mini_batch_size_base, num_iters_SCG, rho_coef_SCG, rho_exp_SCG, sample_times);
-            res_CenSCG[i, :] = res_CenSCG[i, :] + tmp_res;
-            tmp_res[5] = tmp_res[5] / num_users;
+            # tmp_res = CenSCG(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, mini_batch_size_base, num_iters_SCG, rho_coef_SCG, rho_exp_SCG, sample_times);
+            # res_CenSCG[i, :] = res_CenSCG[i, :] + tmp_res;
+            # tmp_res[5] = tmp_res[5] / num_users;
             # println("$(tmp_res)");
 
             # println("CenPSGD, T: $(num_iters_PSGD), time: $(Dates.Time(now()))");
@@ -125,13 +128,13 @@ function jester_main_cen_concave(min_num_iters::Int, interval_num_iters::Int, ma
             # tmp_res[5] = tmp_res[5] / num_users;
             # println("$(tmp_res)");
 
-            # println("CenSFW, T: $(num_iters_SFW), time: $(Dates.Time(now()))");
-            # tmp_res = CenSFW(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, stochastic_gradient_diff_extension_mini_batch, mini_batch_size_SFW, num_iters_SFW, is_batch_size_increasing_SFW, cardinality, sample_times);
-            # res_CenSFW[i, :] = res_CenSFW[i, :] +  tmp_res;
-            # tmp_res[5] = tmp_res[5] / num_users;
-            # println("$(tmp_res)");
+            println("CenSFW, T: $(num_iters_SFW), time: $(Dates.Time(now()))");
+            tmp_res = CenSFW(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, stochastic_gradient_diff_extension_mini_batch, mini_batch_size_SFW, num_iters_SFW, is_batch_size_increasing_SFW, cardinality, sample_times);
+            res_CenSFW[i, :] = res_CenSFW[i, :] +  tmp_res;
+            tmp_res[5] = tmp_res[5] / num_users;
+            println("$(tmp_res)");
 
-            # println("\n");
+            println("\n");
 
             matwrite("data/result_jester_main_cen_concave.mat", Dict("res_CenSCG" => res_CenSCG ./ j, "res_CenPSGD" => res_CenPSGD ./ j, "res_CenSTORM" => res_CenSTORM ./ j, "res_CenSCGPP" => res_CenSCGPP ./ j, "res_CenSFW" => res_CenSFW ./ j));
         end
