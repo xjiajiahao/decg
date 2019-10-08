@@ -1,10 +1,15 @@
-function gen_data_jester()
+function gen_data_jester1()
 ROOT = '../data/jester/';
 OUTPUT_DIR = '../data/';
 
 % load the excel table
-file_name = [ROOT, 'jesterfinal151cols.xls'];
-user_ratings_matrix = transpose(table2array(readtable(file_name, 'ReadVariableNames', false)));  % (num_movies+1)-by-num_users
+
+user_ratings_matrix = [];
+for i = 1 : 3
+    file_name = [ROOT, 'jester-data-', num2str(i), '.xls'];
+    user_ratings_matrix = [user_ratings_matrix; table2array(readtable(file_name, 'ReadVariableNames', false))];
+end
+user_ratings_matrix = transpose(user_ratings_matrix);  % (num_movies+1)-by-num_users
 % preprocessing
 user_ratings_matrix = user_ratings_matrix(2:end, :);  % remove the first row, which is the number of non-zero ratings of each user
 num_movies = size(user_ratings_matrix, 1);
@@ -26,7 +31,7 @@ for i = 1 : num_users
     user_ratings_cell{i} = user_ratings_cell{i}';
 end
 
-filename = [OUTPUT_DIR, 'Jester', '.mat'];
+filename = [OUTPUT_DIR, 'Jester1', '.mat'];
 save(filename, 'user_ratings_cell', 'user_ratings_matrix');
 
 end  % end of the function
