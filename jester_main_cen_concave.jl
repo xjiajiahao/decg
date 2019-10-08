@@ -104,11 +104,11 @@ function jester_main_cen_concave(min_num_iters::Int, interval_num_iters::Int, ma
                 num_iters_SFW = num_iters_base;
             end
 
-            println("CenSCG, T: $(num_iters_SCG), time: $(Dates.Time(now()))");
-            tmp_res = CenSCG(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, mini_batch_size_base, num_iters_SCG, rho_coef_SCG, rho_exp_SCG, sample_times);
-            res_CenSCG[i, :] = res_CenSCG[i, :] + tmp_res;
-            tmp_res[5] = tmp_res[5] / num_users;
-            println("$(tmp_res)");
+            # println("CenSCG, T: $(num_iters_SCG), time: $(Dates.Time(now()))");
+            # tmp_res = CenSCG(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, mini_batch_size_base, num_iters_SCG, rho_coef_SCG, rho_exp_SCG, sample_times);
+            # res_CenSCG[i, :] = res_CenSCG[i, :] + tmp_res;
+            # tmp_res[5] = tmp_res[5] / num_users;
+            # println("$(tmp_res)");
 
             # println("CenPSGD, T: $(num_iters_PSGD), time: $(Dates.Time(now()))");
             # tmp_res = res_CenPSGD[i, :] + CenPSGD(dim, data_cell, PO, f_extension_batch, stochastic_gradient_extension_mini_batch, mini_batch_size_base, num_iters_PSGD, eta_coef_PSGD, eta_exp_PSGD, sample_times);
@@ -116,11 +116,11 @@ function jester_main_cen_concave(min_num_iters::Int, interval_num_iters::Int, ma
             # tmp_res[5] = tmp_res[5] / num_users;
             # println("$(tmp_res)");
 
-            println("CenSTORM, T: $(num_iters_STORM), time: $(Dates.Time(now()))");
-            tmp_res = CenSTORM(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, stochastic_gradient_diff_extension_mini_batch, mini_batch_size_STORM, num_iters_STORM, rho_coef_STORM, rho_exp_STORM, cardinality, interpolate_times_STORM, sample_times);
-            res_CenSTORM[i, :] = res_CenSTORM[i, :] + tmp_res;
-            tmp_res[5] = tmp_res[5] / num_users;
-            println("$(tmp_res)");
+            # println("CenSTORM, T: $(num_iters_STORM), time: $(Dates.Time(now()))");
+            # tmp_res = CenSTORM(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, stochastic_gradient_diff_extension_mini_batch, mini_batch_size_STORM, num_iters_STORM, rho_coef_STORM, rho_exp_STORM, cardinality, interpolate_times_STORM, sample_times);
+            # res_CenSTORM[i, :] = res_CenSTORM[i, :] + tmp_res;
+            # tmp_res[5] = tmp_res[5] / num_users;
+            # println("$(tmp_res)");
 
             # println("CenSCGPP, T: $(num_iters_SCGPP), time: $(Dates.Time(now()))");
             # tmp_res = res_CenSCGPP[i, :] + CenSCGPP(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, stochastic_gradient_diff_extension_mini_batch, mini_batch_size_SCGPP, initial_sample_times_SCGPP, num_iters_SCGPP, interpolate_times_SCGPP, sample_times);
@@ -128,11 +128,11 @@ function jester_main_cen_concave(min_num_iters::Int, interval_num_iters::Int, ma
             # tmp_res[5] = tmp_res[5] / num_users;
             # println("$(tmp_res)");
 
-            # println("CenSFW, T: $(num_iters_SFW), time: $(Dates.Time(now()))");
-            # tmp_res = CenSFW(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, stochastic_gradient_diff_extension_mini_batch, mini_batch_size_SFW, num_iters_SFW, is_batch_size_increasing_SFW, cardinality, sample_times);
-            # res_CenSFW[i, :] = res_CenSFW[i, :] +  tmp_res;
-            # tmp_res[5] = tmp_res[5] / num_users;
-            # println("$(tmp_res)");
+            println("CenSFW, T: $(num_iters_SFW), time: $(Dates.Time(now()))");
+            tmp_res = CenSFW(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, stochastic_gradient_diff_extension_mini_batch, mini_batch_size_SFW, num_iters_SFW, is_batch_size_increasing_SFW, cardinality, sample_times);
+            res_CenSFW[i, :] = res_CenSFW[i, :] +  tmp_res;
+            tmp_res[5] = tmp_res[5] / num_users;
+            println("$(tmp_res)");
 
             println("\n");
 
