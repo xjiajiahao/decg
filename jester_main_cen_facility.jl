@@ -23,7 +23,8 @@ function jester_main_cen_facility(min_num_iters::Int, interval_num_iters::Int, m
     # load data
     # data_cell[i][j] is a n_j-by-2 matrix representing the ratings of agent i's jth user, data_mat is a sparse matrix containing the same data set
     num_agents = 1;
-    data_cell, data_mat, num_movies, num_users = load_jester_partitioned_data(num_agents);
+    # data_cell, data_mat, num_movies, num_users = load_jester_partitioned_data(num_agents);
+    data_cell, data_mat, num_movies, num_users = load_jester_partitioned_data(num_agents, 1);  # the second argument can be 1 or 2, which indicates the version of the Jester dataset
 
     mini_batch_size_base = 40;
     sample_times = 1;

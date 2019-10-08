@@ -1,9 +1,9 @@
-function gen_partitioned_data_jester(num_agents)
+function gen_partitioned_data_jester2(num_agents)
 % data_cell[i][j] is a n_j-by-2 matrix representing the ratings of agent i's jth user
 
 %% initialization
 ROOT = '../data/';
-load([ROOT, 'Jester.mat']);  % user_ratings_cell, user_ratings_matrix
+load([ROOT, 'Jester2.mat']);  % user_ratings_cell, user_ratings_matrix
 [num_movies, num_users] = size(user_ratings_matrix);
 
 rng(1); % For reproducibility
@@ -22,7 +22,7 @@ for i = 1 : num_agents
     user_ratings_cell_arr{i} = user_ratings_cell(tmp_idx);
 end
 
-filename = [ROOT, 'Jester_', num2str(num_agents), '_agents.mat'];
+filename = [ROOT, 'Jester2_', num2str(num_agents), '_agents.mat'];
 save(filename, 'user_ratings_cell_arr', 'user_ratings_matrix', 'num_movies', 'num_users', 'num_agents');
 
 end

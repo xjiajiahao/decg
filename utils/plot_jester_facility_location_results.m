@@ -20,4 +20,4 @@ set (gca, 'FontSize', font_size);
 xlabel('#function evaluations');
 ylabel('objective value');
 grid on;
-title('facility location, MovieLens1M');
+title('facility location, Jester');
