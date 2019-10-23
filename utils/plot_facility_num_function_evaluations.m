@@ -9,11 +9,11 @@ text_size = 20;
 avg_nnz = 1.655975165562914e+02;
 
 num_functions_SCG_STORM = [
-2.4e4, 7.2e4, 5.6458;
-1.2e5, 1.44e5, 5.6481;
-1.92e5, 1.68e5, 5.6484;
-3e5, 2.4e5, 5.6489;
-1.02e6, 3.6e5, 5.6491;
+6e4, 1.8e5, 4.8203;
+2.4e5, 3e5, 4.8233;
+5.4e5, 3.6e5, 4.8240;
+9e5, 4.2e5, 4.8245;
+1.8e6, 4.8e5, 4.8248;
 ];
 
 % rescale
@@ -31,7 +31,7 @@ set (gca, 'FontSize', font_size);
 xlabel('#function evaluations for SCG++');
 ylabel('#function evaluations for SCG');
 grid on;
-title('concave over modular, MovieLens1M', 'FontSize', title_font_size);
+title('facility location, MovieLens1M', 'FontSize', title_font_size);
 
-file_name = ['../data/result_num_functions_concave_over_modular.eps'];
+file_name = ['../data/result_num_functions_facility_location.eps'];
 saveas(gcf, file_name, 'epsc');
