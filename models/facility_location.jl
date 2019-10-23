@@ -125,6 +125,25 @@ end
     return sum_gradient;
 end
 
+@everywhere function gradient_extension_mini_batch(x, batch_ratings, mini_batch_indices, sample_times = 1) # ratings is a n-by-2 matrix sorted in descendant order, where n denotes #movies some user has rated
+    dim = length(x);
+    num_users = length(batch_ratings);
+    mini_batch_size = length(mini_batch_indices);
+    mini_batch_gradient = zeros(dim);
+    if length(mini_batch_indices) > 0
+        for i in mini_batch_indices
+            ratings = batch_ratings[i];
+            mini_batch_gradient += gradient_extension(x, ratings);
+        end
+        mini_batch_gradient = mini_batch_gradient .* (num_users / mini_batch_size);
+    else
+        for ratings in batch_ratings
+            mini_batch_gradient += gradient_extension(x, ratings);
+        end
+    end
+    return mini_batch_gradient;
+end
+
 @everywhere function stochastic_gradient_extension!(x::Vector{Float64}, ratings::Array{Float64, 2}, sample_times::Int64, indices_in_ratings::Vector{Int64}, ret_stochastic_grad::Vector{Float64}, rand_vec::Vector{Float64})
     dim = length(x);
     fill!(indices_in_ratings, zero(Int));
