@@ -54,7 +54,7 @@ function CenSTORM(dim, data_cell, LMO, f_batch, gradient_mini_batch, gradient_di
     num_comm = 0.0;
     curr_obj = f_sum(x);
     num_simple_fn = 0.0;
-    curr_grad_error = norm(full_gradient_sum(x) - grad_estimate);
+    curr_grad_error = norm(full_gradient_sum(x) - grad_estimate)^2;
     results[1, :] = [0, 0.0, num_simple_fn, num_comm, curr_obj, curr_grad_error];
 
     for iter in 1:num_iters
@@ -66,16 +66,22 @@ function CenSTORM(dim, data_cell, LMO, f_batch, gradient_mini_batch, gradient_di
         # sample a mini_batch
         mini_batch_indices_arr = generate_mini_batches();
         rho = min(rho_coef/(iter + 1)^rho_exp, 1);
+        # Hessian based implementation
+        # grad_x = gradient(x, mini_batch_indices_arr, sample_times);
+        # hvp_x = gradient_diff(x, x_old, mini_batch_indices_arr, interpolate_times, sample_times);
+        # grad_estimate = (1 - rho) * (grad_estimate + hvp_x) + rho * grad_x;
+
+        # vanilla implementation
         grad_x = gradient(x, mini_batch_indices_arr, sample_times);
-        hvp_x = gradient_diff(x, x_old, mini_batch_indices_arr, interpolate_times, sample_times);
-        grad_estimate = (1 - rho) * (grad_estimate + hvp_x) + rho * grad_x;
+        grad_x_old = gradient(x_old, mini_batch_indices_arr, sample_times);
+        grad_estimate = (1 - rho) * (grad_estimate - grad_x_old) + grad_x;
 
         if mod(iter, print_freq) == 0
             t_elapsed = time() - t_start;
             curr_obj = f_sum(x);
             num_simple_fn = iter * (1 + cardinality * 2 * interpolate_times) * num_agents * mini_batch_size * sample_times;
             full_grad_x = full_gradient_sum(x);
-            curr_grad_error = norm(full_grad_x - grad_estimate);
+            curr_grad_error = norm(full_grad_x - grad_estimate)^2;
             results[div(iter, print_freq) + 1, :] = [iter, t_elapsed, num_simple_fn, num_comm, curr_obj, curr_grad_error];
         end
     end

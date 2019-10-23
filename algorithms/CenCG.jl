@@ -79,7 +79,7 @@ function CenSCG(dim, data_cell, LMO, f_batch, gradient_mini_batch, mini_batch_si
     num_comm = 0.0;
     curr_obj = f_sum(x);
     num_simple_fn = 0.0;
-    curr_grad_error = norm(full_gradient_sum(x) - grad_x);
+    curr_grad_error = norm(full_gradient_sum(x) - grad_x)^2;
     results[1, :] = [0, 0.0, num_simple_fn, num_comm, curr_obj, curr_grad_error];
 
     for iter in 1:num_iters
@@ -93,7 +93,7 @@ function CenSCG(dim, data_cell, LMO, f_batch, gradient_mini_batch, mini_batch_si
             t_elapsed = time() - t_start;
             curr_obj = f_sum(x);
             full_grad_x = full_gradient_sum(x - v / num_iters);
-            curr_grad_error = norm(full_grad_x - grad_x);
+            curr_grad_error = norm(full_grad_x - grad_x)^2;
             num_simple_fn = iter * num_agents * mini_batch_size * sample_times;  # * 2 * dim @NOTE
             results[div(iter, print_freq) + 1, :] = [iter, t_elapsed, num_simple_fn, num_comm, curr_obj, curr_grad_error];
             # println("rho: ", rho);
