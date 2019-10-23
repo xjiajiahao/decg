@@ -5,20 +5,24 @@ line_width = 2;
 marker_size = 10;
 font_size = 20;
 
-load('../data/result_movie_main_cen_concave_5e2_5e2_1e4_20_20_true.mat');
+load('../data/result_jester_main_cen_concave_5e1_5e1_1e3_20_20_true.mat');
 plot([0.0; res_CenSCG(:, 3)], [0.0; res_CenSCG(:, 5)], 'DisplayName', 'SCG', 'LineWidth', line_width); hold on;
 plot([0.0; res_CenSFW(:, 3)], [0.0; res_CenSFW(:, 5)], 'DisplayName', 'SFW', 'LineWidth', line_width); hold on;
 plot([0.0; res_CenSTORM(:, 3)], [0.0; res_CenSTORM(:, 5)], 'DisplayName', 'STORM', 'LineWidth', line_width); hold on;
 
+% plot(avg_res_CenSCG(:, 3), avg_res_CenSCG(:, 5), 'DisplayName', 'SCG', 'LineWidth', line_width); hold on;
+% plot(avg_res_CenSFW(:, 3), avg_res_CenSFW(:, 5), 'DisplayName', 'SFW', 'LineWidth', line_width); hold on;
+% plot(avg_res_CenSTORM(:, 3), avg_res_CenSTORM(:, 5), 'DisplayName', 'STORM', 'LineWidth', line_width); hold on;
+
 legend('show', 'Location', 'southeast');
-xlim([0, 1.2e6]);
-ylim([5.632, 5.65]);
+xlim([0, 4.8e5]);
+ylim([14.26, 14.276]);
 set(gca, 'FontName', 'Times New Roman');
 set (gca, 'FontSize', font_size);
 xlabel('#function evaluations');
 ylabel('objective value');
 grid on;
-title('concave over modular, MovieLens1M');
+title('concave over modular, Jester');
 
-file_name = ['../data/movielens_concave_over_modular.eps'];
+file_name = ['../data/jester_concave_over_modular.eps'];
 saveas(gcf, file_name, 'epsc');
