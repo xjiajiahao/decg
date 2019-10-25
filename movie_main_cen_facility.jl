@@ -76,7 +76,7 @@ function movie_main_cen_facility(min_num_iters::Int, interval_num_iters::Int, ma
     # mini_batch_size_SCGPP = 10;
     mini_batch_size_SCGPP = 40;
     interpolate_times_SCGPP = 1;
-    sample_times_SCGPP = 1000;
+    sample_times_SCGPP = 1;
 
     # SFW paramters
     is_batch_size_increasing_SFW = true;
@@ -112,7 +112,11 @@ function movie_main_cen_facility(min_num_iters::Int, interval_num_iters::Int, ma
                 num_iters_SCG = Int(ceil(num_iters_base * (1 * 2 * interpolate_times_STORM + 1) * (mini_batch_size_STORM  * 1.0 / mini_batch_size_base)));
                 num_iters_PSGD = Int(ceil(num_iters_base * (1 * 2 * interpolate_times_STORM + 1) * (mini_batch_size_STORM * 1.0 / mini_batch_size_base)));
                 num_iters_STORM = num_iters_base;
-                num_iters_SCGPP = Int(ceil((num_iters_base * (1 * 2 * interpolate_times_STORM + 1) * mini_batch_size_STORM * sample_times - num_users) / ((2 * interpolate_times_SCGPP) * mini_batch_size_SCGPP * sample_times_SCGPP) + 1));
+                if mini_batch_size_SCGPP > 0
+                    num_iters_SCGPP = Int(ceil((num_iters_base * (1 * 2 * interpolate_times_STORM + 1) * mini_batch_size_STORM * sample_times - num_users) / ((2 * interpolate_times_SCGPP) * mini_batch_size_SCGPP * sample_times_SCGPP) + 1));
+                else
+                    num_iters_SCGPP = Int(ceil((num_iters_base * (1 * 2 * interpolate_times_STORM + 1) * mini_batch_size_STORM * sample_times - num_users) / ((2 * interpolate_times_SCGPP) * num_users * sample_times_SCGPP) + 1));
+                end
 
                 if is_batch_size_increasing_SFW
                     num_iters_SFW = Int(ceil((3 * (num_iters_base * (1 * 2 * interpolate_times_STORM + 1) * mini_batch_size_STORM / mini_batch_size_SFW))^(1/3)));
