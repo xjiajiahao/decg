@@ -128,11 +128,11 @@ function movie_main_cen_concave(min_num_iters::Int, interval_num_iters::Int, max
                 num_iters_SFW = num_iters_base;
             end
 
-            println("CenSCG, T: $(num_iters_SCG), time: $(Dates.Time(now()))");
-            tmp_res = CenSCG(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, mini_batch_size_base, num_iters_SCG, rho_coef_SCG, rho_exp_SCG, sample_times);
-            res_CenSCG[i, :] = res_CenSCG[i, :] + tmp_res;
-            tmp_res[5] = tmp_res[5] / num_users;
-            println("$(tmp_res)");
+            # println("CenSCG, T: $(num_iters_SCG), time: $(Dates.Time(now()))");
+            # tmp_res = CenSCG(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, mini_batch_size_base, num_iters_SCG, rho_coef_SCG, rho_exp_SCG, sample_times);
+            # res_CenSCG[i, :] = res_CenSCG[i, :] + tmp_res;
+            # tmp_res[5] = tmp_res[5] / num_users;
+            # println("$(tmp_res)");
 
             # println("CenPSGD, T: $(num_iters_PSGD), time: $(Dates.Time(now()))");
             # tmp_res = CenPSGD(dim, data_cell, PO, f_extension_batch, stochastic_gradient_extension_mini_batch, mini_batch_size_base, num_iters_PSGD, eta_coef_PSGD, eta_exp_PSGD, sample_times);
@@ -140,9 +140,9 @@ function movie_main_cen_concave(min_num_iters::Int, interval_num_iters::Int, max
             # tmp_res[5] = tmp_res[5] / num_users;
             # println("$(tmp_res)");
 
-            # println("CenSTORM, T: $(num_iters_STORM), time: $(Dates.Time(now()))");
-            # tmp_res = CenSTORM(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, stochastic_gradient_diff_extension_mini_batch, mini_batch_size_STORM, num_iters_STORM, rho_coef_STORM, rho_exp_STORM, cardinality, interpolate_times_STORM, sample_times);
-            # res_CenSTORM[i, :] = res_CenSTORM[i, :] +  tmp_res;
+            println("CenSTORM, T: $(num_iters_STORM), time: $(Dates.Time(now()))");
+            tmp_res = CenSTORM(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, stochastic_gradient_diff_extension_mini_batch, mini_batch_size_STORM, num_iters_STORM, rho_coef_STORM, rho_exp_STORM, cardinality, interpolate_times_STORM, sample_times);
+            res_CenSTORM[i, :] = res_CenSTORM[i, :] +  tmp_res;
             # tmp_res[5] = tmp_res[5] / num_users;
             # println("$(tmp_res)");
 
