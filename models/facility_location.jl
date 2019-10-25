@@ -125,6 +125,19 @@ end
     return sum_gradient;
 end
 
+@everywhere function gradient_extension_at_zero_batch(batch_ratings) # ratings is a n-by-2 matrix sorted in descendant order, where n denotes #movies some user has rated
+    dim = length(x);
+    sum_gradient = zeros(dim);
+    for ratings in batch_ratings
+        nnz = size(ratings, 2);
+        for i = 1 : nnz
+            tmp_idx = round(Int, ratings[1, i]);
+            sum_gradient[tmp_index] += ratings[2, i];
+        end
+    end
+    return sum_gradient;
+end
+
 @everywhere function stochastic_gradient_extension!(x::Vector{Float64}, ratings::Array{Float64, 2}, sample_times::Int64, indices_in_ratings::Vector{Int64}, ret_stochastic_grad::Vector{Float64}, rand_vec::Vector{Float64})
     dim = length(x);
     fill!(indices_in_ratings, zero(Int));
