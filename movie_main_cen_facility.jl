@@ -76,7 +76,7 @@ function movie_main_cen_facility(min_num_iters::Int, interval_num_iters::Int, ma
     # mini_batch_size_SCGPP = 10;
     mini_batch_size_SCGPP = 40;
     interpolate_times_SCGPP = 1;
-    sample_times_SCGPP = 100;
+    sample_times_SCGPP = 1000;
 
     # SFW paramters
     is_batch_size_increasing_SFW = true;
@@ -139,11 +139,11 @@ function movie_main_cen_facility(min_num_iters::Int, interval_num_iters::Int, ma
             # tmp_res[5] = tmp_res[5] / num_users;
             # println("$(tmp_res)");
 
-            # println("CenSTORM, T: $(num_iters_STORM), time: $(Dates.Time(now()))");
-            # tmp_res = CenSTORM(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, stochastic_gradient_diff_extension_mini_batch, mini_batch_size_STORM, num_iters_STORM, rho_coef_STORM, rho_exp_STORM, cardinality, interpolate_times_STORM, sample_times);
-            # res_CenSTORM[i, :] = res_CenSTORM[i, :] + tmp_res;
-            # tmp_res[5] = tmp_res[5] / num_users;
-            # println("$(tmp_res)");
+            println("CenSTORM, T: $(num_iters_STORM), time: $(Dates.Time(now()))");
+            tmp_res = CenSTORM(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, stochastic_gradient_diff_extension_mini_batch, mini_batch_size_STORM, num_iters_STORM, rho_coef_STORM, rho_exp_STORM, cardinality, interpolate_times_STORM, sample_times);
+            res_CenSTORM[i, :] = res_CenSTORM[i, :] + tmp_res;
+            tmp_res[5] = tmp_res[5] / num_users;
+            println("$(tmp_res)");
 
             println("CenSCGPP, T: $(num_iters_SCGPP), time: $(Dates.Time(now()))");
             tmp_res = res_CenSCGPP[i, :] + CenSCGPP(dim, data_cell, LMO, f_extension_batch, gradient_extension_at_zero_batch, stochastic_gradient_diff_extension_mini_batch, mini_batch_size_SCGPP, num_iters_SCGPP, cardinality, interpolate_times_SCGPP, sample_times_SCGPP);

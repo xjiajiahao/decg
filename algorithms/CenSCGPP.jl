@@ -1,9 +1,9 @@
 # centralized SCGPP-FW, here num_iters denotes #iteration
 function CenSCGPP(dim, data_cell, LMO, f_batch, gradient_at_zero_batch, gradient_diff_mini_batch, mini_batch_size, num_iters, cardinality, interpolate_times = 1, sample_times = 1)
     num_agents = size(data_cell, 2);  # num_agents should be 1
-    function gradient(x, mini_batch_indices_arr, sample_times) # compute the sum of local gradients
+    function gradient_at_zero() # compute the sum of local gradients
         grad_x_ret = @sync @distributed (+) for i in 1:num_agents
-            gradient_at_zero_batch(data_cell[i])
+            gradient_at_zero_batch(dim, data_cell[i])
         end
         return grad_x_ret;
     end

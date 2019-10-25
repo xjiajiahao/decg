@@ -125,14 +125,13 @@ end
     return sum_gradient;
 end
 
-@everywhere function gradient_extension_at_zero_batch(batch_ratings) # ratings is a n-by-2 matrix sorted in descendant order, where n denotes #movies some user has rated
-    dim = length(x);
+@everywhere function gradient_extension_at_zero_batch(dim, batch_ratings) # ratings is a n-by-2 matrix sorted in descendant order, where n denotes #movies some user has rated
     sum_gradient = zeros(dim);
     for ratings in batch_ratings
         nnz = size(ratings, 2);
         for i = 1 : nnz
             tmp_idx = round(Int, ratings[1, i]);
-            sum_gradient[tmp_index] += ratings[2, i];
+            sum_gradient[tmp_idx] += ratings[2, i];
         end
     end
     return sum_gradient;
