@@ -37,7 +37,7 @@ gen_weight_matrix(num_nodes, 'er', 0.4);  # generate the weight matrix of the ne
 include("movie_main_stochastic.jl");
 res_DeSCG, res_DeSGTFW, res_AccDeSGTFW, res_CenSCG =  movie_main_stochastic(10, 10, 100, 2, "er", 16, 10, false);  # see the main file for detailed descriptions of the function arguments.
 ```
-Note that in Example 2, one should use the command `julia -p auto` to launch JULIA in a multithread node.
+Note that in Example 2, one can use the command `julia -p n` to launch JULIA with `n` worker processes, e.g., `julia -p 4`.
 
 ### Directory Structure
 ``` bash
