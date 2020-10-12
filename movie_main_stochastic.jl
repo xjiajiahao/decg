@@ -1,7 +1,7 @@
 using Dates, MAT
 
 include("models/facility_location.jl");
-include("algorithms/CenCG.jl"); include("algorithms/DeCG.jl"); include("algorithms/DeGTFW.jl"); include("algorithms/CenGreedy.jl"); include("algorithms/AccDeGTFW.jl");
+include("algorithms/CenCG.jl"); include("algorithms/DeCG.jl"); include("algorithms/DeGTFW.jl"); include("algorithms/AccDeGTFW.jl");
 include("utils/comm.jl");
 
 
@@ -34,7 +34,7 @@ function movie_main_stochastic(min_num_iters::Int, interval_num_iters::Int, max_
     # generate LMO
     d = ones(dim);
     a_2d = ones(1, dim); # a should be a n_constraints-by-dim matrix
-    LMO = generate_linear_prog_function(d, a_2d, cardinality*1.0);
+    LMO = generate_linear_prog_function(d, cardinality);
 
     num_iters_arr = min_num_iters:interval_num_iters:max_num_iters;
     res_DeSCG= zeros(length(num_iters_arr), 5);
@@ -48,7 +48,7 @@ function movie_main_stochastic(min_num_iters::Int, interval_num_iters::Int, max_
         println("trial: $(j)");
         for i = 1 : length(num_iters_arr)
             # set the value of K (the degree of the chebyshev polynomial)
-            if 1/(1-beta) <= ((e^2 + 1)/(e^2 - 1))^2
+            if 1/(1-beta) <= ((e^2 + 1)/(e^2 - 1))^2 || beta == 1.0
                 K = 1;
             else
                 K = round(Int, ceil(sqrt((1 + beta)/(1 - beta))) + 1);
@@ -74,7 +74,7 @@ function movie_main_stochastic(min_num_iters::Int, interval_num_iters::Int, max_
             res_AccDeSGTFW[i, :] = res_AccDeSGTFW[i, :] + AccDeSGTFW(dim, data_cell, num_agents, weights, num_out_edges, LMO, f_extension_batch, stochastic_gradient_extension_batch, num_iters, beta, K);
 
             println("CenSCG, T: $(decg_num_iters), time: $(Dates.Time(now()))");
-            res_CenSCG[i, :] = res_CenSCG[i, :] + CenSCG(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_batch, decg_num_iters);
+            res_CenSCG[i, :] = res_CenSCG[i, :] + CenSCG(dim, data_cell, LMO, f_extension_batch, stochastic_gradient_extension_mini_batch, div(num_users, 10), decg_num_iters, 1, 2/3);
 
             matwrite("data/result_movie_main_stochastic.mat", Dict("res_DeSCG" => res_DeSCG ./ j, "res_DeSGTFW" => res_DeSGTFW ./ j, "res_AccDeSGTFW" => res_AccDeSGTFW ./ j, "res_CenSCG" => res_CenSCG ./ j));
         end

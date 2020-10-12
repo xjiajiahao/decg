@@ -1,7 +1,7 @@
 using Dates, MAT
 
 include("models/facility_location.jl");
-include("algorithms/CenCG.jl"); include("algorithms/DeCG.jl"); include("algorithms/DeGTFW.jl"); include("algorithms/CenGreedy.jl"); include("algorithms/AccDeGTFW.jl");
+include("algorithms/CenCG.jl"); include("algorithms/DeCG.jl"); include("algorithms/DeGTFW.jl"); include("algorithms/AccDeGTFW.jl");
 include("utils/comm.jl");
 
 function movie_main_det(min_num_iters::Int, interval_num_iters::Int, max_num_iters::Int, graph_style::String, num_agents::Int, cardinality::Int, FIX_COMM::Bool)
@@ -32,7 +32,7 @@ function movie_main_det(min_num_iters::Int, interval_num_iters::Int, max_num_ite
     # generate LMO
     d = ones(dim);
     a_2d = ones(1, dim); # a should be a n_constraints-by-dim matrix
-    LMO = generate_linear_prog_function(d, a_2d, cardinality*1.0);
+    LMO = generate_linear_prog_function(d, cardinality);
 
     num_iters_arr = min_num_iters:interval_num_iters:max_num_iters;
     res_DeCG= zeros(length(num_iters_arr), 5);
@@ -44,7 +44,7 @@ function movie_main_det(min_num_iters::Int, interval_num_iters::Int, max_num_ite
     t_start = time();
     for i = 1 : length(num_iters_arr)
         # set the value of K (the degree of the chebyshev polynomial)
-        if 1/(1-beta) <= ((e^2 + 1)/(e^2 - 1))^2
+        if 1/(1-beta) <= ((e^2 + 1)/(e^2 - 1))^2 || beta == 1
             K = 1;
         else
             K = ceil(sqrt((1 + beta)/(1 - beta))) + 1;
